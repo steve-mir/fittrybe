@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fittrybe — Find Your Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime: #B6FF00;
+    --black: #0D0D0D;
+    --white: #FFFFFF;
+    --gray: #9CA3AF;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  /* VIDEO */
+  .hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scale(1.05);
+    animation: videoSettle 8s ease-out forwards;
+    will-change: transform;
+    z-index: 0;
+  }
+
+  @keyframes videoSettle {
+    to { transform: scale(1.0); }
+  }
+
+  /* OVERLAYS */
+  .hero__overlay-base {
+    position: absolute; inset: 0; z-index: 1;
+    background: rgba(13,13,13,0.45);
+  }
+  .hero__overlay-bottom {
+    position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(to bottom, transparent 55%, var(--black) 100%);
+  }
+  .hero__overlay-left {
+    position: absolute; inset: 0; z-index: 3;
+    background: linear-gradient(to right, rgba(13,13,13,0.55) 0%, transparent 55%);
+  }
+  .hero__overlay-lime {
+    position: absolute; inset: 0; z-index: 4;
+    background: rgba(182,255,0,0.05);
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+  /* Film grain */
+  .hero__grain {
+    position: absolute; inset: 0; z-index: 5;
+    opacity: 0.06;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  /* CONTENT */
+  .hero__content {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0 6vw;
+    padding-top: 44vh;
+  }
+
+  .hero__inner {
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* BADGE */
+  .hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(182,255,0,0.12);
+    border: 1px solid rgba(182,255,0,0.4);
+    border-radius: 999px;
+    padding: 6px 14px;
+    width: fit-content;
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp 0.5s ease forwards 0.1s;
+  }
+  .hero__badge-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--lime);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity:1; }
+    50% { transform: scale(1.35); opacity:0.7; }
+  }
+  .hero__badge span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    color: var(--lime);
+    text-transform: uppercase;
+  }
+
+  /* HEADLINE */
+  .hero__headline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+  .hero__line {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(52px, 6.5vw, 84px);
+    line-height: 1.0;
+    color: var(--white);
+    opacity: 0;
+    transform: translateY(30px);
+    display: block;
+  }
+  .hero__line--lime { color: var(--lime); }
+  .hero__line:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards 0.3s; }
+  .hero__line:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards 0.42s; }
+  .hero__line:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards 0.54s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SUB */
+  .hero__sub {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--gray);
+    max-width: 460px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards 0.75s;
+  }
+
+  /* CTAs */
+  .hero__ctas {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 28px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards 0.95s;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--lime);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 28px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 22px rgba(182,255,0,0.5);
+  }
+  .btn-primary:hover .btn-arrow { transform: translateX(4px); }
+  .btn-arrow {
+    display: inline-block;
+    transition: transform 0.2s ease;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 14px 24px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.22);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.6); }
+
+  /* SOCIAL PROOF */
+  .hero__proof {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.5s ease forwards 1.15s;
+  }
+  .hero__avatars {
+    display: flex;
+  }
+  .hero__avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--black);
+    background: #2a2a2a;
+    overflow: hidden;
+    margin-right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .hero__proof-text {
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.4;
+  }
+  .hero__proof-text strong { color: var(--lime); font-weight: 600; }
+
+  /* BOTTOM */
+  .hero__bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 28px;
+  }
+
+  /* PILLS */
+  .hero__pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 0 20px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  .hero__pills::-webkit-scrollbar { display: none; }
+
+  .hero__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.8);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    opacity: 0;
+    transform: translateY(12px);
+    flex-shrink: 0;
+  }
+  .hero__pill:hover, .hero__pill.active {
+    background: rgba(182,255,0,0.12);
+    border-color: rgba(182,255,0,0.4);
+    color: var(--lime);
+  }
+  .hero__pill:nth-child(1) { animation: fadeUp 0.4s ease forwards 1.3s; }
+  .hero__pill:nth-child(2) { animation: fadeUp 0.4s ease forwards 1.4s; }
+  .hero__pill:nth-child(3) { animation: fadeUp 0.4s ease forwards 1.5s; }
+  .hero__pill:nth-child(4) { animation: fadeUp 0.4s ease forwards 1.6s; }
+  .hero__pill:nth-child(5) { animation: fadeUp 0.4s ease forwards 1.7s; }
+  .hero__pill:nth-child(6) { animation: fadeUp 0.4s ease forwards 1.8s; }
+
+  /* SCROLL INDICATOR */
+  .hero__scroll {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.4;
+    transition: opacity 0.4s ease;
+    cursor: pointer;
+  }
+  .hero__scroll.hidden { opacity: 0; pointer-events: none; }
+  .hero__scroll-line {
+    width: 1px;
+    height: 38px;
+    background: rgba(255,255,255,0.5);
+  }
+  .hero__scroll-chevron {
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    animation: bounce 1.8s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* LOGO (top left) */
+  .hero__logo {
+    position: absolute;
+    top: 32px; left: 6vw;
+    z-index: 20;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0s;
+  }
+  .hero__logo span:first-child { color: var(--lime); }
+  .hero__logo span:last-child { color: var(--black); background: var(--lime); padding: 0 4px; border-radius: 3px; }
+
+  /* NAV */
+  .hero__nav {
+    position: absolute;
+    top: 28px; right: 6vw;
+    z-index: 20;
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards 0.1s;
+  }
+  .hero__nav a {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    transition: color 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .hero__nav a:hover { color: var(--white); }
+  .hero__nav-cta {
+    background: rgba(182,255,0,0.12) !important;
+    border: 1px solid rgba(182,255,0,0.35) !important;
+    color: var(--lime) !important;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-weight: 500 !important;
+    transition: background 0.2s !important;
+  }
+  .hero__nav-cta:hover { background: rgba(182,255,0,0.22) !important; color: var(--lime) !important; }
+
+  /* SECTION BELOW (teaser) */
+  .below-hero {
+    background: var(--black);
+    padding: 80px 6vw;
+    text-align: center;
+  }
+  .below-hero p {
+    color: var(--gray);
+    font-size: 16px;
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .hero__overlay-base { background: rgba(13,13,13,0.6); }
+    .hero__overlay-left { display: none; }
+
+    .hero__content {
+      padding: 0 5vw;
+      padding-top: 38vh;
+      justify-content: center;
+    }
+    .hero__inner {
+      align-items: center;
+      text-align: center;
+      max-width: 100%;
+    }
+    .hero__badge { margin-left: auto; margin-right: auto; }
+    .hero__line { font-size: clamp(40px, 11vw, 60px); }
+    .hero__sub { font-size: 15px; text-align: center; }
+    .hero__ctas {
+      flex-direction: column;
+      width: 100%;
+    }
+    .btn-primary, .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+    .hero__proof { flex-direction: column; text-align: center; }
+    .hero__nav { display: none; }
+    .hero__pills {
+      justify-content: flex-start;
+      mask-image: linear-gradient(to right, transparent 0%, black 8%, black 85%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 85%, transparent 100%);
+    }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+
+  <!-- VIDEO BACKGROUND -->
+  <video class="hero__video"
+    autoplay muted loop playsinline
+    preload="auto"
+    poster="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=1280&q=80">
+    <!-- Add your .webm and .mp4 sources here -->
+    <!-- <source src="hero.webm" type="video/webm"> -->
+    <source src="public/videos/hero.mp4" type="video/mp4">
+  </video>
+
+  <!-- OVERLAY STACK -->
+  <div class="hero__overlay-base"></div>
+  <div class="hero__overlay-bottom"></div>
+  <div class="hero__overlay-left"></div>
+  <div class="hero__overlay-lime"></div>
+  <div class="hero__grain"></div>
+
+  <!-- LOGO -->
+  <div class="hero__logo">
+    <span>Fit</span><span>trybe</span>
+  </div>
+
+  <!-- NAV -->
+  <nav class="hero__nav">
+    <a href="#">Explore</a>
+    <a href="#">How It Works</a>
+    <a href="#">Community</a>
+    <a href="#" class="hero__nav-cta">Download App</a>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="hero__content">
+    <div class="hero__inner">
+
+      <!-- BADGE -->
+      <div class="hero__badge">
+        <div class="hero__badge-dot"></div>
+        <span>Find Your Game</span>
+      </div>
+
+      <!-- HEADLINE -->
+      <div class="hero__headline">
+        <span class="hero__line">Play Local.</span>
+        <span class="hero__line hero__line--lime">Find Your People.</span>
+        <span class="hero__line">Show Up.</span>
+      </div>
+
+      <!-- SUBHEADLINE -->
+      <p class="hero__sub">
+        Discover local sports sessions, join a game, and build your crew — all in one app.
+      </p>
+
+      <!-- CTAs -->
+      <div class="hero__ctas">
+        <a href="#" class="btn-primary">
+          Download the App <span class="btn-arrow">→</span>
+        </a>
+        <a href="#how" class="btn-secondary">
+          See How It Works
+        </a>
+      </div>
+
+      <!-- SOCIAL PROOF -->
+      <div class="hero__proof">
+        <div class="hero__avatars">
+          <div class="hero__avatar">🏃</div>
+          <div class="hero__avatar">⚽</div>
+          <div class="hero__avatar">🏀</div>
+          <div class="hero__avatar">🎾</div>
+        </div>
+        <p class="hero__proof-text">
+          ★ Join <strong>2,000+</strong> players already active near you
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM ANCHOR -->
+  <div class="hero__bottom">
+    <!-- PILLS -->
+    <div class="hero__pills">
+      <button class="hero__pill active">🔥 All</button>
+      <button class="hero__pill">🏃 Running</button>
+      <button class="hero__pill">⚽ Football</button>
+      <button class="hero__pill">🏀 Basketball</button>
+      <button class="hero__pill">🎾 Tennis</button>
+      <button class="hero__pill">🏸 Badminton</button>
+    </div>
+
+    <!-- SCROLL INDICATOR -->
+    <div class="hero__scroll" id="scrollIndicator">
+      <div class="hero__scroll-line"></div>
+      <div class="hero__scroll-chevron">⌄</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- SECTION BELOW (anchor) -->
+<section class="below-hero" id="how">
+  <p>↑ Hero section ends here. The next section (How It Works / Explore) would follow.</p>
+</section>
+
+<script>
+  // Pill active toggle
+  document.querySelectorAll('.hero__pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.hero__pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+
+  // Hide scroll indicator on scroll
+  const scrollEl = document.getElementById('scrollIndicator');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 60) {
+      scrollEl.classList.add('hidden');
+    } else {
+      scrollEl.classList.remove('hidden');
+    }
+  }, { passive: true });
+
+  // Scroll indicator click
+  scrollEl.addEventListener('click', () => {
+    document.getElementById('how').scrollIntoView({ behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>

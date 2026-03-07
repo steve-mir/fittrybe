@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fittrybe — Find Your Game.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lime: #B6FF00;
+    --black: #0D0D0D;
+    --white: #FFFFFF;
+    --gray: #9CA3AF;
+    --dark-card: #111811;
+    --dark-card2: #0f1a0f;
+    --border: rgba(182,255,0,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* NAVBAR */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 5vw;
+    height: 68px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: transparent;
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  nav.scrolled {
+    background: rgba(13,13,13,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  .nav-logo span.fit { color: var(--white); }
+  .nav-logo span.trybe { color: var(--lime); }
+  .nav-links { display: flex; align-items: center; gap: 2rem; }
+  .nav-links a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -3px; left: 0; right: 0;
+    height: 1px; background: var(--lime);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+  .nav-cta {
+    background: var(--lime);
+    color: var(--black) !important;
+    padding: 0.5rem 1.4rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+  }
+  .nav-cta::after { display: none !important; }
+  .nav-cta:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(182,255,0,0.3) !important;
+    color: var(--black) !important;
+  }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 120px 5vw 80px;
+    gap: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(182,255,0,0.12) 0%, transparent 70%);
+    top: 50%; left: 30%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: glowPulse 4s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.7; transform: translate(-50%,-50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
+  }
+  .hero-left { position: relative; z-index: 2; }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(182,255,0,0.1);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 1.5rem;
+    opacity: 0; transform: translateY(20px);
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--lime);
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
+  .hero-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .hero-headline .line {
+    display: block;
+    overflow: hidden;
+  }
+  .hero-headline .line span {
+    display: block;
+    transform: translateY(110%);
+    animation: slideUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  .hero-headline .line:nth-child(1) span { animation-delay: 0.3s; }
+  .hero-headline .line:nth-child(2) span { animation-delay: 0.45s; }
+  .hero-headline .line:nth-child(3) span { animation-delay: 0.6s; }
+  @keyframes slideUp { to { transform: translateY(0); } }
+  .hero-headline .accent { color: var(--lime); }
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--gray);
+    line-height: 1.7;
+    max-width: 420px;
+    margin-bottom: 2.5rem;
+    opacity: 0; transform: translateY(20px);
+    animation: fadeUp 0.6s 0.8s forwards;
+  }
+  @keyframes fadeUp { to { opacity:1; transform: translateY(0); } }
+  .hero-actions {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    opacity: 0; transform: translateY(20px);
+    animation: fadeUp 0.6s 1s forwards;
+  }
+  .btn-primary {
+    background: var(--lime);
+    color: var(--black);
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(182,255,0,0.35);
+  }
+  .btn-ghost {
+    color: var(--white);
+    padding: 0.85rem 2rem;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--lime); color: var(--lime); }
+
+  /* PHONE MOCKUPS */
+  .hero-right {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 600px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .phone-wrap {
+    position: absolute;
+    border-radius: 38px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+    transition: transform 0.4s ease;
+  }
+  .phone-wrap img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .phone-1 {
+    width: 220px; height: 475px;
+    left: 50%; top: 50%;
+    transform: translate(-70%, -50%) rotate(-6deg);
+    z-index: 2;
+    animation: floatA 6s ease-in-out infinite;
+  }
+  .phone-2 {
+    width: 220px; height: 475px;
+    left: 50%; top: 50%;
+    transform: translate(-30%, -50%) rotate(4deg);
+    z-index: 3;
+    animation: floatB 6s ease-in-out infinite;
+  }
+  @keyframes floatA {
+    0%,100% { transform: translate(-70%,-50%) rotate(-6deg) translateY(0); }
+    50% { transform: translate(-70%,-50%) rotate(-6deg) translateY(-12px); }
+  }
+  @keyframes floatB {
+    0%,100% { transform: translate(-30%,-50%) rotate(4deg) translateY(0); }
+    50% { transform: translate(-30%,-50%) rotate(4deg) translateY(-18px); }
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5vw;
+  }
+  .stat-item {
+    padding: 2rem 0;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--lime);
+    display: block;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gray);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+    display: block;
+  }
+
+  /* SECTION STYLES */
+  section { padding: 100px 5vw; position: relative; }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 1rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 0.95;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+  }
+  .section-title .accent { color: var(--lime); }
+
+  /* ABOUT SECTION */
+  #about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+  .about-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 2.5rem;
+  }
+  .about-stat {
+    background: var(--black);
+    padding: 1.5rem;
+  }
+  .about-stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--lime);
+    line-height: 1;
+  }
+  .about-stat-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-top: 0.3rem;
+    font-weight: 500;
+  }
+  .about-right { position: relative; }
+  .about-big-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(5rem, 12vw, 9rem);
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    position: absolute;
+    top: -2rem; right: -2rem;
+    line-height: 1;
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+  }
+  .about-body {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--gray);
+    max-width: 480px;
+  }
+  .about-body p + p { margin-top: 1rem; }
+  .sport-tags {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-top: 2rem;
+  }
+  .sport-tag {
+    padding: 0.4rem 0.9rem;
+    background: rgba(182,255,0,0.07);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    transition: all 0.2s;
+  }
+  .sport-tag:hover { background: rgba(182,255,0,0.15); color: var(--lime); border-color: rgba(182,255,0,0.4); }
+
+  /* FEATURES */
+  #features { background: #080d08; }
+  .features-header { text-align: center; max-width: 600px; margin: 0 auto 4rem; }
+  .features-header .section-title { margin-bottom: 0.5rem; }
+  .features-header p { color: var(--gray); font-size: 1rem; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .feature-card {
+    background: var(--dark-card2);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .feature-card:hover { background: #0d1a0d; }
+  .feature-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--lime);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1.2rem;
+    display: block;
+    transition: transform 0.3s;
+  }
+  .feature-card:hover .feature-icon { transform: scale(1.1) translateY(-4px); }
+  .feature-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.7rem;
+  }
+  .feature-desc { font-size: 0.9rem; color: var(--gray); line-height: 1.7; }
+
+  /* HOW IT WORKS */
+  #how {
+    position: relative;
+    overflow: hidden;
+  }
+  .how-inner { max-width: 800px; margin: 0 auto; text-align: center; }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 4rem;
+    position: relative;
+  }
+  .steps-connector {
+    position: absolute;
+    top: 2.5rem; left: 16.67%; right: 16.67%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--lime), rgba(182,255,0,0.3), var(--lime));
+    z-index: 0;
+  }
+  .steps-connector-animated {
+    position: absolute; top: 0; left: 0; width: 0; height: 100%;
+    background: var(--lime);
+    animation: drawLine 2s 1s ease forwards;
+  }
+  @keyframes drawLine { to { width: 100%; } }
+  .step {
+    position: relative;
+    z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 1.5rem;
+  }
+  .step-num {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--black);
+    border: 2px solid var(--lime);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--lime);
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .step:hover .step-num { background: var(--lime); color: var(--black); }
+  .step-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.6rem;
+  }
+  .step-desc { font-size: 0.88rem; color: var(--gray); line-height: 1.7; }
+
+  /* COMMUNITY / SOCIAL PROOF */
+  #community { background: #080d08; overflow: hidden; }
+  .community-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+  .testimonials { display: flex; flex-direction: column; gap: 1rem; }
+  .testimonial {
+    background: #0f160f;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    transition: border-color 0.3s, transform 0.3s;
+    transform: rotate(var(--r, 0));
+  }
+  .testimonial:nth-child(1) { --r: -0.5deg; }
+  .testimonial:nth-child(2) { --r: 0.3deg; }
+  .testimonial:nth-child(3) { --r: -0.2deg; }
+  .testimonial:hover { border-color: rgba(182,255,0,0.4); transform: rotate(0) scale(1.01); }
+  .testimonial-text { font-size: 0.95rem; line-height: 1.7; color: rgba(255,255,255,0.8); margin-bottom: 1rem; }
+  .testimonial-author { display: flex; align-items: center; gap: 0.7rem; }
+  .author-avatar {
+    width: 36px; height: 36px;
+    background: var(--lime);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    color: var(--black);
+  }
+  .author-name { font-weight: 600; font-size: 0.88rem; }
+  .author-info { font-size: 0.78rem; color: var(--gray); }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+    margin: 3rem 0;
+    background: rgba(182,255,0,0.03);
+  }
+  .marquee-track {
+    display: flex; gap: 3rem;
+    animation: marqueeScroll 20s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-track span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray);
+    flex-shrink: 0;
+  }
+  .marquee-track span.lit { color: var(--lime); }
+  @keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  .community-right h2 { margin-bottom: 1.5rem; }
+  .activity-wall {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .activity-card {
+    background: #0d1a0d;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .activity-card:hover { transform: translateY(-4px); border-color: rgba(182,255,0,0.35); }
+  .activity-card .sport-icon { font-size: 1.4rem; margin-bottom: 0.5rem; display: block; }
+  .activity-card .activity-name { font-weight: 700; font-size: 0.9rem; line-height: 1.3; }
+  .activity-card .activity-meta { font-size: 0.75rem; color: var(--gray); margin-top: 0.3rem; }
+  .activity-card .spot-badge {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(182,255,0,0.12);
+    color: var(--lime);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+  }
+
+  /* WAITLIST / CTA */
+  #waitlist {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .waitlist-bg-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 60px,
+      rgba(182,255,0,0.012) 60px,
+      rgba(182,255,0,0.012) 62px
+    );
+    pointer-events: none;
+  }
+  .waitlist-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(182,255,0,0.1) 0%, transparent 65%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+  .waitlist-inner { position: relative; z-index: 2; max-width: 600px; }
+  .waitlist-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 1rem;
+  }
+  .waitlist-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .waitlist-headline .accent { color: var(--lime); }
+  .waitlist-sub { color: var(--gray); font-size: 1rem; margin-bottom: 2.5rem; line-height: 1.6; }
+  .waitlist-form {
+    display: flex;
+    gap: 0;
+    max-width: 440px;
+    margin: 0 auto 1rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .waitlist-form:focus-within { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(182,255,0,0.1); }
+  .waitlist-form input {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: none;
+    padding: 0.9rem 1.2rem;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .waitlist-form input::placeholder { color: var(--gray); }
+  .waitlist-form button {
+    background: var(--lime);
+    border: none;
+    padding: 0.9rem 1.5rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--black);
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .waitlist-form button:hover { background: #caff33; }
+  .waitlist-note { font-size: 0.78rem; color: var(--gray); }
+
+  /* APP DOWNLOAD */
+  #download {
+    background: #080d08;
+    padding: 80px 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+    border-top: 1px solid var(--border);
+  }
+  .download-left h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .download-left p { color: var(--gray); font-size: 0.95rem; }
+  .store-btns { display: flex; gap: 1rem; margin-top: 1.5rem; }
+  .store-btn {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.75rem 1.4rem;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--white);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .store-btn:hover { border-color: var(--lime); transform: translateY(-2px); }
+  .store-btn svg { width: 22px; height: 22px; fill: var(--white); }
+  .store-btn-text { display: flex; flex-direction: column; }
+  .store-btn-text small { font-size: 0.65rem; color: var(--gray); letter-spacing: 0.05em; text-transform: uppercase; }
+  .store-btn-text strong { font-size: 0.95rem; font-weight: 700; }
+  .download-phone {
+    width: 200px;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+    transform: rotate(-3deg);
+    animation: floatB 5s ease-in-out infinite;
+  }
+  .download-phone img { width: 100%; display: block; }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 5vw;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .footer-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  .footer-logo .fit { color: var(--white); }
+  .footer-logo .trybe { color: var(--lime); }
+  .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .footer-links a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 0.82rem;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--lime); }
+  .footer-social { display: flex; gap: 1rem; }
+  .social-icon {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; color: var(--gray);
+    font-size: 0.85rem;
+    transition: border-color 0.2s, color 0.2s;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+  }
+  .social-icon:hover { border-color: var(--lime); color: var(--lime); }
+
+  /* REVEAL ANIMATIONS */
+  .reveal {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    #hero { grid-template-columns: 1fr; padding-top: 100px; }
+    .hero-right { height: 400px; order: -1; }
+    #about { grid-template-columns: 1fr; gap: 3rem; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr; gap: 2rem; }
+    .steps-connector { display: none; }
+    .community-inner { grid-template-columns: 1fr; }
+    #download { flex-direction: column; text-align: center; }
+    .store-btns { justify-content: center; }
+    footer { flex-direction: column; text-align: center; }
+    .footer-links, .footer-social { justify-content: center; }
+    .nav-links { display: none; }
+    .activity-wall { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 580px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .activity-wall { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: 1fr; }
+    .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#" class="nav-logo"><span class="fit">fit</span><span class="trybe">trybe</span></a>
+  <div class="nav-links">
+    <a href="#about">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="#community">Community</a>
+    <a href="#waitlist" class="nav-cta">Join Waitlist</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-glow"></div>
+  <div class="hero-left">
+    <div class="hero-tag">🔥 Coming Soon — Be First To Play</div>
+    <h1 class="hero-headline">
+      <span class="line"><span>Find</span></span>
+      <span class="line"><span class="accent">Your</span></span>
+      <span class="line"><span>Game.</span></span>
+    </h1>
+    <p class="hero-sub">Discover real sports sessions near you. Join a game, meet your tribe, show up and play. Local sport — made social and consistent.</p>
+    <div class="hero-actions">
+      <a href="#waitlist" class="btn-primary">Join Waitlist →</a>
+      <a href="#how" class="btn-ghost">▶ How It Works</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="phone-wrap phone-1">
+      <img src="/mnt/user-data/uploads/IMG-20260303-WA0007.jpg" alt="Explore screen">
+    </div>
+    <div class="phone-wrap phone-2">
+      <img src="/mnt/user-data/uploads/IMG-20260303-WA0009.jpg" alt="Event detail screen">
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item reveal">
+    <span class="stat-num" data-target="5">0</span>
+    <span class="stat-label">Sports & Growing</span>
+  </div>
+  <div class="stat-item reveal reveal-delay-2">
+    <span class="stat-num" data-target="100">0</span>
+    <span class="stat-label">Real People. Local Games</span>
+  </div>
+  <div class="stat-item reveal reveal-delay-4">
+    <span class="stat-num">FREE</span>
+    <span class="stat-label">To Join & Play</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-left reveal">
+    <span class="section-tag">What Is Fittrybe?</span>
+    <h2 class="section-title">Connecting<br>People<br>Through <span class="accent">Sport</span></h2>
+    <div class="about-stat-grid">
+      <div class="about-stat"><span class="about-stat-num">5+</span><div class="about-stat-label">Sports</div></div>
+      <div class="about-stat"><span class="about-stat-num">0</span><div class="about-stat-label">Active Now</div></div>
+      <div class="about-stat"><span class="about-stat-num">∞</span><div class="about-stat-label">New Connections</div></div>
+      <div class="about-stat"><span class="about-stat-num">Jan '26</span><div class="about-stat-label">Member Since</div></div>
+    </div>
+  </div>
+  <div class="about-right reveal reveal-delay-2">
+    <div class="about-big-text">PLAY</div>
+    <div class="about-body">
+      <p>Fittrybe is a location-based social sports app built for people who want to stay active and meet others through real-world play. Whether you're new to a city, looking for casual teammates, or just want to show up and compete — we've got you.</p>
+      <p>Browse nearby sessions, reserve a spot in seconds, and get matched with people who play at your level. No team required. No commitment beyond showing up.</p>
+    </div>
+    <div class="sport-tags">
+      <span class="sport-tag">⚽ Football</span>
+      <span class="sport-tag">🏀 Basketball</span>
+      <span class="sport-tag">🏸 Badminton</span>
+      <span class="sport-tag">🎾 Tennis</span>
+      <span class="sport-tag">🏃 Running</span>
+      <span class="sport-tag">🚴 Cycling</span>
+      <span class="sport-tag">🏊 Swim</span>
+      <span class="sport-tag">🏋️ Gym</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="features-header reveal">
+    <span class="section-tag">Everything You Need To Play</span>
+    <h2 class="section-title">Built For <span class="accent">Players</span></h2>
+    <p>Every tool you need to find, join, and host local sports sessions — all in one place.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <span class="feature-icon">🗺️</span>
+      <div class="feature-name">Discover Sessions</div>
+      <p class="feature-desc">Browse sports near you on a live map. Filter by sport, distance, date, and skill level. See what's happening within 15 miles.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">👥</span>
+      <div class="feature-name">Event Group Chats</div>
+      <p class="feature-desc">Talk to your teammates before you even arrive. Every session has a built-in group chat so you can coordinate and connect.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">📅</span>
+      <div class="feature-name">My Events</div>
+      <p class="feature-desc">Track all your upcoming sessions and sessions you're hosting in one clean view. Know your week. Show up reliably.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">🔔</span>
+      <div class="feature-name">Real-Time Notifications</div>
+      <p class="feature-desc">Know the moment someone joins your game, a new session drops nearby, or a spot opens up in a full event.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">🎮</span>
+      <div class="feature-name">Host Your Own Game</div>
+      <p class="feature-desc">Create events in minutes. Set the sport, venue, format, skill level, and team setup. Manage your roster and share with the community.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <span class="feature-icon">⭐</span>
+      <div class="feature-name">Reliability Score</div>
+      <p class="feature-desc">Your attendance record matters. Build a 100% reliability rating and earn trust within your local sports community.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="how-inner">
+    <div class="reveal">
+      <span class="section-tag">Simple. Social. Active.</span>
+      <h2 class="section-title">3 Steps To <span class="accent">Playing</span></h2>
+    </div>
+    <div class="steps">
+      <div class="steps-connector"><div class="steps-connector-animated"></div></div>
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <div class="step-title">Download & Sign Up</div>
+        <p class="step-desc">Create your profile in seconds. Tell us your sports and skill level. We do the rest.</p>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">02</div>
+        <div class="step-title">Explore Nearby</div>
+        <p class="step-desc">Find sessions by sport, distance, and time. Free sessions, all skill levels welcome.</p>
+      </div>
+      <div class="step reveal reveal-delay-4">
+        <div class="step-num">03</div>
+        <div class="step-title">Show Up & Play</div>
+        <p class="step-desc">Join the group chat, meet your team, arrive and compete. Your tribe is waiting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>Football</span><span class="lit">·</span>
+    <span>Basketball</span><span class="lit">·</span>
+    <span>Badminton</span><span class="lit">·</span>
+    <span>Tennis</span><span class="lit">·</span>
+    <span>Running</span><span class="lit">·</span>
+    <span>Cycling</span><span class="lit">·</span>
+    <span>Swim</span><span class="lit">·</span>
+    <span>Gym</span><span class="lit">·</span>
+    <span class="lit">Play Local.</span><span class="lit">·</span>
+    <span>Football</span><span class="lit">·</span>
+    <span>Basketball</span><span class="lit">·</span>
+    <span>Badminton</span><span class="lit">·</span>
+    <span>Tennis</span><span class="lit">·</span>
+    <span>Running</span><span class="lit">·</span>
+    <span>Cycling</span><span class="lit">·</span>
+    <span>Swim</span><span class="lit">·</span>
+    <span>Gym</span><span class="lit">·</span>
+    <span class="lit">Move Together.</span><span class="lit">·</span>
+  </div>
+</div>
+
+<!-- COMMUNITY -->
+<section id="community">
+  <div class="community-inner">
+    <div class="reveal">
+      <span class="section-tag">Your Community Awaits</span>
+      <h2 class="section-title">Real People.<br><span class="accent">Real Games.</span><br>Your City.</h2>
+      <div class="testimonials" style="margin-top:2rem">
+        <div class="testimonial">
+          <p class="testimonial-text">"Joined a badminton session my first week in Crawley. Now I play every Monday with the same crew. Fittrybe actually works."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">F</div>
+            <div><div class="author-name">Francis O.</div><div class="author-info">Badminton · Crawley</div></div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <p class="testimonial-text">"I hosted my first basketball 3v3 and had 9 players confirm within an hour. The group chat made coordination seamless."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">M</div>
+            <div><div class="author-name">Made Easy</div><div class="author-info">Basketball · Redhill</div></div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <p class="testimonial-text">"As an expat I struggled to meet people. Finding a football session through Fittrybe changed that completely."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">D</div>
+            <div><div class="author-name">Danny K.</div><div class="author-info">Football · Surrey</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="community-right reveal reveal-delay-2">
+      <span class="section-tag">Active Sessions</span>
+      <h2 class="section-title">Games <span class="accent">Near You</span></h2>
+      <div class="activity-wall">
+        <div class="activity-card">
+          <span class="sport-icon">🏸</span>
+          <div class="activity-name">Badminton with Francis</div>
+          <div class="activity-meta">Mon 2 Mar · 18:00 · K2 Crawley</div>
+          <span class="spot-badge">FULL</span>
+        </div>
+        <div class="activity-card">
+          <span class="sport-icon">⚽</span>
+          <div class="activity-name">Football with Danny</div>
+          <div class="activity-meta">Mon 2 Mar · 18:00 · Broadfield 3G</div>
+          <span class="spot-badge">4 SPOTS</span>
+        </div>
+        <div class="activity-card">
+          <span class="sport-icon">🏀</span>
+          <div class="activity-name">Basketball 3v3</div>
+          <div class="activity-meta">Mon 2 Mar · 18:00 · Donyngs Centre</div>
+          <span class="spot-badge">9/10 LEFT</span>
+        </div>
+        <div class="activity-card">
+          <span class="sport-icon">🎾</span>
+          <div class="activity-name">Social Tennis Hit</div>
+          <div class="activity-meta">Coming Soon · All Levels</div>
+          <span class="spot-badge">OPEN</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section id="waitlist">
+  <div class="waitlist-bg-stripe"></div>
+  <div class="waitlist-glow"></div>
+  <div class="waitlist-inner reveal">
+    <div class="waitlist-eyebrow">⚡ Launching Soon</div>
+    <h2 class="waitlist-headline">Be First<br>To <span class="accent">Play.</span></h2>
+    <p class="waitlist-sub">We're launching soon. Join 300+ people already on the waitlist and get early access when we go live in your city.</p>
+    <div class="waitlist-form" id="waitlistForm">
+      <input type="email" placeholder="Enter your email..." id="emailInput">
+      <button onclick="handleWaitlist()">Join →</button>
+    </div>
+    <p class="waitlist-note" id="waitlistNote">Free to join. No spam. Cancel anytime.</p>
+  </div>
+</section>
+
+<!-- APP DOWNLOAD -->
+<div id="download">
+  <div class="download-left reveal">
+    <h2>Get The App</h2>
+    <p>Available on iOS and Android. Download and find your first game today.</p>
+    <div class="store-btns">
+      <a href="#" class="store-btn">
+        <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <div class="store-btn-text"><small>Download on the</small><strong>App Store</strong></div>
+      </a>
+      <a href="#" class="store-btn">
+        <svg viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.22.98.14l12.5-7.08-2.54-2.54-10.94 9.48zm-1.1-20.3C2.03 3.76 2 4.07 2 4.41v15.18c0 .34.03.65.09.94l10.12-10.12-10.13-7.95zm19.08 8.94l-2.48-1.41-2.82 2.82 2.82 2.82 2.5-1.42c.71-.4.71-1.41-.02-1.81zM4.16.38l12.5 7.08-2.54 2.54L3.18.52C3.54.44 3.9.5 4.16.38z"/></svg>
+        <div class="store-btn-text"><small>Get it on</small><strong>Google Play</strong></div>
+      </a>
+    </div>
+  </div>
+  <div class="download-phone reveal reveal-delay-2">
+    <img src="/mnt/user-data/uploads/IMG-20260303-WA0007.jpg" alt="Fittrybe app">
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="footer-logo"><span class="fit">fit</span><span class="trybe">trybe</span></a>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+    <a href="#">FAQ</a>
+  </div>
+  <div class="footer-social">
+    <a href="#" class="social-icon">IG</a>
+    <a href="#" class="social-icon">TW</a>
+    <a href="#" class="social-icon">TK</a>
+  </div>
+</footer>
+
+<script>
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Intersection Observer for reveals
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => obs.observe(r));
+
+  // Count-up
+  const counters = document.querySelectorAll('[data-target]');
+  const counterObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target);
+        const suffix = el.dataset.suffix || (target >= 100 ? '+' : '+');
+        let count = 0;
+        const inc = Math.max(1, Math.floor(target / 60));
+        const timer = setInterval(() => {
+          count = Math.min(count + inc, target);
+          el.textContent = count + suffix;
+          if (count >= target) clearInterval(timer);
+        }, 25);
+        counterObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => counterObs.observe(c));
+
+  // Waitlist form
+  function handleWaitlist() {
+    const input = document.getElementById('emailInput');
+    const note = document.getElementById('waitlistNote');
+    if (!input.value || !input.value.includes('@')) {
+      input.style.borderColor = '#ff4444';
+      setTimeout(() => input.style.borderColor = '', 1000);
+      return;
+    }
+    const btn = document.querySelector('#waitlistForm button');
+    btn.textContent = "✓ You're in!";
+    btn.style.background = '#6aff00';
+    input.value = '';
+    note.textContent = "🎉 Welcome to the tribe! We'll be in touch soon.";
+    note.style.color = '#B6FF00';
+  }
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleWaitlist();
+  });
+</script>
+</body>
+</html>
