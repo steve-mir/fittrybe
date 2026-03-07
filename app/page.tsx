@@ -24,6 +24,8 @@ const TRANSITION_MS  = 400;
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -31,41 +33,94 @@ function Navbar() {
   }, []);
 
   return (
-    <nav
-      style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        padding: "0 5vw", height: 68,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: scrolled ? "rgba(13,13,13,0.85)" : "transparent",
-        backdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(182,255,0,0.15)" : "none",
-        transition: "background 0.4s ease, backdrop-filter 0.4s ease, border-bottom 0.4s ease",
-      }}
-    >
-      <a href="#" style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "1.6rem", letterSpacing: "-0.02em", textDecoration: "none" }}>
-        <span style={{ color: "#fff" }}>fit</span>
-        <span style={{ color: "#B6FF00" }}>trybe</span>
-      </a>
-      <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+    <>
+      <nav
+        style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+          padding: "0 5vw", height: 68,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: scrolled || menuOpen ? "rgba(13,13,13,0.95)" : "transparent",
+          backdropFilter: scrolled || menuOpen ? "blur(16px)" : "none",
+          borderBottom: scrolled || menuOpen ? "1px solid rgba(182,255,0,0.15)" : "none",
+          transition: "background 0.4s ease, backdrop-filter 0.4s ease, border-bottom 0.4s ease",
+        }}
+      >
+        <a href="#" style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "1.6rem", letterSpacing: "-0.02em", textDecoration: "none", zIndex: 101 }}>
+          <span style={{ color: "#fff" }}>fit</span>
+          <span style={{ color: "#B6FF00" }}>trybe</span>
+        </a>
+
+        {/* Desktop nav links */}
+        <div className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+          {["About", "Features", "How It Works", "Community"].map((label, i) => {
+            const hrefs = ["#about-us", "#features", "#how", "#community"];
+            return (
+              <a key={label} href={hrefs[i]} style={{ color: "#9CA3AF", textDecoration: "none", fontSize: "0.9rem", fontWeight: 500, letterSpacing: "0.03em", transition: "color 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#9CA3AF")}
+              >{label}</a>
+            );
+          })}
+          <a href="#waitlist" style={{
+            background: "#B6FF00", color: "#0D0D0D", padding: "0.5rem 1.4rem",
+            borderRadius: 4, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.05em",
+            textTransform: "uppercase", textDecoration: "none", transition: "transform 0.2s, box-shadow 0.2s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(182,255,0,0.3)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+          >Join Waitlist</a>
+        </div>
+
+        {/* Hamburger */}
+        <button
+          className="hamburger"
+          onClick={() => setMenuOpen(v => !v)}
+          aria-label="Toggle menu"
+          style={{
+            display: "none", flexDirection: "column", gap: 5, background: "none",
+            border: "none", cursor: "pointer", padding: 8, zIndex: 101,
+          }}
+        >
+          {[0,1,2].map(i => (
+            <span key={i} style={{
+              display: "block", width: 24, height: 2, background: "#fff", borderRadius: 2,
+              transition: "transform 0.3s, opacity 0.3s",
+              transform: menuOpen
+                ? i === 0 ? "translateY(7px) rotate(45deg)" : i === 2 ? "translateY(-7px) rotate(-45deg)" : "scaleX(0)"
+                : "none",
+              opacity: menuOpen && i === 1 ? 0 : 1,
+            }} />
+          ))}
+        </button>
+      </nav>
+
+      {/* Mobile menu */}
+      <div className="mobile-menu" style={{
+        position: "fixed", top: 68, left: 0, right: 0, zIndex: 99,
+        background: "rgba(13,13,13,0.97)", backdropFilter: "blur(16px)",
+        borderBottom: "1px solid rgba(182,255,0,0.15)",
+        padding: menuOpen ? "1.5rem 5vw 2rem" : "0 5vw",
+        maxHeight: menuOpen ? 400 : 0, overflow: "hidden",
+        transition: "max-height 0.4s ease, padding 0.3s ease",
+        display: "flex", flexDirection: "column", gap: "0.25rem",
+      }}>
         {["About", "Features", "How It Works", "Community"].map((label, i) => {
           const hrefs = ["#about-us", "#features", "#how", "#community"];
           return (
-            <a key={label} href={hrefs[i]} style={{ color: "#9CA3AF", textDecoration: "none", fontSize: "0.9rem", fontWeight: 500, letterSpacing: "0.03em", transition: "color 0.2s" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#9CA3AF")}
-            >{label}</a>
+            <a key={label} href={hrefs[i]} onClick={() => setMenuOpen(false)} style={{
+              color: "#9CA3AF", textDecoration: "none", fontSize: "1.1rem", fontWeight: 600,
+              padding: "0.75rem 0", borderBottom: "1px solid rgba(255,255,255,0.06)",
+            }}>{label}</a>
           );
         })}
-        <a href="#waitlist" style={{
-          background: "#B6FF00", color: "#0D0D0D", padding: "0.5rem 1.4rem",
-          borderRadius: 4, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.05em",
-          textTransform: "uppercase", textDecoration: "none", transition: "transform 0.2s, box-shadow 0.2s",
-        }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(182,255,0,0.3)"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
-        >Join Waitlist</a>
+        <a href="#waitlist" onClick={() => setMenuOpen(false)} style={{
+          display: "inline-block", marginTop: "1rem",
+          background: "#B6FF00", color: "#0D0D0D", padding: "0.75rem 1.5rem",
+          borderRadius: 4, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.05em",
+          textTransform: "uppercase", textDecoration: "none", textAlign: "center",
+        }}>Join Waitlist</a>
       </div>
-    </nav>
+    </>
   );
 }
 
@@ -75,7 +130,7 @@ function HeroSection() {
       minHeight: "100vh", display: "grid", gridTemplateColumns: "1fr 1fr",
       alignItems: "center", padding: "120px 5vw 80px", gap: "4rem",
       position: "relative", overflow: "hidden",
-    }}>
+    }} className="hero-section">
       {/* bg glow */}
       <div style={{
         position: "absolute", width: 600, height: 600,
@@ -143,7 +198,7 @@ function HeroSection() {
       </div>
 
       {/* Phone mockups */}
-      <div style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "center", height: 600, opacity: 0, animation: "fadeUp 0.8s 0.5s forwards" }}>
+      <div className="hero-phones" style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "center", height: 600, opacity: 0, animation: "fadeUp 0.8s 0.5s forwards" }}>
         {[
           { cls: "phone-1", style: { width: 220, height: 475, left: "50%", top: "50%", transform: "translate(-70%, -50%) rotate(-6deg)", zIndex: 2, animation: "floatA 6s ease-in-out infinite" } },
           { cls: "phone-2", style: { width: 220, height: 475, left: "50%", top: "50%", transform: "translate(-30%, -50%) rotate(4deg)", zIndex: 3, animation: "floatB 6s ease-in-out infinite" } },
@@ -192,7 +247,7 @@ function StatsBar() {
   }, []);
 
   return (
-    <div ref={ref} style={{
+    <div ref={ref} className="stats-bar" style={{
       display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
       borderTop: "1px solid rgba(182,255,0,0.15)", borderBottom: "1px solid rgba(182,255,0,0.15)",
       padding: "0 5vw",
@@ -206,8 +261,8 @@ function StatsBar() {
           padding: "2rem 0", textAlign: "center",
           borderRight: i < 2 ? "1px solid rgba(182,255,0,0.15)" : "none",
         }}>
-          <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "3rem", fontWeight: 900, lineHeight: 1, color: "#B6FF00", display: "block" }}>{num}</span>
-          <span style={{ fontSize: "0.8rem", fontWeight: 500, color: "#9CA3AF", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: "0.3rem", display: "block" }}>{label}</span>
+          <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 900, lineHeight: 1, color: "#B6FF00", display: "block" }}>{num}</span>
+          <span style={{ fontSize: "clamp(0.65rem, 1.5vw, 0.8rem)", fontWeight: 500, color: "#9CA3AF", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: "0.3rem", display: "block" }}>{label}</span>
         </div>
       ))}
     </div>
@@ -229,18 +284,13 @@ function PhoneCarousel() {
     const prevIdx = currentRef.current;
     currentRef.current = idx;
     setCurrent(idx);
-
-    // Progress bars
     setFillWidths(SEQUENCE.map((_, i) => i < idx ? "100%" : "0%"));
     setFillingIdx(idx);
-
-    // Slide transitions
     setSlideStates(prevStates => SEQUENCE.map((_, i) => {
       if (i === prevIdx && prevIdx >= 0) return "exiting";
       if (i === idx) return "entering";
       return "idle";
     }));
-
     setTimeout(() => {
       setSlideStates(prev => prev.map((s, i) => {
         if (i === idx) return "active";
@@ -248,11 +298,9 @@ function PhoneCarousel() {
         return s;
       }));
     }, 50);
-
     setTimeout(() => {
       setSlideStates(prev => prev.map((s, i) => i === idx ? "active" : (s === "exiting" ? "idle" : s)));
     }, TRANSITION_MS);
-
     setCaptionVisible(false);
     setTimeout(() => {
       setCaption(SEQUENCE[idx].caption);
@@ -296,13 +344,13 @@ function PhoneCarousel() {
   };
 
   return (
-    <section id="about-us" ref={sectionRef} style={{
+    <section id="about-us" ref={sectionRef} className="phone-carousel-section" style={{
       minHeight: "100vh", padding: "100px 6vw", display: "flex",
       alignItems: "center", position: "relative", overflow: "hidden", background: "#080d08",
     }}>
       <div style={{ position: "absolute", top: "50%", right: "25%", transform: "translate(50%, -50%)", width: 700, height: 700, background: "radial-gradient(circle, rgba(182,255,0,0.07) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
 
-      <div style={{ display: "grid", gridTemplateColumns: "40% 60%", width: "100%", maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
+      <div className="phone-carousel-grid" style={{ display: "grid", gridTemplateColumns: "40% 60%", width: "100%", maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Left */}
         <div ref={auLeftRef} style={{ display: "flex", flexDirection: "column", justifyContent: "center", paddingRight: 60, gap: 28 }}>
           <div style={{
@@ -319,7 +367,7 @@ function PhoneCarousel() {
           </div>
 
           <h2 style={{
-            fontFamily: "'Syne', sans-serif", fontSize: "clamp(38px, 4.5vw, 62px)", fontWeight: 800,
+            fontFamily: "'Syne', sans-serif", fontSize: "clamp(28px, 4.5vw, 62px)", fontWeight: 800,
             lineHeight: 1.05, letterSpacing: "-0.02em", color: "#fff",
             opacity: inView ? 1 : 0, transform: inView ? "translateX(0)" : "translateX(-30px)",
             transition: "opacity 0.5s ease 0.08s, transform 0.5s ease 0.08s",
@@ -383,7 +431,7 @@ function PhoneCarousel() {
         </div>
 
         {/* Right - Phone */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative", minHeight: 700 }}>
+        <div className="phone-right" style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative", minHeight: 700 }}>
           <div style={{ position: "absolute", width: 440, height: 440, background: "radial-gradient(circle, rgba(182,255,0,0.18) 0%, transparent 65%)", filter: "blur(60px)", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 0, pointerEvents: "none" }} />
           {[{ side: "left", style: { left: "calc(50% - 280px)", top: "50%", transform: "translateY(-50%) rotate(-8deg) scale(0.85)" } },
             { side: "right", style: { right: "calc(50% - 280px)", top: "50%", transform: "translateY(-50%) rotate(8deg) scale(0.85)" } }].map(({ side, style }) => (
@@ -479,23 +527,23 @@ function RevealSection({ children, delay = 0, style = {} }: { children: React.Re
 
 function AboutSection() {
   return (
-    <section id="about" style={{ padding: "100px 5vw", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6rem", alignItems: "center" }}>
+    <section id="about" className="about-section" style={{ padding: "100px 5vw", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6rem", alignItems: "center" }}>
       <RevealSection>
         <span style={{ display: "inline-block", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem", padding: "0.3rem 0.7rem", border: "1px solid rgba(182,255,0,0.15)", borderRadius: 2 }}>What Is Fittrybe?</span>
-        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "1.5rem" }}>
+        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "1.5rem" }}>
           Connecting<br />People<br />Through <span style={{ color: "#B6FF00" }}>Sport</span>
         </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, background: "rgba(182,255,0,0.15)", border: "1px solid rgba(182,255,0,0.15)", marginTop: "2.5rem" }}>
+        <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, background: "rgba(182,255,0,0.15)", border: "1px solid rgba(182,255,0,0.15)", marginTop: "2.5rem" }}>
           {[["5+","Sports"],["0","Active Now"],["∞","New Connections"],["Jan '26","Member Since"]].map(([num, label]) => (
             <div key={label} style={{ background: "#0D0D0D", padding: "1.5rem" }}>
-              <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "2.5rem", fontWeight: 900, color: "#B6FF00", lineHeight: 1 }}>{num}</span>
+              <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#B6FF00", lineHeight: 1 }}>{num}</span>
               <div style={{ fontSize: "0.8rem", color: "#9CA3AF", marginTop: "0.3rem", fontWeight: 500 }}>{label}</div>
             </div>
           ))}
         </div>
       </RevealSection>
       <RevealSection delay={0.2} style={{ position: "relative" }}>
-        <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(5rem, 12vw, 9rem)", fontWeight: 900, color: "rgba(255,255,255,0.03)", position: "absolute", top: "-2rem", right: "-2rem", lineHeight: 1, pointerEvents: "none", textTransform: "uppercase", letterSpacing: "-0.04em" }}>PLAY</div>
+        <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(4rem, 12vw, 9rem)", fontWeight: 900, color: "rgba(255,255,255,0.03)", position: "absolute", top: "-2rem", right: "-2rem", lineHeight: 1, pointerEvents: "none", textTransform: "uppercase", letterSpacing: "-0.04em" }}>PLAY</div>
         <div style={{ fontSize: "1rem", lineHeight: 1.8, color: "#9CA3AF", maxWidth: 480 }}>
           <p>Fittrybe is a location-based social sports app built for people who want to stay active and meet others through real-world play. Whether you&apos;re new to a city, looking for casual teammates, or just want to show up and compete — we&apos;ve got you.</p>
           <p style={{ marginTop: "1rem" }}>Browse nearby sessions, reserve a spot in seconds, and get matched with people who play at your level. No team required. No commitment beyond showing up.</p>
@@ -530,10 +578,10 @@ function FeaturesSection() {
     <section id="features" style={{ padding: "100px 5vw", background: "#080d08" }}>
       <RevealSection style={{ textAlign: "center", maxWidth: 600, margin: "0 auto 4rem" }}>
         <span style={{ display: "inline-block", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem", padding: "0.3rem 0.7rem", border: "1px solid rgba(182,255,0,0.15)", borderRadius: 2 }}>Everything You Need To Play</span>
-        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "0.5rem" }}>Built For <span style={{ color: "#B6FF00" }}>Players</span></h2>
+        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "0.5rem" }}>Built For <span style={{ color: "#B6FF00" }}>Players</span></h2>
         <p style={{ color: "#9CA3AF", fontSize: "1rem" }}>Every tool you need to find, join, and host local sports sessions — all in one place.</p>
       </RevealSection>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "rgba(182,255,0,0.15)", border: "1px solid rgba(182,255,0,0.15)" }}>
+      <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "rgba(182,255,0,0.15)", border: "1px solid rgba(182,255,0,0.15)" }}>
         {features.map((f, i) => (
           <RevealSection key={f.name} delay={[0,0.1,0.2,0.1,0.2,0.3][i]}>
             <FeatureCard {...f} />
@@ -568,10 +616,10 @@ function HowSection() {
       <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
         <RevealSection>
           <span style={{ display: "inline-block", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem", padding: "0.3rem 0.7rem", border: "1px solid rgba(182,255,0,0.15)", borderRadius: 2 }}>Simple. Social. Active.</span>
-          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: 0 }}>3 Steps To <span style={{ color: "#B6FF00" }}>Playing</span></h2>
+          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: 0 }}>3 Steps To <span style={{ color: "#B6FF00" }}>Playing</span></h2>
         </RevealSection>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", marginTop: "4rem", position: "relative" }}>
-          <div style={{ position: "absolute", top: "2.5rem", left: "16.67%", right: "16.67%", height: 1, background: "linear-gradient(90deg, #B6FF00, rgba(182,255,0,0.3), #B6FF00)", zIndex: 0 }} />
+        <div className="how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", marginTop: "4rem", position: "relative" }}>
+          <div className="how-connector" style={{ position: "absolute", top: "2.5rem", left: "16.67%", right: "16.67%", height: 1, background: "linear-gradient(90deg, #B6FF00, rgba(182,255,0,0.3), #B6FF00)", zIndex: 0 }} />
           {[
             { num: "01", title: "Download & Sign Up", desc: "Create your profile in seconds. Tell us your sports and skill level. We do the rest." },
             { num: "02", title: "Explore Nearby", desc: "Find sessions by sport, distance, and time. Free sessions, all skill levels welcome." },
@@ -619,10 +667,10 @@ function Marquee() {
 function CommunitySection() {
   return (
     <section id="community" style={{ padding: "100px 5vw", background: "#080d08", overflow: "hidden" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5rem", alignItems: "start" }}>
+      <div className="community-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5rem", alignItems: "start" }}>
         <RevealSection>
           <span style={{ display: "inline-block", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem", padding: "0.3rem 0.7rem", border: "1px solid rgba(182,255,0,0.15)", borderRadius: 2 }}>Your Community Awaits</span>
-          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "1.5rem" }}>
+          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "1.5rem" }}>
             Real People.<br /><span style={{ color: "#B6FF00" }}>Real Games.</span><br />Your City.
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "2rem" }}>
@@ -638,10 +686,10 @@ function CommunitySection() {
 
         <RevealSection delay={0.2}>
           <span style={{ display: "inline-block", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem", padding: "0.3rem 0.7rem", border: "1px solid rgba(182,255,0,0.15)", borderRadius: 2 }}>Active Sessions</span>
-          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: 0 }}>
+          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 0.95, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: 0 }}>
             Games <span style={{ color: "#B6FF00" }}>Near You</span>
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginTop: "2rem" }}>
+          <div className="activity-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginTop: "2rem" }}>
             {[
               { icon: "🏸", name: "Badminton with Francis", meta: "Mon 2 Mar · 18:00 · K2 Crawley", badge: "FULL" },
               { icon: "⚽", name: "Football with Danny", meta: "Mon 2 Mar · 18:00 · Broadfield 3G", badge: "4 SPOTS" },
@@ -708,15 +756,15 @@ function WaitlistSection() {
     <section id="waitlist" style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", position: "relative", overflow: "hidden", padding: "100px 5vw" }}>
       <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(182,255,0,0.012) 60px, rgba(182,255,0,0.012) 62px)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", width: 700, height: 700, background: "radial-gradient(circle, rgba(182,255,0,0.1) 0%, transparent 65%)", top: "50%", left: "50%", transform: "translate(-50%,-50%)", pointerEvents: "none" }} />
-      <RevealSection style={{ position: "relative", zIndex: 2, maxWidth: 600 }}>
+      <RevealSection style={{ position: "relative", zIndex: 2, maxWidth: 600, width: "100%" }}>
         <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem" }}>⚡ Launching Soon</div>
-        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(3rem, 6vw, 5rem)", fontWeight: 900, textTransform: "uppercase", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1rem" }}>
+        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: 900, textTransform: "uppercase", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1rem" }}>
           Be First<br />To <span style={{ color: "#B6FF00" }}>Play.</span>
         </h2>
         <p style={{ color: "#9CA3AF", fontSize: "1rem", marginBottom: "2.5rem", lineHeight: 1.6 }}>
           We&apos;re launching soon. Join 300+ people already on the waitlist and get early access when we go live in your city.
         </p>
-        <div style={{
+        <div className="waitlist-form" style={{
           display: "flex", gap: 0, maxWidth: 440, margin: "0 auto 1rem",
           border: `1px solid ${error ? "#ff4444" : "rgba(255,255,255,0.12)"}`,
           borderRadius: 4, overflow: "hidden", transition: "border-color 0.3s",
@@ -727,7 +775,7 @@ function WaitlistSection() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSubmit()}
-            style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "none", padding: "0.9rem 1.2rem", color: "#fff", fontFamily: "'Barlow', sans-serif", fontSize: "0.95rem", outline: "none" }}
+            style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "none", padding: "0.9rem 1.2rem", color: "#fff", fontFamily: "'Barlow', sans-serif", fontSize: "0.95rem", outline: "none", minWidth: 0 }}
           />
           <button onClick={handleSubmit} style={{
             background: submitted ? "#6aff00" : "#B6FF00", border: "none", padding: "0.9rem 1.5rem",
@@ -745,11 +793,11 @@ function WaitlistSection() {
 
 function DownloadSection() {
   return (
-    <div id="download" style={{ background: "#080d08", padding: "80px 5vw", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "3rem", borderTop: "1px solid rgba(182,255,0,0.15)" }}>
+    <div id="download" className="download-section" style={{ background: "#080d08", padding: "80px 5vw", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "3rem", borderTop: "1px solid rgba(182,255,0,0.15)", flexWrap: "wrap" }}>
       <RevealSection>
-        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "2.5rem", fontWeight: 900, textTransform: "uppercase", lineHeight: 1, marginBottom: "0.5rem" }}>Get The App</h2>
+        <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, textTransform: "uppercase", lineHeight: 1, marginBottom: "0.5rem" }}>Get The App</h2>
         <p style={{ color: "#9CA3AF", fontSize: "0.95rem" }}>Available on iOS and Android. Download and find your first game today.</p>
-        <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+        <div className="store-buttons" style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
           {[
             { icon: "M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z", small: "Download on the", strong: "App Store" },
             { icon: "M3.18 23.76c.3.17.64.22.98.14l12.5-7.08-2.54-2.54-10.94 9.48zm-1.1-20.3C2.03 3.76 2 4.07 2 4.41v15.18c0 .34.03.65.09.94l10.12-10.12-10.13-7.95zm19.08 8.94l-2.48-1.41-2.82 2.82 2.82 2.82 2.5-1.42c.71-.4.71-1.41-.02-1.81zM4.16.38l12.5 7.08-2.54 2.54L3.18.52C3.54.44 3.9.5 4.16.38z", small: "Get it on", strong: "Google Play" },
@@ -772,7 +820,7 @@ function DownloadSection() {
         </div>
       </RevealSection>
       <RevealSection delay={0.2}>
-        <div style={{ width: 200, borderRadius: 32, overflow: "hidden", boxShadow: "0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)", transform: "rotate(-3deg)", animation: "floatB 5s ease-in-out infinite" }}>
+        <div className="download-phone" style={{ width: 200, borderRadius: 32, overflow: "hidden", boxShadow: "0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)", transform: "rotate(-3deg)", animation: "floatB 5s ease-in-out infinite" }}>
           <Image src="/images/screen1.jpg" alt="Fittrybe app" width={200} height={400} style={{ width: "100%", display: "block" }} />
         </div>
       </RevealSection>
@@ -782,11 +830,11 @@ function DownloadSection() {
 
 function Footer() {
   return (
-    <footer style={{ padding: "3rem 5vw", borderTop: "1px solid rgba(182,255,0,0.15)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem" }}>
+    <footer className="footer" style={{ padding: "3rem 5vw", borderTop: "1px solid rgba(182,255,0,0.15)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem" }}>
       <a href="#" style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "1.4rem", letterSpacing: "-0.02em", textDecoration: "none" }}>
         <span style={{ color: "#fff" }}>fit</span><span style={{ color: "#B6FF00" }}>trybe</span>
       </a>
-      <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+      <div className="footer-links" style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
         {["Privacy Policy", "Terms", "Contact", "FAQ"].map(link => (
           <a key={link} href="#" style={{ color: "#9CA3AF", textDecoration: "none", fontSize: "0.82rem", transition: "color 0.2s" }}
             onMouseEnter={e => (e.currentTarget.style.color = "#B6FF00")}
@@ -811,7 +859,7 @@ function Footer() {
   );
 }
 
-// ─── Global CSS injected once ─────────────────────────────────────────────────
+// ─── Global CSS ───────────────────────────────────────────────────────────────
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -822,6 +870,8 @@ const GLOBAL_CSS = `
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
     opacity: 0.025; pointer-events: none; z-index: 1000;
   }
+
+  /* ─── Keyframes ─── */
   @keyframes glowPulse { 0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)} }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
   @keyframes slideUp { to { transform: translateY(0); } }
@@ -831,8 +881,199 @@ const GLOBAL_CSS = `
   @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
   @keyframes float1 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-20px)} }
   @keyframes marqueeScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-  @media (max-width: 900px) {
-    nav > div:last-child { display: none; }
+
+  /* ─── Tablet: 768px–1024px ─── */
+  @media (max-width: 1024px) {
+    /* Hero: stack on tablet */
+    .hero-section {
+      grid-template-columns: 1fr !important;
+      padding: 100px 6vw 60px !important;
+      text-align: center;
+      justify-items: center;
+    }
+    .hero-section > div:first-child {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .hero-phones {
+      display: none !important;
+    }
+
+    /* About section */
+    .about-section {
+      grid-template-columns: 1fr !important;
+      gap: 3rem !important;
+    }
+
+    /* Features grid: 2 columns */
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Phone carousel: stack */
+    .phone-carousel-grid {
+      grid-template-columns: 1fr !important;
+      gap: 3rem;
+    }
+    .phone-carousel-section {
+      padding: 80px 6vw !important;
+    }
+    .phone-right {
+      min-height: 500px !important;
+    }
+
+    /* How grid: keep 3 cols but hide connector */
+    .how-connector { display: none !important; }
+
+    /* Community */
+    .community-grid {
+      grid-template-columns: 1fr !important;
+      gap: 3rem !important;
+    }
+
+    /* Activity grid */
+    .activity-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* Download */
+    .download-section {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+    }
+    .download-phone { display: none !important; }
+  }
+
+  /* ─── Mobile: max 768px ─── */
+  @media (max-width: 768px) {
+    /* Navbar */
+    .desktop-nav { display: none !important; }
+    .hamburger { display: flex !important; }
+    .mobile-menu { display: flex !important; }
+
+    /* Hero */
+    .hero-section {
+      padding: 90px 5vw 50px !important;
+      min-height: auto !important;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      grid-template-columns: 1fr !important;
+    }
+    .stats-bar > div {
+      border-right: none !important;
+      border-bottom: 1px solid rgba(182,255,0,0.15);
+      padding: 1.5rem 0 !important;
+    }
+    .stats-bar > div:last-child {
+      border-bottom: none !important;
+    }
+
+    /* Phone carousel */
+    .phone-carousel-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .phone-carousel-section {
+      padding: 60px 5vw !important;
+      min-height: auto !important;
+    }
+    .phone-right {
+      min-height: 420px !important;
+    }
+
+    /* Features */
+    .features-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* How steps: stack */
+    .how-grid {
+      grid-template-columns: 1fr !important;
+      gap: 2.5rem !important;
+    }
+    .how-connector { display: none !important; }
+
+    /* Community */
+    .community-grid {
+      grid-template-columns: 1fr !important;
+      gap: 3rem !important;
+    }
+
+    /* Activity grid: 1 column */
+    .activity-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* About */
+    .about-section {
+      grid-template-columns: 1fr !important;
+      gap: 3rem !important;
+      padding: 60px 5vw !important;
+    }
+    .stats-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* Download */
+    .download-section {
+      flex-direction: column !important;
+      padding: 60px 5vw !important;
+    }
+    .download-phone { display: none !important; }
+    .store-buttons {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+    }
+
+    /* Waitlist form */
+    .waitlist-form {
+      flex-direction: column !important;
+      border-radius: 8px !important;
+      overflow: visible !important;
+      border: none !important;
+      gap: 0.75rem !important;
+    }
+    .waitlist-form input {
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      border-radius: 4px !important;
+      width: 100% !important;
+    }
+    .waitlist-form button {
+      border-radius: 4px !important;
+      width: 100% !important;
+      padding: 1rem !important;
+    }
+
+    /* Footer */
+    .footer {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1.5rem !important;
+    }
+    .footer-links {
+      gap: 1rem !important;
+    }
+
+    /* General padding */
+    section {
+      padding-left: 5vw !important;
+      padding-right: 5vw !important;
+    }
+  }
+
+  /* ─── Small mobile: max 480px ─── */
+  @media (max-width: 480px) {
+    .phone-right {
+      min-height: 380px !important;
+    }
+    .stats-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .activity-grid {
+      grid-template-columns: 1fr !important;
+    }
   }
 `;
 
