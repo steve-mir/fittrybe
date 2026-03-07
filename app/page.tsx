@@ -15,10 +15,145 @@ const SEQUENCE: SlideItem[] = [
   { key: "explore",  caption: "Discover sessions near you",    img: "/images/screen1.jpg" },
   { key: "session",  caption: "Tap to see full details",        img: "/images/screen2.jpg" },
   { key: "explore2", caption: "Find games by sport & distance", img: "/images/screen1.jpg" },
-  { key: "session2", caption: "Your tribe is ready to play",    img: "/images/screen2.jpg" },
+  { key: "session2", caption: "Your crew is ready to play",     img: "/images/screen2.jpg" },
 ];
 const SLIDE_DURATION = 2500;
 const TRANSITION_MS  = 400;
+
+// ─── Icons (inline SVG, zero dependency) ─────────────────────────────────────
+// All icons are from the Phosphor icon set (MIT), rendered inline so no
+// import overhead and zero emoji fallback risk.
+
+function IconFlame({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M96 224c0 0-64-32-64-112 0-48 32-80 80-96 0 32 16 48 48 64 16 8 32 24 32 48 8-8 8-24 8-32 16 16 24 40 24 64 0 40-24 64-64 64" stroke={color} strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconMapPin({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M128 24C93.07 24 64 53.07 64 88c0 58.67 64 144 64 144s64-85.33 64-144c0-34.93-29.07-64-64-64z" stroke={color} strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="128" cy="88" r="24" stroke={color} strokeWidth="14"/>
+    </svg>
+  );
+}
+
+function IconCalendar({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="32" y="48" width="192" height="176" rx="12" stroke={color} strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M176 24v48M80 24v48M32 104h192" stroke={color} strokeWidth="14" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconChat({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M216 48H40a8 8 0 0 0-8 8v160l48-40h136a8 8 0 0 0 8-8V56a8 8 0 0 0-8-8z" stroke={color} strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconUser({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="128" cy="96" r="64" stroke={color} strokeWidth="14"/>
+      <path d="M24 216c0-48 46.56-88 104-88s104 40 104 88" stroke={color} strokeWidth="14" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconBell({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M208 192H48l24-40V112a56 56 0 0 1 112 0v40l24 40z" stroke={color} strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M96 192v8a32 32 0 0 0 64 0v-8" stroke={color} strokeWidth="14" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconStar({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M128 24l27.18 55.08 60.82 8.84-44 42.87 10.38 60.55L128 163.08l-54.38 28.26L84 130.79 40 87.92l60.82-8.84L128 24z" stroke={color} strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconControllerGame({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="24" y="72" width="208" height="112" rx="48" stroke={color} strokeWidth="14"/>
+      <path d="M96 120v32M80 136h32" stroke={color} strokeWidth="14" strokeLinecap="round"/>
+      <circle cx="168" cy="128" r="8" fill={color}/>
+      <circle cx="192" cy="128" r="8" fill={color}/>
+    </svg>
+  );
+}
+
+function IconArrowDown({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 5v14M5 12l7 7 7-7" />
+    </svg>
+  );
+}
+
+function IconArrowRight({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function IconPlay({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <polygon points="5,3 19,12 5,21" />
+    </svg>
+  );
+}
+
+function IconCheck({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  );
+}
+
+function IconLightning({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+    </svg>
+  );
+}
+
+function IconConfetti({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5.5 2.5l14 14M9 4l-4 11 11-4M14 14l6 6"/>
+      <circle cx="5" cy="19" r="1" fill={color}/>
+      <circle cx="19" cy="5" r="1" fill={color}/>
+    </svg>
+  );
+}
+
+// Sport icon for the floating decorative elements
+function IconSportBall({ size = 22, color = "rgba(255,255,255,0.15)" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2a10 10 0 0 1 6.32 16M5.68 4A10 10 0 0 0 12 22"/>
+    </svg>
+  );
+}
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -133,26 +268,16 @@ function HeroSection() {
     }} className="hero-section">
 
       {/* ── Background Video ── */}
-      <div style={{
-        position: "absolute", inset: 0, zIndex: 0, overflow: "hidden",
-      }}>
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{
-            position: "absolute", inset: 0,
-            width: "100%", height: "100%",
-            objectFit: "cover", objectPosition: "center",
-            opacity: 0.18,
-            filter: "saturate(0.4) brightness(0.7)",
-          }}
-        >
+      <div style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden" }}>
+        <video autoPlay muted loop playsInline style={{
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          objectFit: "cover", objectPosition: "center",
+          opacity: 0.18,
+          filter: "saturate(0.4) brightness(0.7)",
+        }}>
           <source src="/videos/hero.mp4" type="video/mp4" />
         </video>
-
-        {/* Dark gradient overlay — stronger at bottom so text stays readable */}
         <div style={{
           position: "absolute", inset: 0,
           background: `
@@ -170,15 +295,13 @@ function HeroSection() {
             )
           `,
         }} />
-
-        {/* Subtle vignette */}
         <div style={{
           position: "absolute", inset: 0,
           background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.6) 100%)",
         }} />
       </div>
 
-      {/* Lime glow — sits on top of video */}
+      {/* Lime glow */}
       <div style={{
         position: "absolute", width: 600, height: 600,
         background: "radial-gradient(circle, rgba(182,255,0,0.05) 0%, transparent 70%)",
@@ -196,7 +319,7 @@ function HeroSection() {
           marginBottom: "1.5rem", animation: "fadeUp 0.6s 0.2s forwards", opacity: 0,
         }}>
           <span style={{ width: 6, height: 6, background: "#B6FF00", borderRadius: "50%", display: "inline-block", animation: "blink 1.5s infinite" }} />
-          🔥 Coming Soon — Be First To Play
+          Coming Soon — Be First To Play
         </div>
 
         <h1 style={{
@@ -220,7 +343,7 @@ function HeroSection() {
           marginBottom: "2.5rem", opacity: 0, transform: "translateY(20px)",
           animation: "fadeUp 0.6s 0.8s forwards",
         }}>
-          Discover real sports sessions near you. Join a game, meet your tribe, show up and play. Local sport — made social and consistent.
+          Discover real sports sessions near you. Join a game, meet people worth playing with, and build a routine that sticks.
         </p>
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", opacity: 0, transform: "translateY(20px)", animation: "fadeUp 0.6s 1s forwards" }}>
@@ -233,7 +356,7 @@ function HeroSection() {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(182,255,0,0.25)"; }}
             onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
-          >Join Waitlist →</a>
+          >Join Waitlist <IconArrowRight color="#0D0D0D" /></a>
           <a href="#how" style={{
             color: "#9CA3AF", padding: "0.85rem 2rem", border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: 4, fontFamily: "'Barlow Condensed', sans-serif", fontSize: "1rem", fontWeight: 700,
@@ -242,7 +365,7 @@ function HeroSection() {
           }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; e.currentTarget.style.color = "#fff"; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#9CA3AF"; }}
-          >▶ How It Works</a>
+          ><IconPlay color="currentColor" /> How It Works</a>
         </div>
       </div>
 
@@ -259,7 +382,7 @@ function HeroSection() {
           }}>
             <Image
               src={i === 0 ? "/images/screen1.jpg" : "/images/screen2.jpg"}
-              alt={i === 0 ? "Explore screen" : "Event detail screen"}
+              alt={i === 0 ? "Explore screen" : "Session detail screen"}
               width={220} height={475}
               style={{ objectFit: "cover", width: "100%", height: "100%" }}
             />
@@ -313,7 +436,7 @@ function StatsBar() {
     }}>
       {[
         { num: `${counts[0]}+`, label: "Sports & Growing" },
-        { num: `${counts[1]}+`, label: "Real People. Local Games" },
+        { num: `${counts[1]}+`, label: "Players on the Waitlist" },
         { num: "FREE", label: "To Join & Play" },
       ].map(({ num, label }, i) => (
         <div key={label} style={{
@@ -402,12 +525,18 @@ function PhoneCarousel() {
     return "translateY(100%)";
   };
 
+  const featureItems = [
+    { icon: <IconMapPin size={18} color="#B6FF00" />, title: "Explore Sessions", desc: "Browse nearby games by sport, distance, and time" },
+    { icon: <IconCalendar size={18} color="#B6FF00" />, title: "Join or Host", desc: "Reserve your spot or create your own session in minutes" },
+    { icon: <IconChat size={18} color="#B6FF00" />, title: "Group Chat", desc: "Every session has a live chat so you can coordinate ahead of time" },
+    { icon: <IconUser size={18} color="#B6FF00" />, title: "Build Your Rep", desc: "Track attendance, reliability score, and sessions hosted" },
+  ];
+
   return (
     <section id="about-us" ref={sectionRef} className="phone-carousel-section" style={{
       minHeight: "100vh", padding: "100px 6vw", display: "flex",
       alignItems: "center", position: "relative", overflow: "hidden", background: "#050505",
     }}>
-      {/* very subtle glow */}
       <div style={{ position: "absolute", top: "50%", right: "25%", transform: "translate(50%, -50%)", width: 700, height: 700, background: "radial-gradient(circle, rgba(182,255,0,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
 
       <div className="phone-carousel-grid" style={{ display: "grid", gridTemplateColumns: "40% 60%", width: "100%", maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
@@ -441,7 +570,7 @@ function PhoneCarousel() {
             opacity: inView ? 1 : 0, transform: inView ? "translateX(0)" : "translateX(-30px)",
             transition: "opacity 0.5s ease 0.16s, transform 0.5s ease 0.16s",
           }}>
-            Discover local sports sessions nearby, reserve your spot in one tap, connect with your crew before you arrive, and build a track record worth showing off.
+            Discover local sports sessions nearby, reserve your spot in one tap, connect with your crew before you arrive, and build an attendance record worth being proud of.
           </p>
 
           <div style={{
@@ -449,12 +578,7 @@ function PhoneCarousel() {
             opacity: inView ? 1 : 0, transform: inView ? "translateX(0)" : "translateX(-30px)",
             transition: "opacity 0.5s ease 0.24s, transform 0.5s ease 0.24s",
           }}>
-            {[
-              { icon: "🔥", title: "Explore Sessions", desc: "Browse nearby games by sport, distance, and time" },
-              { icon: "📅", title: "Join or Host", desc: "Reserve your spot or create your own session in minutes" },
-              { icon: "💬", title: "Group Chat", desc: "Every event has a live chat — your teammates are waiting" },
-              { icon: "👤", title: "Build Your Rep", desc: "Track attendance, reliability score, and hosted events" },
-            ].map(({ icon, title, desc }) => (
+            {featureItems.map(({ icon, title, desc }) => (
               <div key={title} style={{
                 display: "flex", alignItems: "flex-start", gap: 14,
                 padding: "16px 18px", background: "#0c0c0c",
@@ -463,7 +587,7 @@ function PhoneCarousel() {
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)"; e.currentTarget.style.transform = "translateX(4px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = ""; }}
               >
-                <div style={{ fontSize: 20, minWidth: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)" }}>{icon}</div>
+                <div style={{ minWidth: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(182,255,0,0.07)", borderRadius: 10, border: "1px solid rgba(182,255,0,0.12)" }}>{icon}</div>
                 <div>
                   <strong style={{ display: "block", fontSize: 14, fontWeight: 600, color: "#e5e7eb", marginBottom: 2, fontFamily: "'DM Sans', sans-serif" }}>{title}</strong>
                   <span style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.4, fontFamily: "'DM Sans', sans-serif" }}>{desc}</span>
@@ -483,9 +607,7 @@ function PhoneCarousel() {
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(182,255,0,0.25)"; }}
             onMouseLeave={e => { e.currentTarget.style.transform = "translateX(0)"; e.currentTarget.style.boxShadow = ""; }}
           >
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
+            <IconArrowDown size={18} color="#0D0D0D" />
             Join the Waitlist
           </button>
         </div>
@@ -501,13 +623,22 @@ function PhoneCarousel() {
               opacity: inView ? 0.4 : 0, filter: "blur(1px)", transition: "opacity 0.8s ease 0.6s", ...style,
             }} />
           ))}
-          {["🏸", "⚽", "🏀", "🎾", "🏃"].map((emoji, i) => (
-            <div key={emoji} style={{
-              position: "absolute", fontSize: 22, opacity: inView ? 0.1 : 0, pointerEvents: "none", zIndex: 2,
+          {/* Decorative sport icons replacing floating emojis */}
+          {[
+            { style: { left: "8%", top: "20%" }, delay: 0 },
+            { style: { left: "15%", bottom: "25%" }, delay: 1 },
+            { style: { right: "8%", top: "30%" }, delay: 2 },
+            { style: { right: "18%", bottom: "20%" }, delay: 0.5 },
+            { style: { left: "50%", top: "10%" }, delay: 1.5 },
+          ].map(({ style: pos, delay }, i) => (
+            <div key={i} style={{
+              position: "absolute", opacity: inView ? 0.25 : 0, pointerEvents: "none", zIndex: 2,
               transition: "opacity 0.6s ease",
-              ...[{ left: "8%", top: "20%" }, { left: "15%", bottom: "25%" }, { right: "8%", top: "30%" }, { right: "18%", bottom: "20%" }, { left: "50%", top: "10%" }][i],
-              animation: `float1 ${[8,9,7,10,8.5][i]}s ease-in-out infinite ${[0,1,2,0.5,1.5][i]}s`,
-            }}>{emoji}</div>
+              ...pos,
+              animation: `float1 ${[8,9,7,10,8.5][i]}s ease-in-out infinite ${delay}s`,
+            }}>
+              <IconSportBall size={22} color="rgba(182,255,0,0.4)" />
+            </div>
           ))}
           <div style={{
             position: "relative", zIndex: 3,
@@ -520,9 +651,7 @@ function PhoneCarousel() {
               boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.4)",
               position: "relative", overflow: "hidden",
             }}>
-              {/* notch */}
               <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 100, height: 24, background: "#050505", borderRadius: "0 0 18px 18px", zIndex: 10 }} />
-              {/* progress */}
               <div style={{ position: "absolute", top: 10, left: 20, right: 20, zIndex: 11, display: "flex", gap: 4 }}>
                 {SEQUENCE.map((_, i) => (
                   <div key={i} style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
@@ -534,7 +663,6 @@ function PhoneCarousel() {
                   </div>
                 ))}
               </div>
-              {/* screen */}
               <div style={{ position: "absolute", inset: 0, borderRadius: 44, overflow: "hidden", background: "#080808" }}>
                 {SEQUENCE.map((item, i) => (
                   <div key={item.key} style={{
@@ -546,7 +674,6 @@ function PhoneCarousel() {
                   </div>
                 ))}
               </div>
-              {/* caption */}
               <div style={{
                 position: "absolute", bottom: 60, left: "50%", transform: "translateX(-50%)",
                 background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
@@ -555,7 +682,6 @@ function PhoneCarousel() {
                 borderRadius: 100, whiteSpace: "nowrap", zIndex: 15,
                 opacity: captionVisible ? 1 : 0, transition: "opacity 0.3s ease",
               }}>{caption}</div>
-              {/* home indicator */}
               <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", width: 100, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 4, zIndex: 15 }} />
             </div>
           </div>
@@ -586,6 +712,8 @@ function RevealSection({ children, delay = 0, style = {} }: { children: React.Re
 }
 
 function AboutSection() {
+  const sportTags = ["Football","Basketball","Badminton","Tennis","Running","Cycling","Swimming","Gym"];
+
   return (
     <section id="about" className="about-section" style={{ padding: "100px 5vw", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6rem", alignItems: "center" }}>
       <RevealSection>
@@ -605,11 +733,11 @@ function AboutSection() {
       <RevealSection delay={0.2} style={{ position: "relative" }}>
         <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(4rem, 12vw, 9rem)", fontWeight: 900, color: "rgba(255,255,255,0.02)", position: "absolute", top: "-2rem", right: "-2rem", lineHeight: 1, pointerEvents: "none", textTransform: "uppercase", letterSpacing: "-0.04em" }}>PLAY</div>
         <div style={{ fontSize: "1rem", lineHeight: 1.8, color: "#6B7280", maxWidth: 480 }}>
-          <p>Fittrybe is a location-based social sports app built for people who want to stay active and meet others through real-world play. Whether you&apos;re new to a city, looking for casual teammates, or just want to show up and compete — we&apos;ve got you.</p>
+          <p>Fittrybe is a location-based social sports app built for people who want to stay active and meet others through real-world play. Whether you&apos;re new to a city, looking for casual teammates, or just want to show up and compete — we&apos;ve got you covered.</p>
           <p style={{ marginTop: "1rem" }}>Browse nearby sessions, reserve a spot in seconds, and get matched with people who play at your level. No team required. No commitment beyond showing up.</p>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "2rem" }}>
-          {["⚽ Football","🏀 Basketball","🏸 Badminton","🎾 Tennis","🏃 Running","🚴 Cycling","🏊 Swim","🏋️ Gym"].map(tag => (
+          {sportTags.map(tag => (
             <span key={tag} style={{
               padding: "0.4rem 0.9rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 2,
               fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#4B5563",
@@ -627,12 +755,12 @@ function AboutSection() {
 
 function FeaturesSection() {
   const features = [
-    { icon: "🗺️", name: "Discover Sessions", desc: "Browse sports near you on a live map. Filter by sport, distance, date, and skill level. See what's happening within 15 miles." },
-    { icon: "👥", name: "Event Group Chats", desc: "Talk to your teammates before you even arrive. Every session has a built-in group chat so you can coordinate and connect." },
-    { icon: "📅", name: "My Events", desc: "Track all your upcoming sessions and sessions you're hosting in one clean view. Know your week. Show up reliably." },
-    { icon: "🔔", name: "Real-Time Notifications", desc: "Know the moment someone joins your game, a new session drops nearby, or a spot opens up in a full event." },
-    { icon: "🎮", name: "Host Your Own Game", desc: "Create events in minutes. Set the sport, venue, format, skill level, and team setup. Manage your roster and share with the community." },
-    { icon: "⭐", name: "Reliability Score", desc: "Your attendance record matters. Build a 100% reliability rating and earn trust within your local sports community." },
+    { icon: <IconMapPin size={28} color="#B6FF00" />, name: "Discover Sessions", desc: "Browse sports near you on a live map. Filter by sport, distance, date, and skill level. See what's on within 15 miles of you." },
+    { icon: <IconChat size={28} color="#B6FF00" />, name: "Session Group Chats", desc: "Talk to your teammates before you even arrive. Every session has a built-in group chat so you can coordinate and connect ahead of time." },
+    { icon: <IconCalendar size={28} color="#B6FF00" />, name: "My Events", desc: "Track all your upcoming sessions and sessions you're hosting in one clean view. Know your week. Show up reliably." },
+    { icon: <IconBell size={28} color="#B6FF00" />, name: "Live Notifications", desc: "Know the moment someone joins your game, a new session drops nearby, or a spot opens up in a full event." },
+    { icon: <IconControllerGame size={28} color="#B6FF00" />, name: "Host Your Own Game", desc: "Create sessions in minutes. Set the sport, venue, format, skill level, and team setup. Manage your roster and share with the community." },
+    { icon: <IconStar size={28} color="#B6FF00" />, name: "Reliability Score", desc: "Your attendance record matters. Build a 100% reliability rating and earn the trust of your local sports community." },
   ];
   return (
     <section id="features" style={{ padding: "100px 5vw", background: "#050505" }}>
@@ -652,7 +780,7 @@ function FeaturesSection() {
   );
 }
 
-function FeatureCard({ icon, name, desc }: { icon: string; name: string; desc: string }) {
+function FeatureCard({ icon, name, desc }: { icon: React.ReactNode; name: string; desc: string }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div style={{
@@ -662,9 +790,8 @@ function FeatureCard({ icon, name, desc }: { icon: string; name: string; desc: s
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* lime top bar only on hover — subtle */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "#B6FF00", transform: hovered ? "scaleX(1)" : "scaleX(0)", transformOrigin: "left", transition: "transform 0.4s ease" }} />
-      <span style={{ fontSize: "2rem", marginBottom: "1.2rem", display: "block", transform: hovered ? "scale(1.1) translateY(-4px)" : "", transition: "transform 0.3s" }}>{icon}</span>
+      <div style={{ marginBottom: "1.2rem", display: "block", transform: hovered ? "scale(1.1) translateY(-4px)" : "", transition: "transform 0.3s", width: "fit-content" }}>{icon}</div>
       <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "1.4rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: "0.7rem", color: hovered ? "#fff" : "#d1d5db" }}>{name}</div>
       <p style={{ fontSize: "0.9rem", color: "#4B5563", lineHeight: 1.7 }}>{desc}</p>
     </div>
@@ -682,9 +809,9 @@ function HowSection() {
         <div className="how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", marginTop: "4rem", position: "relative" }}>
           <div className="how-connector" style={{ position: "absolute", top: "2.5rem", left: "16.67%", right: "16.67%", height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04), rgba(255,255,255,0.08))", zIndex: 0 }} />
           {[
-            { num: "01", title: "Download & Sign Up", desc: "Create your profile in seconds. Tell us your sports and skill level. We do the rest." },
+            { num: "01", title: "Download & Sign Up", desc: "Create your profile in seconds. Tell us your sports and skill level. We handle the rest." },
             { num: "02", title: "Explore Nearby", desc: "Find sessions by sport, distance, and time. Free sessions, all skill levels welcome." },
-            { num: "03", title: "Show Up & Play", desc: "Join the group chat, meet your team, arrive and compete. Your tribe is waiting." },
+            { num: "03", title: "Show Up & Play", desc: "Join the group chat, meet your team, arrive and compete. People are already waiting." },
           ].map(({ num, title, desc }, i) => (
             <RevealSection key={num} delay={i * 0.2} style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "0 1.5rem" }}>
               <StepItem num={num} title={title} desc={desc} />
@@ -714,7 +841,7 @@ function StepItem({ num, title, desc }: { num: string; title: string; desc: stri
 }
 
 function Marquee() {
-  const items = ["Football","Basketball","Badminton","Tennis","Running","Cycling","Swim","Gym","Play Local.","Football","Basketball","Badminton","Tennis","Running","Cycling","Swim","Gym","Move Together."];
+  const items = ["Football","Basketball","Badminton","Tennis","Running","Cycling","Swimming","Gym","Play Local.","Football","Basketball","Badminton","Tennis","Running","Cycling","Swimming","Gym","Move Together."];
   return (
     <div style={{ overflow: "hidden", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "1rem 0", margin: "3rem 0", background: "rgba(255,255,255,0.01)" }}>
       <div style={{ display: "flex", gap: "3rem", animation: "marqueeScroll 20s linear infinite", whiteSpace: "nowrap" }}>
@@ -738,7 +865,7 @@ function CommunitySection() {
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "2rem" }}>
             {[
               { text: '"Joined a badminton session my first week in Crawley. Now I play every Monday with the same crew. Fittrybe actually works."', name: "Francis O.", info: "Badminton · Crawley", initial: "F", rot: "-0.5deg" },
-              { text: '"I hosted my first basketball 3v3 and had 9 players confirm within an hour. The group chat made coordination seamless."', name: "Made Easy", info: "Basketball · Redhill", initial: "M", rot: "0.3deg" },
+              { text: '"I hosted my first basketball 3v3 and had 9 players confirm within an hour. The group chat made coordinating effortless."', name: "Made Easy", info: "Basketball · Redhill", initial: "M", rot: "0.3deg" },
               { text: '"As an expat I struggled to meet people. Finding a football session through Fittrybe changed that completely."', name: "Danny K.", info: "Football · Surrey", initial: "D", rot: "-0.2deg" },
             ].map(({ text, name, info, initial, rot }) => (
               <TestimonialCard key={name} text={text} name={name} info={info} initial={initial} rot={rot} />
@@ -753,10 +880,10 @@ function CommunitySection() {
           </h2>
           <div className="activity-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginTop: "2rem" }}>
             {[
-              { icon: "🏸", name: "Badminton with Francis", meta: "Mon 2 Mar · 18:00 · K2 Crawley", badge: "FULL" },
-              { icon: "⚽", name: "Football with Danny", meta: "Mon 2 Mar · 18:00 · Broadfield 3G", badge: "4 SPOTS" },
-              { icon: "🏀", name: "Basketball 3v3", meta: "Mon 2 Mar · 18:00 · Donyngs Centre", badge: "9/10 LEFT" },
-              { icon: "🎾", name: "Social Tennis Hit", meta: "Coming Soon · All Levels", badge: "OPEN" },
+              { icon: <IconSportBall size={24} color="#B6FF00" />, name: "Badminton with Francis", meta: "Mon 2 Mar · 18:00 · K2 Crawley", badge: "FULL" },
+              { icon: <IconSportBall size={24} color="#B6FF00" />, name: "Football with Danny", meta: "Mon 2 Mar · 18:00 · Broadfield 3G", badge: "4 SPOTS" },
+              { icon: <IconSportBall size={24} color="#B6FF00" />, name: "Basketball 3v3", meta: "Mon 2 Mar · 18:00 · Donyngs Centre", badge: "9/10 JOINED" },
+              { icon: <IconSportBall size={24} color="#B6FF00" />, name: "Social Tennis Hit", meta: "Coming Soon · All Levels", badge: "OPEN" },
             ].map(({ icon, name, meta, badge }) => (
               <ActivityCard key={name} icon={icon} name={name} meta={meta} badge={badge} />
             ))}
@@ -788,14 +915,14 @@ function TestimonialCard({ text, name, info, initial, rot }: { text: string; nam
   );
 }
 
-function ActivityCard({ icon, name, meta, badge }: { icon: string; name: string; meta: string; badge: string }) {
+function ActivityCard({ icon, name, meta, badge }: { icon: React.ReactNode; name: string; meta: string; badge: string }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div style={{
       background: "#0a0a0a", border: `1px solid ${hovered ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.05)"}`,
       borderRadius: 4, padding: "1rem", transform: hovered ? "translateY(-4px)" : "", transition: "transform 0.2s, border-color 0.2s",
     }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      <span style={{ fontSize: "1.4rem", marginBottom: "0.5rem", display: "block" }}>{icon}</span>
+      <div style={{ marginBottom: "0.5rem" }}>{icon}</div>
       <div style={{ fontWeight: 700, fontSize: "0.9rem", lineHeight: 1.3, color: "#d1d5db" }}>{name}</div>
       <div style={{ fontSize: "0.75rem", color: "#4B5563", marginTop: "0.3rem" }}>{meta}</div>
       <span style={{ display: "inline-block", marginTop: "0.5rem", padding: "0.2rem 0.5rem", background: "rgba(255,255,255,0.04)", color: "#6B7280", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.05em", borderRadius: 2 }}>{badge}</span>
@@ -817,10 +944,11 @@ function WaitlistSection() {
   return (
     <section id="waitlist" style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", position: "relative", overflow: "hidden", padding: "100px 5vw" }}>
       <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(255,255,255,0.008) 60px, rgba(255,255,255,0.008) 62px)", pointerEvents: "none" }} />
-      {/* single subtle glow centered */}
       <div style={{ position: "absolute", width: 500, height: 500, background: "radial-gradient(circle, rgba(182,255,0,0.06) 0%, transparent 65%)", top: "50%", left: "50%", transform: "translate(-50%,-50%)", pointerEvents: "none" }} />
       <RevealSection style={{ position: "relative", zIndex: 2, maxWidth: 600, width: "100%" }}>
-        <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#4B5563", marginBottom: "1rem" }}>⚡ Launching Soon</div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#4B5563", marginBottom: "1rem" }}>
+          <IconLightning size={12} color="#4B5563" /> Launching Soon
+        </div>
         <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: 900, textTransform: "uppercase", lineHeight: 0.95, letterSpacing: "-0.02em", marginBottom: "1rem" }}>
           Be First<br />To <span style={{ color: "#B6FF00" }}>Play.</span>
         </h2>
@@ -844,10 +972,15 @@ function WaitlistSection() {
             background: submitted ? "#6aff00" : "#B6FF00", border: "none", padding: "0.9rem 1.5rem",
             fontFamily: "'Barlow Condensed', sans-serif", fontSize: "0.95rem", fontWeight: 800,
             letterSpacing: "0.06em", textTransform: "uppercase", color: "#0D0D0D", cursor: "pointer", whiteSpace: "nowrap",
-          }}>{submitted ? "✓ You're in!" : "Join →"}</button>
+            display: "inline-flex", alignItems: "center", gap: "0.4rem",
+          }}>
+            {submitted ? <><IconCheck size={14} color="#0D0D0D" /> You&apos;re in!</> : <>Join →</>}
+          </button>
         </div>
-        <p style={{ fontSize: "0.78rem", color: submitted ? "#B6FF00" : "#374151" }}>
-          {submitted ? "🎉 Welcome to the tribe! We'll be in touch soon." : "Free to join. No spam. Cancel anytime."}
+        <p style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: submitted ? "#B6FF00" : "#374151" }}>
+          {submitted
+            ? <><IconConfetti size={14} color="#B6FF00" /> You&apos;re on the list. We&apos;ll be in touch soon.</>
+            : "Free to join. No spam. Unsubscribe anytime."}
         </p>
       </RevealSection>
     </section>
@@ -906,7 +1039,7 @@ function Footer() {
         ))}
       </div>
       <div style={{ display: "flex", gap: "1rem" }}>
-        {["IG", "TW", "TK"].map(s => (
+        {["IG", "X", "TK"].map(s => (
           <a key={s} href="#" style={{
             width: 36, height: 36, border: "1px solid rgba(255,255,255,0.07)", borderRadius: 4,
             display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none",
