@@ -21,8 +21,6 @@ const SLIDE_DURATION = 2500;
 const TRANSITION_MS  = 400;
 
 // ─── Icons (inline SVG, zero dependency) ─────────────────────────────────────
-// All icons are from the Phosphor icon set (MIT), rendered inline so no
-// import overhead and zero emoji fallback risk.
 
 function IconFlame({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
   return (
@@ -145,7 +143,6 @@ function IconConfetti({ size = 16, color = "currentColor" }: { size?: number; co
   );
 }
 
-// Sport icon for the floating decorative elements
 function IconSportBall({ size = 22, color = "rgba(255,255,255,0.15)" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5">
@@ -263,7 +260,7 @@ function HeroSection() {
   return (
     <section id="hero" style={{
       minHeight: "100vh", display: "grid", gridTemplateColumns: "1fr 1fr",
-      alignItems: "center", padding: "120px 5vw 80px", gap: "4rem",
+      alignItems: "center", padding: "140px 5vw 100px", gap: "4rem",
       position: "relative", overflow: "hidden",
     }} className="hero-section">
 
@@ -309,8 +306,8 @@ function HeroSection() {
         animation: "glowPulse 4s ease-in-out infinite", zIndex: 1,
       }} />
 
-      {/* ── Left copy ── */}
-      <div style={{ position: "relative", zIndex: 2 }}>
+      {/* ── Left copy — centered on mobile via CSS class, left on desktop ── */}
+      <div className="hero-copy" style={{ position: "relative", zIndex: 2 }}>
         <div style={{
           display: "inline-flex", alignItems: "center", gap: "0.5rem",
           background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
@@ -346,7 +343,7 @@ function HeroSection() {
           Discover real sports sessions near you. Join a game, meet people worth playing with, and build a routine that sticks.
         </p>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", opacity: 0, transform: "translateY(20px)", animation: "fadeUp 0.6s 1s forwards" }}>
+        <div className="hero-buttons" style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", opacity: 0, transform: "translateY(20px)", animation: "fadeUp 0.6s 1s forwards" }}>
           <a href="#waitlist" style={{
             background: "#B6FF00", color: "#0D0D0D", padding: "0.85rem 2rem", border: "none",
             borderRadius: 4, fontFamily: "'Barlow Condensed', sans-serif", fontSize: "1rem", fontWeight: 800,
@@ -623,7 +620,6 @@ function PhoneCarousel() {
               opacity: inView ? 0.4 : 0, filter: "blur(1px)", transition: "opacity 0.8s ease 0.6s", ...style,
             }} />
           ))}
-          {/* Decorative sport icons replacing floating emojis */}
           {[
             { style: { left: "8%", top: "20%" }, delay: 0 },
             { style: { left: "15%", bottom: "25%" }, delay: 1 },
@@ -1082,14 +1078,22 @@ const GLOBAL_CSS = `
   @media (max-width: 1024px) {
     .hero-section {
       grid-template-columns: 1fr !important;
-      padding: 100px 6vw 60px !important;
+      padding: 120px 6vw 80px !important;
       text-align: center;
       justify-items: center;
     }
-    .hero-section > div:first-child {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .hero-copy {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+    }
+    .hero-copy p {
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+    .hero-buttons {
+      justify-content: center !important;
     }
     .hero-phones { display: none !important; }
     .about-section { grid-template-columns: 1fr !important; gap: 3rem !important; }
@@ -1109,7 +1113,37 @@ const GLOBAL_CSS = `
     .desktop-nav { display: none !important; }
     .hamburger { display: flex !important; }
     .mobile-menu { display: flex !important; }
-    .hero-section { padding: 90px 5vw 50px !important; min-height: auto !important; }
+
+    /* ── Hero: taller + fully centered ── */
+    .hero-section {
+      padding: 120px 5vw 100px !important;
+      min-height: 100svh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      text-align: center !important;
+    }
+    .hero-copy {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+      width: 100% !important;
+    }
+    .hero-copy h1 span span {
+      text-align: center !important;
+    }
+    .hero-copy p {
+      margin-left: auto !important;
+      margin-right: auto !important;
+      text-align: center !important;
+    }
+    .hero-buttons {
+      justify-content: center !important;
+      width: 100% !important;
+    }
+
     .stats-bar { grid-template-columns: 1fr !important; }
     .stats-bar > div { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 1.5rem 0 !important; }
     .stats-bar > div:last-child { border-bottom: none !important; }
@@ -1139,6 +1173,10 @@ const GLOBAL_CSS = `
 
   /* ─── Small mobile: max 480px ─── */
   @media (max-width: 480px) {
+    .hero-section {
+      padding: 110px 5vw 90px !important;
+      min-height: 100svh !important;
+    }
     .phone-right { min-height: 380px !important; }
     .stats-grid { grid-template-columns: 1fr !important; }
     .activity-grid { grid-template-columns: 1fr !important; }
