@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface SlideItem {
@@ -193,7 +196,7 @@ function Navbar() {
               >{label}</a>
             );
           })}
-          <a href="#waitlist" style={{
+          <a href="waitlist" style={{
             background: "#B6FF00", color: "#0D0D0D", padding: "0.5rem 1.4rem",
             borderRadius: 4, fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.05em",
             textTransform: "uppercase", textDecoration: "none", transition: "transform 0.2s, box-shadow 0.2s",
@@ -245,7 +248,7 @@ function Navbar() {
             }}>{label}</a>
           );
         })}
-        <a href="#waitlist" onClick={() => setMenuOpen(false)} style={{
+        <a href="waitlist" onClick={() => setMenuOpen(false)} style={{
           display: "inline-block", marginTop: "1rem",
           background: "#B6FF00", color: "#0D0D0D", padding: "0.75rem 1.5rem",
           borderRadius: 4, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.05em",
@@ -344,7 +347,7 @@ function HeroSection() {
         </p>
 
         <div className="hero-buttons" style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", opacity: 0, transform: "translateY(20px)", animation: "fadeUp 0.6s 1s forwards" }}>
-          <a href="#waitlist" style={{
+          <a href="waitlist" style={{
             background: "#B6FF00", color: "#0D0D0D", padding: "0.85rem 2rem", border: "none",
             borderRadius: 4, fontFamily: "'Barlow Condensed', sans-serif", fontSize: "1rem", fontWeight: 800,
             letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none",
@@ -402,11 +405,20 @@ function HeroSection() {
 
 function StatsBar() {
   const [counts, setCounts] = useState([0, 0]);
+  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const animated = useRef(false);
 
+  // Realtime Firestore listener
   useEffect(() => {
-    const targets = [5, 100];
+    const unsubscribe = onSnapshot(collection(db, "waitlist"), (snap) => {
+      setWaitlistCount(snap.size);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const targets = [5, waitlistCount ?? 100];
     const observer = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && !animated.current) {
         animated.current = true;
@@ -423,7 +435,9 @@ function StatsBar() {
     }, { threshold: 0.5 });
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, []);
+  }, [waitlistCount]);
+
+  const displayCount = waitlistCount !== null ? waitlistCount : counts[1];
 
   return (
     <div ref={ref} className="stats-bar" style={{
@@ -433,7 +447,7 @@ function StatsBar() {
     }}>
       {[
         { num: `${counts[0]}+`, label: "Sports & Growing" },
-        { num: `${counts[1]}+`, label: "Players on the Waitlist" },
+        { num: `${displayCount.toLocaleString()}+`, label: "Players on the Waitlist" },
         { num: "FREE", label: "To Join & Play" },
       ].map(({ num, label }, i) => (
         <div key={label} style={{
