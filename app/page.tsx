@@ -391,14 +391,14 @@ function HeroSection() {
       </div>
 
       {/* Scroll hint */}
-      <div style={{
+      {/* <div style={{
         position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)",
         zIndex: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
         opacity: 0, animation: "fadeUp 0.6s 1.4s forwards",
       }}>
         <span style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#374151" }}>Scroll</span>
         <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, #374151, transparent)", animation: "scrollPulse 2s ease-in-out infinite" }} />
-      </div>
+      </div> */}
     </section>
   );
 }
@@ -463,64 +463,10 @@ function StatsBar() {
 }
 
 function PhoneCarousel() {
-  const [current, setCurrent] = useState(-1);
-  const [slideStates, setSlideStates] = useState<string[]>(SEQUENCE.map(() => "idle"));
-  const [caption, setCaption] = useState("");
-  const [captionVisible, setCaptionVisible] = useState(false);
-  const [fillWidths, setFillWidths] = useState<string[]>(SEQUENCE.map(() => "0%"));
-  const [fillingIdx, setFillingIdx] = useState(-1);
-  const started = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const currentRef = useRef(-1);
-
-  const showSlide = useCallback((idx: number) => {
-    const prevIdx = currentRef.current;
-    currentRef.current = idx;
-    setCurrent(idx);
-    setFillWidths(SEQUENCE.map((_, i) => i < idx ? "100%" : "0%"));
-    setFillingIdx(idx);
-    setSlideStates(prevStates => SEQUENCE.map((_, i) => {
-      if (i === prevIdx && prevIdx >= 0) return "exiting";
-      if (i === idx) return "entering";
-      return "idle";
-    }));
-    setTimeout(() => {
-      setSlideStates(prev => prev.map((s, i) => {
-        if (i === idx) return "active";
-        if (s === "exiting") return "idle";
-        return s;
-      }));
-    }, 50);
-    setTimeout(() => {
-      setSlideStates(prev => prev.map((s, i) => i === idx ? "active" : (s === "exiting" ? "idle" : s)));
-    }, TRANSITION_MS);
-    setCaptionVisible(false);
-    setTimeout(() => {
-      setCaption(SEQUENCE[idx].caption);
-      setCaptionVisible(true);
-    }, 300);
-  }, []);
-
-  const startCarousel = useCallback(() => {
-    if (started.current) return;
-    started.current = true;
-    showSlide(0);
-    timerRef.current = setInterval(() => {
-      showSlide((currentRef.current + 1) % SEQUENCE.length);
-    }, SLIDE_DURATION + TRANSITION_MS);
-  }, [showSlide]);
-
   const sectionRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) startCarousel();
-    }, { threshold: 0.15 });
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => { observer.disconnect(); if (timerRef.current) clearInterval(timerRef.current); };
-  }, [startCarousel]);
-
   const [inView, setInView] = useState(false);
   const auLeftRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) setInView(true);
@@ -528,13 +474,6 @@ function PhoneCarousel() {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
-
-  const slideTransform = (state: string) => {
-    if (state === "entering") return "translateY(100%)";
-    if (state === "active") return "translateY(0%)";
-    if (state === "exiting") return "translateY(-100%)";
-    return "translateY(100%)";
-  };
 
   const featureItems = [
     { icon: <IconMapPin size={18} color="#B6FF00" />, title: "Explore Sessions", desc: "Browse nearby games by sport, distance, and time" },
@@ -623,17 +562,24 @@ function PhoneCarousel() {
           </button>
         </div>
 
-        {/* Right - Phone */}
+        {/* Right - Phone with video */}
         <div className="phone-right" style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative", minHeight: 700 }}>
+          {/* Glow blob */}
           <div style={{ position: "absolute", width: 440, height: 440, background: "radial-gradient(circle, rgba(182,255,0,0.08) 0%, transparent 65%)", filter: "blur(60px)", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 0, pointerEvents: "none" }} />
-          {[{ side: "left", style: { left: "calc(50% - 280px)", top: "50%", transform: "translateY(-50%) rotate(-8deg) scale(0.85)" } },
-            { side: "right", style: { right: "calc(50% - 280px)", top: "50%", transform: "translateY(-50%) rotate(8deg) scale(0.85)" } }].map(({ side, style }) => (
+
+          {/* Ghost phones behind */}
+          {[
+            { side: "left", style: { left: "calc(50% - 280px)", top: "50%", transform: "translateY(-50%) rotate(-8deg) scale(0.85)" } },
+            { side: "right", style: { right: "calc(50% - 280px)", top: "50%", transform: "translateY(-50%) rotate(8deg) scale(0.85)" } },
+          ].map(({ side, style }) => (
             <div key={side} style={{
               position: "absolute", width: 240, height: 490, borderRadius: 36,
               border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)", zIndex: 1,
               opacity: inView ? 0.4 : 0, filter: "blur(1px)", transition: "opacity 0.8s ease 0.6s", ...style,
             }} />
           ))}
+
+          {/* Floating sport balls */}
           {[
             { style: { left: "8%", top: "20%" }, delay: 0 },
             { style: { left: "15%", bottom: "25%" }, delay: 1 },
@@ -645,15 +591,20 @@ function PhoneCarousel() {
               position: "absolute", opacity: inView ? 0.25 : 0, pointerEvents: "none", zIndex: 2,
               transition: "opacity 0.6s ease",
               ...pos,
-              animation: `float1 ${[8,9,7,10,8.5][i]}s ease-in-out infinite ${delay}s`,
+              animation: `float1 ${[8, 9, 7, 10, 8.5][i]}s ease-in-out infinite ${delay}s`,
             }}>
               <IconSportBall size={22} color="rgba(182,255,0,0.4)" />
             </div>
           ))}
+
+          {/* Phone mockup with video */}
           <div style={{
             position: "relative", zIndex: 3,
-            opacity: inView ? 1 : 0, transform: inView ? "translateY(0) rotateY(-9deg) rotateX(4deg)" : "translateY(40px)",
-            transition: inView ? "opacity 0.7s ease 0.3s, transform 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s" : "opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s",
+            opacity: inView ? 1 : 0,
+            transform: inView ? "translateY(0) rotateY(-9deg) rotateX(4deg)" : "translateY(40px)",
+            transition: inView
+              ? "opacity 0.7s ease 0.3s, transform 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s"
+              : "opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s",
           }}>
             <div style={{
               width: 290, height: 600, background: "#0a0a0a", borderRadius: 44,
@@ -661,38 +612,39 @@ function PhoneCarousel() {
               boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.4)",
               position: "relative", overflow: "hidden",
             }}>
-              <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 100, height: 24, background: "#050505", borderRadius: "0 0 18px 18px", zIndex: 10 }} />
-              <div style={{ position: "absolute", top: 10, left: 20, right: 20, zIndex: 11, display: "flex", gap: 4 }}>
-                {SEQUENCE.map((_, i) => (
-                  <div key={i} style={{ flex: 1, height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
-                    <div style={{
-                      height: "100%", borderRadius: 2, background: "#B6FF00",
-                      width: fillWidths[i],
-                      transition: i === fillingIdx && fillWidths[i] === "0%" ? "none" : i === fillingIdx ? `width ${SLIDE_DURATION}ms linear` : "none",
-                    }} />
-                  </div>
-                ))}
-              </div>
-              <div style={{ position: "absolute", inset: 0, borderRadius: 44, overflow: "hidden", background: "#080808" }}>
-                {SEQUENCE.map((item, i) => (
-                  <div key={item.key} style={{
-                    position: "absolute", inset: 0,
-                    transform: slideTransform(slideStates[i]),
-                    transition: slideStates[i] === "idle" ? "none" : `transform ${TRANSITION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-                  }}>
-                    <Image src={item.img} alt={item.caption} fill style={{ objectFit: "cover", objectPosition: "top" }} />
-                  </div>
-                ))}
-              </div>
+              {/* Dynamic island / notch */}
+              {/* <div style={{
+                position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+                width: 100, height: 24, background: "#050505",
+                borderRadius: "0 0 18px 18px", zIndex: 10,
+              }} /> */}
+
+              {/* Video fills the entire phone screen */}
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "top",
+                  borderRadius: 44,
+                  display: "block",
+                }}
+              >
+                <source src="/videos/mockup.mp4" type="video/mp4" />
+              </video>
+
+              {/* Home indicator bar */}
               <div style={{
-                position: "absolute", bottom: 60, left: "50%", transform: "translateX(-50%)",
-                background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
-                border: "1px solid rgba(255,255,255,0.08)", color: "#fff",
-                fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", padding: "7px 14px",
-                borderRadius: 100, whiteSpace: "nowrap", zIndex: 15,
-                opacity: captionVisible ? 1 : 0, transition: "opacity 0.3s ease",
-              }}>{caption}</div>
-              <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", width: 100, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 4, zIndex: 15 }} />
+                position: "absolute", bottom: 10, left: "50%",
+                transform: "translateX(-50%)", width: 100, height: 4,
+                background: "rgba(255,255,255,0.3)", borderRadius: 4, zIndex: 15,
+              }} />
             </div>
           </div>
         </div>
@@ -965,33 +917,21 @@ function WaitlistSection() {
         <p style={{ color: "#4B5563", fontSize: "1rem", marginBottom: "2.5rem", lineHeight: 1.6 }}>
           We&apos;re launching soon. Join 300+ people already on the waitlist and get early access when we go live in your city.
         </p>
-        <div className="waitlist-form" style={{
-          display: "flex", gap: 0, maxWidth: 440, margin: "0 auto 1rem",
-          border: `1px solid ${error ? "#ff4444" : "rgba(255,255,255,0.08)"}`,
-          borderRadius: 4, overflow: "hidden", transition: "border-color 0.3s",
-        }}>
-          <input
-            type="email"
-            placeholder="Enter your email..."
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSubmit()}
-            style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "none", padding: "0.9rem 1.2rem", color: "#fff", fontFamily: "'Barlow', sans-serif", fontSize: "0.95rem", outline: "none", minWidth: 0 }}
-          />
-          <button onClick={handleSubmit} style={{
-            background: submitted ? "#6aff00" : "#B6FF00", border: "none", padding: "0.9rem 1.5rem",
-            fontFamily: "'Barlow Condensed', sans-serif", fontSize: "0.95rem", fontWeight: 800,
-            letterSpacing: "0.06em", textTransform: "uppercase", color: "#0D0D0D", cursor: "pointer", whiteSpace: "nowrap",
-            display: "inline-flex", alignItems: "center", gap: "0.4rem",
-          }}>
-            {submitted ? <><IconCheck size={14} color="#0D0D0D" /> You&apos;re in!</> : <>Join →</>}
-          </button>
-        </div>
-        <p style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: submitted ? "#B6FF00" : "#374151" }}>
+        <a href="waitlist" style={{
+            background: "#B6FF00", color: "#0D0D0D", padding: "0.85rem 2rem", border: "none",
+            borderRadius: 4, fontFamily: "'Barlow Condensed', sans-serif", fontSize: "1rem", fontWeight: 800,
+            letterSpacing: "0.08em", textTransform: "uppercase", textDecoration: "none",
+            display: "inline-flex", alignItems: "center", gap: "0.5rem",
+            transition: "transform 0.2s, box-shadow 0.2s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(182,255,0,0.25)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+          >Join Waitlist <IconArrowRight color="#0D0D0D" /></a>
+        {/* <p style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: submitted ? "#B6FF00" : "#374151" }}>
           {submitted
             ? <><IconConfetti size={14} color="#B6FF00" /> You&apos;re on the list. We&apos;ll be in touch soon.</>
             : "Free to join. No spam. Unsubscribe anytime."}
-        </p>
+        </p> */}
       </RevealSection>
     </section>
   );
@@ -1212,7 +1152,7 @@ export default function Home() {
       <FeaturesSection />
       <HowSection />
       <Marquee />
-      <CommunitySection />
+      {/* <CommunitySection /> */}
       <WaitlistSection />
       <DownloadSection />
       <Footer />
