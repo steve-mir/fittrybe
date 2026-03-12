@@ -1,210 +1,132 @@
+/**
+ * ─── Fittrybe — Root Layout ───────────────────────────────────────────────────
+ * SEO: Metadata API + JSON-LD + next/font + GA4 + preconnect hints
+ */
+
 import type { Metadata, Viewport } from "next";
+import { Barlow_Condensed, DM_Sans } from "next/font/google";
+import { seoConfig } from "@/lib/seo-config";
+import {
+  buildOrganizationSchema,
+  buildWebSiteSchema,
+  buildGraphSchema,
+} from "@/lib/structured-data";
 
-// ─── SEO Metadata ─────────────────────────────────────────────────────────────
+// ─── Font Optimisation ────────────────────────────────────────────────────────
+const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "700", "800", "900"],
+  variable: "--font-barlow-condensed",
+  display: "swap",
+  preload: true,
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-dm-sans",
+  display: "swap",
+  preload: true,
+});
+
+// ─── Global Metadata ──────────────────────────────────────────────────────────
 export const metadata: Metadata = {
-  // ── Core ──────────────────────────────────────────────────────────────────
+  metadataBase: new URL(seoConfig.siteUrl),
   title: {
-    default: "Fittrybe — Find Your Game. Play With Your City.",
-    template: "%s | Fittrybe",
+    default: seoConfig.defaultTitle,
+    template: seoConfig.titleTemplate,
   },
-  description:
-    "Fittrybe is a location-based social sports app. Discover real sports sessions near you, reserve your spot in one tap, and meet your tribe. Football, basketball, badminton, tennis and more.",
-  keywords: [
-    "local sports",
-    "sports sessions near me",
-    "find football game",
-    "find basketball game",
-    "social sports app",
-    "sports community",
-    "join a sports team",
-    "local sports events",
-    "fittrybe",
-    "play sport locally",
-    "sports near me",
-    "casual sports",
-    "badminton near me",
-    "tennis near me",
-    "running group near me",
-  ],
-
-  // ── Authors & Creator ──────────────────────────────────────────────────────
-  authors: [{ name: "Fittrybe", url: "https://fittrybe.com" }],
-  creator: "Fittrybe",
-  publisher: "Fittrybe",
-
-  // ── Canonical & Alternate ──────────────────────────────────────────────────
+  description: seoConfig.description,
+  keywords: seoConfig.keywords,
+  authors: [{ name: seoConfig.author.name, url: seoConfig.author.url }],
+  creator: seoConfig.creator,
+  publisher: seoConfig.publisher,
   alternates: {
-    canonical: "https://fittrybe.com",
+    canonical: seoConfig.siteUrl,
+    languages: { "en-GB": seoConfig.siteUrl, "en-US": seoConfig.siteUrl },
   },
-
-  // ── Robots ────────────────────────────────────────────────────────────────
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-
-  // ── Open Graph ────────────────────────────────────────────────────────────
+  robots: seoConfig.robotsDefault,
   openGraph: {
     type: "website",
-    locale: "en_GB",
-    url: "https://fittrybe.com",
-    siteName: "Fittrybe",
-    title: "Fittrybe — Find Your Game. Play With Your City.",
-    description:
-      "Discover real sports sessions near you. Join a game, meet your tribe, show up and play. Local sport — made social and consistent.",
+    locale: seoConfig.siteLocale,
+    url: seoConfig.siteUrl,
+    siteName: seoConfig.siteName,
+    title: seoConfig.defaultTitle,
+    description: seoConfig.shortDescription,
     images: [
       {
-        url: "https://fittrybe.com/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Fittrybe — Find Your Game",
+        url: `/api/og?title=${encodeURIComponent("Find Your Game. Play With Your City.")}`,
+        width: seoConfig.defaultOGImage.width,
+        height: seoConfig.defaultOGImage.height,
+        alt: seoConfig.defaultOGImage.alt,
+        type: seoConfig.defaultOGImage.type,
       },
     ],
   },
-
-  // ── Twitter / X ───────────────────────────────────────────────────────────
   twitter: {
     card: "summary_large_image",
-    title: "Fittrybe — Find Your Game. Play With Your City.",
-    description:
-      "Discover real sports sessions near you. Join a game, meet your tribe, show up and play.",
-    site: "@fittrybe",
-    creator: "@fittrybe",
-    images: ["https://fittrybe.com/og-image.jpg"],
+    title: seoConfig.defaultTitle,
+    description: seoConfig.shortDescription,
+    site: seoConfig.twitterHandle,
+    creator: seoConfig.twitterHandle,
+    images: [`/api/og?title=${encodeURIComponent("Find Your Game. Play With Your City.")}`],
   },
-
-  // ── App-specific ──────────────────────────────────────────────────────────
-  applicationName: "Fittrybe",
-  category: "sports",
-  classification: "Sports & Recreation",
-
-  // ── App Store Links (for app banners) ─────────────────────────────────────
+  applicationName: seoConfig.applicationName,
+  category: seoConfig.category,
   appleWebApp: {
     capable: true,
-    title: "Fittrybe",
+    title: seoConfig.siteName,
     statusBarStyle: "black-translucent",
   },
-
-  // ── Icons ─────────────────────────────────────────────────────────────────
   icons: {
     icon: [
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
       { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
     shortcut: "/favicon.ico",
   },
-
-  // ── Manifest ──────────────────────────────────────────────────────────────
   manifest: "/manifest.json",
-
-  // ── Verification ──────────────────────────────────────────────────────────
-  // Uncomment and fill in once you have these codes:
-  // verification: {
-  //   google: "YOUR_GOOGLE_SITE_VERIFICATION_CODE",
-  //   yandex: "YOUR_YANDEX_VERIFICATION",
-  //   bing: "YOUR_BING_SITE_AUTH",
-  // },
-
-  // ── Other ─────────────────────────────────────────────────────────────────
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
+  formatDetection: { email: false, address: false, telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#B6FF00",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: seoConfig.themeColor },
+    { media: "(prefers-color-scheme: light)", color: seoConfig.themeColor },
+  ],
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  userScalable: true,
 };
 
-// ─── Structured Data (JSON-LD) ────────────────────────────────────────────────
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://fittrybe.com/#website",
-      url: "https://fittrybe.com",
-      name: "Fittrybe",
-      description: "Local social sports app — find sessions, join games, meet your tribe.",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: "https://fittrybe.com/search?q={search_term_string}",
-        },
-        "query-input": "required name=search_term_string",
-      },
-    },
-    {
-      "@type": "Organization",
-      "@id": "https://fittrybe.com/#organization",
-      name: "Fittrybe",
-      url: "https://fittrybe.com",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://fittrybe.com/logo.png",
-        width: 512,
-        height: 512,
-      },
-      sameAs: [
-        "https://instagram.com/fittrybe",
-        "https://twitter.com/fittrybe",
-        "https://tiktok.com/@fittrybe",
-      ],
-    },
-    {
-      "@type": "MobileApplication",
-      "@id": "https://fittrybe.com/#app",
-      name: "Fittrybe",
-      operatingSystem: "iOS, Android",
-      applicationCategory: "SportsApplication",
-      description:
-        "Discover real sports sessions near you. Join a game, meet your tribe, show up and play.",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "GBP",
-      },
-    },
-  ],
-};
+const globalJsonLd = buildGraphSchema([buildOrganizationSchema(), buildWebSiteSchema()]);
 
-// ─── Root Layout ──────────────────────────────────────────────────────────────
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang={seoConfig.siteLanguage} dir="ltr" className={`${barlowCondensed.variable} ${dmSans.variable}`}>
       <head>
-        {/* Structured data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        {/* Preconnect to font origin */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: globalJsonLd }} />
+        <link rel="preconnect" href="https://firestore.googleapis.com" />
+        <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+        {seoConfig.analytics.ga4MeasurementId && (
+          <link rel="preconnect" href="https://www.googletagmanager.com" />
+        )}
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {seoConfig.analytics.ga4MeasurementId && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${seoConfig.analytics.ga4MeasurementId}`} />
+            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${seoConfig.analytics.ga4MeasurementId}',{anonymize_ip:true});` }} />
+          </>
+        )}
+      </body>
     </html>
   );
 }

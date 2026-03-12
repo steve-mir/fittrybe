@@ -1,0 +1,46 @@
+{
+  "name": "Fittrybe — Find Your Game. Play With Your City.",
+  "short_name": "Fittrybe",
+  "description": "Discover real sports sessions near you. Join a game, meet your tribe, show up and play.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#B6FF00",
+  "orientation": "portrait",
+  "categories": ["sports", "social", "lifestyle"],
+  "lang": "en-GB",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screen1.jpg",
+      "type": "image/jpeg",
+      "sizes": "390x844",
+      "form_factor": "narrow"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.fittrybe",
+      "id": "com.fittrybe"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/fittrybe"
+    }
+  ],
+  "prefer_related_applications": false
+}
