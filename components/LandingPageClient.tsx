@@ -768,15 +768,23 @@ function BentoGrid() {
           </div>
         </motion.article>
 
-        {/* Sports icons */}
+        {/* Sports icons - Updated with centered heading */}
         <motion.article
           className="bento-card" aria-label="Sports supported by Fittrybe"
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, delay: 0.1 }}
           style={{ gridColumn: "2 / 4", padding: "2.5rem", background: "#0D0D0D", minHeight: 200 }}
         >
-          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1.5rem" }}>● SPORTS</h3>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }} role="list" aria-label="Supported sports">
+          <h3 style={{ 
+            fontSize: "0.68rem", 
+            fontWeight: 700, 
+            letterSpacing: "0.12em", 
+            textTransform: "uppercase", 
+            color: "#B6FF00", 
+            marginBottom: "1.5rem",
+            textAlign: "center" // Added center alignment
+          }}>● SPORTS</h3>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", justifyContent: "center" }} role="list" aria-label="Supported sports"> {/* Added justifyContent center */}
             {SPORT_EMOJIS.map(({ emoji, label, delay }) => (
               <motion.div key={label} className="sport-icon-float" role="listitem"
                 animate={{ y: [0, -8, 0] }} transition={{ duration: 3 + delay, repeat: Infinity, ease: "easeInOut", delay }}
@@ -787,26 +795,95 @@ function BentoGrid() {
           </div>
         </motion.article>
 
-        {/* Download CTA */}
+        {/* Download CTA - Updated with side-by-side buttons on mobile and centered text */}
         <motion.article
           className="bento-card" aria-label="Download Fittrybe on the App Store and Google Play"
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, delay: 0.2 }}
-          style={{ gridColumn: "2 / 4", padding: "2.5rem", background: "linear-gradient(135deg, #0f1a00 0%, #0D0D0D 60%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem" }}
+          style={{ gridColumn: "2 / 4", padding: "2.5rem", background: "linear-gradient(135deg, #0f1a00 0%, #0D0D0D 60%)" }}
         >
-          <div>
-            <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "0.75rem" }}>● COMING SOON</p>
-            <h3 style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontSize: "clamp(1.8rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.02em", lineHeight: 1 }}>GET THE APP</h3>
-          </div>
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            <a href="/waitlist" className="store-btn" aria-label="Join waitlist for Fittrybe on the App Store">
-              <IconApple size={20} color="#fff" />
-              <div><div style={{ fontSize: "0.6rem", color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.05em" }}>DOWNLOAD ON THE</div><div style={{ fontSize: "0.9rem", fontWeight: 700 }}>App Store</div></div>
-            </a>
-            <a href="/waitlist" className="store-btn" aria-label="Join waitlist for Fittrybe on Google Play">
-              <IconGooglePlay size={20} color="#B6FF00" />
-              <div><div style={{ fontSize: "0.6rem", color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.05em" }}>GET IT ON</div><div style={{ fontSize: "0.9rem", fontWeight: 700 }}>Google Play</div></div>
-            </a>
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            justifyContent: "center",
+            width: "100%"
+          }}>
+            <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+              <p style={{ 
+                fontSize: "0.68rem", 
+                fontWeight: 700, 
+                letterSpacing: "0.12em", 
+                textTransform: "uppercase", 
+                color: "#B6FF00", 
+                marginBottom: "0.75rem" 
+              }}>● COMING SOON</p>
+              <h3 style={{ 
+                fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", 
+                fontSize: "clamp(1.8rem, 4vw, 3rem)", 
+                fontWeight: 900, 
+                textTransform: "uppercase", 
+                letterSpacing: "-0.02em", 
+                lineHeight: 1 
+              }}>GET THE APP</h3>
+            </div>
+            
+            <div style={{ 
+              display: "flex", 
+              gap: "0.75rem", 
+              flexWrap: "wrap", 
+              justifyContent: "center",
+              width: "100%"
+            }}>
+              <a href="/waitlist" className="store-btn" aria-label="Join waitlist for Fittrybe on the App Store" style={{
+                display: "inline-flex", 
+                alignItems: "center", 
+                gap: "10px", 
+                padding: "14px 22px",
+                borderRadius: "12px", 
+                border: "1.5px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.04)", 
+                cursor: "pointer",
+                transition: "background 0.2s, border-color 0.2s, transform 0.2s",
+                textDecoration: "none", 
+                color: "#fff",
+                flex: "0 1 auto", // Allow buttons to shrink but not grow
+                minWidth: "160px", // Set minimum width for consistency
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.transform = ""; }}
+              >
+                <IconApple size={20} color="#fff" />
+                <div style={{ textAlign: "center" }}> {/* Center align text inside button */}
+                  <div style={{ fontSize: "0.6rem", color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.05em" }}>DOWNLOAD ON THE</div>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 700 }}>App Store</div>
+                </div>
+              </a>
+              <a href="/waitlist" className="store-btn" aria-label="Join waitlist for Fittrybe on Google Play" style={{
+                display: "inline-flex", 
+                alignItems: "center", 
+                gap: "10px", 
+                padding: "14px 22px",
+                borderRadius: "12px", 
+                border: "1.5px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.04)", 
+                cursor: "pointer",
+                transition: "background 0.2s, border-color 0.2s, transform 0.2s",
+                textDecoration: "none", 
+                color: "#fff",
+                flex: "0 1 auto", // Allow buttons to shrink but not grow
+                minWidth: "160px", // Set minimum width for consistency
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.transform = ""; }}
+              >
+                <IconGooglePlay size={20} color="#B6FF00" />
+                <div style={{ textAlign: "center" }}> {/* Center align text inside button */}
+                  <div style={{ fontSize: "0.6rem", color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.05em" }}>GET IT ON</div>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 700 }}>Google Play</div>
+                </div>
+              </a>
+            </div>
           </div>
         </motion.article>
       </div>
@@ -832,9 +909,9 @@ function Footer() {
 
         <nav aria-label="Footer navigation" style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
           {[
-            { label: "Privacy Policy", href: "/privacy" },
-            { label: "Terms of Service", href: "/terms" },
-            { label: "Contact Us", href: "mailto:hello@fittrybe.com" },
+            // { label: "Privacy Policy", href: "/privacy" },
+            // { label: "Terms of Service", href: "/terms" },
+            // { label: "Contact Us", href: "mailto:hello@fittrybe.com" },
             { label: "Join Waitlist", href: "/waitlist" },
           ].map(link => (
             <a key={link.label} href={link.href} className="footer-link">{link.label}</a>
