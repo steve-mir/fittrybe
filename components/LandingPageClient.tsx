@@ -526,7 +526,7 @@ function HeroSection() {
               position: "relative",
             }}>
               {/* Dynamic Island */}
-              <div style={{
+              {/* <div style={{
                 position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)",
                 width: 110, height: 34,
                 background: "#000",
@@ -535,14 +535,14 @@ function HeroSection() {
                 boxShadow: "0 2px 8px rgba(0,0,0,0.8)",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               }}>
-                {/* Camera dot */}
+              * Camera dot *
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.05)", position: "relative" }}>
                   <div style={{ position: "absolute", inset: 3, borderRadius: "50%", background: "#0a0a0a" }} />
                   <div style={{ position: "absolute", top: 2, left: 2, width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />
                 </div>
-                {/* Face ID line */}
+                * Face ID line *
                 <div style={{ width: 40, height: 3, background: "#1a1a1a", borderRadius: 2 }} />
-              </div>
+              </div> */}
 
               {/* App video */}
               <HeroPhoneVideo />
@@ -654,10 +654,10 @@ function StickyScrollStory() {
                 boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
               }}>
                 {/* Dynamic Island */}
-                <div className="sticky-di" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 96, height: 28, background: "#000", borderRadius: 18, zIndex: 20, boxShadow: "0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                {/* <div className="sticky-di" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 96, height: 28, background: "#000", borderRadius: 18, zIndex: 20, boxShadow: "0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)" }} />
                   <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a2a1a" }} />
-                </div>
+                </div> */}
 
                 {SCROLL_SLIDES.map((slide, i) => (
                   <motion.div key={slide.img + i} style={{ position: "absolute", inset: 0, opacity: opacities[i] }}>
