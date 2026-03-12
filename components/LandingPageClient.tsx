@@ -25,6 +25,7 @@ import {
   useTransform,
   useMotionValueEvent,
 } from "framer-motion";
+import Link from "next/link";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconArrowRight({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -71,6 +72,15 @@ function IconTiktok({ size = 18, color = "currentColor" }: { size?: number; colo
     </svg>
   );
 }
+
+function IconFacebook({ size = 18, color = "currentColor" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <path d="M9.5 3v3.5H7V10h2.5v9h4v-9h3.5V6.5H13.5V4c0-.6.4-1 1-1h3V0h-4C10.8 0 9.5 1.3 9.5 3z"/>
+    </svg>
+  );
+}
+
 function IconChevronDown({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -226,13 +236,13 @@ function Navbar() {
         transition: "background 0.4s ease, backdrop-filter 0.4s ease, border-bottom 0.4s ease",
       }}
     >
-      <a href="/" aria-label="Fittrybe — return to homepage" style={{
+      <Link href="/" aria-label="Fittrybe — return to homepage" style={{
         fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
         fontWeight: 900, fontSize: "1.7rem", letterSpacing: "-0.02em", textDecoration: "none",
       }}>
         <span style={{ color: "#fff" }}>fit</span>
         <span style={{ color: "#B6FF00" }}>trybe</span>
-      </a>
+      </Link>
 
       <a href="/waitlist" aria-label="Join the Fittrybe waitlist for early access" style={{
         background: "#B6FF00", color: "#0D0D0D",
@@ -851,13 +861,13 @@ function Footer() {
   return (
     <footer style={{ background: "#0D0D0D", borderTop: "1px solid rgba(255,255,255,0.05)", padding: "40px 5vw" }}>
       <div className="footer-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-        <a href="/" aria-label="Fittrybe homepage" style={{
+        <Link href="/" aria-label="Fittrybe homepage" style={{
           fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
           fontWeight: 900, fontSize: "1.6rem", letterSpacing: "-0.02em", textDecoration: "none",
         }}>
           <span style={{ color: "#fff" }}>fit</span>
           <span style={{ color: "#B6FF00" }}>trybe</span>
-        </a>
+        </Link>
 
         <nav aria-label="Footer navigation" style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
           {[
@@ -872,8 +882,9 @@ function Footer() {
 
         <div style={{ display: "flex", gap: "0.5rem" }} aria-label="Fittrybe social media links">
           {[
+            { href: "https://instagram.com/fittrybe.uk", Icon: IconInstagram, label: "Follow Fittrybe on Instagram" },
+            { href: "https://www.facebook.com/share/1AZ19Yqe2y/", Icon: IconFacebook, label: "Follow Fittrybe on Facebook" },
             { href: "https://twitter.com/fittrybe", Icon: IconTwitterX, label: "Follow Fittrybe on X (Twitter)" },
-            { href: "https://instagram.com/fittrybe", Icon: IconInstagram, label: "Follow Fittrybe on Instagram" },
             { href: "https://tiktok.com/@fittrybe", Icon: IconTiktok, label: "Follow Fittrybe on TikTok" },
           ].map(({ href, Icon, label }) => (
             <a key={href} href={href} className="social-icon-btn" aria-label={label} rel="noopener noreferrer" target="_blank">
