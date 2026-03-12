@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     template: seoConfig.titleTemplate,
   },
   description: seoConfig.description,
-  keywords: seoConfig.keywords,
+  // keywords: seoConfig.keywords,
   authors: [{ name: seoConfig.author.name, url: seoConfig.author.url }],
   creator: seoConfig.creator,
   publisher: seoConfig.publisher,

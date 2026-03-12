@@ -90,8 +90,7 @@ function IconChevronDown({ size = 18, color = "currentColor" }: { size?: number;
 }
 
 // ─── CSS (font variables injected by next/font in layout) ────────────────────
-const globalStyles = `
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+const globalStyles = `*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { background: #050505; color: #fff; font-family: var(--font-dm-sans, 'DM Sans', sans-serif); overflow-x: hidden; }
 
@@ -188,20 +187,61 @@ const globalStyles = `
     .bento-grid { grid-template-columns: 1fr !important; }
     .bento-grid > * { grid-column: 1 / -1 !important; grid-row: auto !important; }
     .footer-inner { flex-direction: column !important; align-items: flex-start !important; gap: 1.5rem !important; }
-    .sticky-inner {
-      flex-direction: column !important;
-      height: auto !important;
-      padding: 60px 5vw !important;
-      gap: 2rem !important;
-      justify-content: flex-start !important;
-      overflow-y: auto !important;
-    }
-    .sticky-left { flex: none !important; width: 100% !important; padding: 0 !important; text-align: center !important; align-items: center !important; height: auto !important; }
-    .sticky-right { flex: none !important; width: 100% !important; height: auto !important; justify-content: center !important; }
-    .sticky-phone-outer { width: 200px !important; height: 410px !important; border-radius: 38px !important; }
-    .sticky-phone-inner { border-radius: 36px !important; }
-    .sticky-di { width: 80px !important; height: 26px !important; top: 10px !important; }
+
+  /* ── Sticky scroll: mobile stacked layout ── */
+  .sticky-inner {
+    flex-direction: column !important;
+    height: 100vh !important;
+    padding: 80px 5vw 60px !important;
+    gap: 0 !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    align-items: center !important;
   }
+  .sticky-right {
+    flex: none !important;
+    width: 100% !important;
+    height: 45% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    order: 1 !important;
+  }
+    .sticky-left {
+    flex: none !important;
+    width: 100% !important;
+    height: 55% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; /* Change this from flex-start to center */
+    padding-top: 1.5rem !important;
+    order: 2 !important;
+    position: relative !important;
+  }
+  
+  /* Add this new rule to center the content containers */
+  .sticky-left > div {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 0 5vw !important; /* Add some padding on the sides */
+    text-align: center !important;
+  }
+  
+  /* Center the paragraph text */
+  .sticky-left p {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .sticky-phone-outer { width: 160px !important; height: 330px !important; border-radius: 36px !important; }
+  .sticky-phone-inner { border-radius: 34px !important; }
+  .sticky-di { width: 80px !important; height: 26px !important; top: 10px !important; }
+}
   @media (max-width: 480px) {
     .hero-section { padding: 80px 4vw 50px !important; }
     .hero-phones { min-height: 360px !important; }
@@ -596,7 +636,7 @@ function StickyScrollStory() {
 
           {/* iPhone 17 orange - StickyScroll */}
           <div style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.8)) drop-shadow(0 0 30px rgba(255,95,20,0.2))", position: "relative" }}>
-            <div style={{
+            <div className="sticky-phone-outer" style={{
               width: 260, height: 540,
               background: "linear-gradient(160deg, #FF8040 0%, #E85A10 30%, #C94810 55%, #FF6A20 80%, #FF9050 100%)",
               borderRadius: 48, padding: "2px",
@@ -608,13 +648,13 @@ function StickyScrollStory() {
               <div style={{ position: "absolute", left: -3, top: 152, width: 3, height: 32, background: "linear-gradient(to right, #C94810, #E86020)", borderRadius: "2px 0 0 2px" }} />
               <div style={{ position: "absolute", right: -3, top: 136, width: 3, height: 54, background: "linear-gradient(to left, #C94810, #E86020)", borderRadius: "0 2px 2px 0" }} />
 
-              <div style={{
+              <div className="sticky-phone-inner" style={{
                 width: "100%", height: "100%",
                 background: "#0d0d0d", borderRadius: 46, overflow: "hidden", position: "relative",
                 boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
               }}>
                 {/* Dynamic Island */}
-                <div style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 96, height: 28, background: "#000", borderRadius: 18, zIndex: 20, boxShadow: "0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <div className="sticky-di" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 96, height: 28, background: "#000", borderRadius: 18, zIndex: 20, boxShadow: "0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)" }} />
                   <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a2a1a" }} />
                 </div>
@@ -774,90 +814,11 @@ function BentoGrid() {
   );
 }
 
-// ─── 4. FAQ SECTION (AI Search + Google Rich Results) ─────────────────────────
-function FAQSection({ faqs }: { faqs: Array<{ question: string; answer: string }> }) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  return (
-    <section id="faq" aria-label="Frequently asked questions about Fittrybe" style={{ padding: "80px 5vw", background: "#080808" }}>
-      <div style={{ maxWidth: 760, margin: "0 auto" }}>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.6 }}
-          style={{ textAlign: "center", marginBottom: "3rem" }}
-        >
-          <h2 style={{
-            fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
-            fontSize: "clamp(2rem, 5vw, 4rem)", fontWeight: 900,
-            textTransform: "uppercase", letterSpacing: "-0.02em",
-          }}>
-            COMMON <span style={{ color: "#B6FF00" }}>QUESTIONS</span>
-          </h2>
-          <p style={{ color: "#6B7280", marginTop: "0.75rem", fontSize: "0.95rem" }}>
-            Everything you need to know about Fittrybe and joining the waitlist.
-          </p>
-        </motion.div>
-
-        <dl>
-          {faqs.map((faq, i) => (
-            <div key={i} className="faq-item">
-              <dt>
-                <button
-                  onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                  aria-expanded={openIndex === i}
-                  aria-controls={`faq-answer-${i}`}
-                  style={{
-                    width: "100%", background: "none", border: "none", color: "#fff",
-                    textAlign: "left", padding: "1.25rem 0", cursor: "pointer",
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: "1rem", fontWeight: 600,
-                    gap: "1rem",
-                  }}
-                >
-                  <span>{faq.question}</span>
-                  <motion.span animate={{ rotate: openIndex === i ? 180 : 0 }} transition={{ duration: 0.25 }} style={{ flexShrink: 0, color: "#B6FF00" }}>
-                    <IconChevronDown size={18} color="#B6FF00" />
-                  </motion.span>
-                </button>
-              </dt>
-              <dd id={`faq-answer-${i}`} role="region" style={{ overflow: "hidden" }}>
-                <motion.div
-                  initial={false}
-                  animate={{ height: openIndex === i ? "auto" : 0, opacity: openIndex === i ? 1 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <p style={{ color: "#9CA3AF", fontSize: "0.95rem", lineHeight: 1.7, paddingBottom: "1.25rem" }}>
-                    {faq.answer}
-                  </p>
-                </motion.div>
-              </dd>
-            </div>
-          ))}
-        </dl>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ textAlign: "center", marginTop: "3rem" }}
-        >
-          <a href="/waitlist" aria-label="Join the Fittrybe waitlist to get early access to local sports sessions" style={{
-            background: "#B6FF00", color: "#0D0D0D", padding: "0.85rem 2.5rem",
-            borderRadius: 8, fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
-            fontSize: "1rem", fontWeight: 800, letterSpacing: "0.08em",
-            textTransform: "uppercase", textDecoration: "none",
-            display: "inline-flex", alignItems: "center", gap: "0.5rem",
-            transition: "transform 0.2s, box-shadow 0.2s",
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(182,255,0,0.25)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
-          >Join the Waitlist <IconArrowRight size={16} color="#0D0D0D" /></a>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// ─── 5. FOOTER ────────────────────────────────────────────────────────────────
+// ─── 4. FOOTER ────────────────────────────────────────────────────────────────
 function Footer() {
+  // Use lazy initializer to get current year without causing hydration issues
+  const [currentYear] = useState<number>(() => new Date().getFullYear());
+
   return (
     <footer style={{ background: "#0D0D0D", borderTop: "1px solid rgba(255,255,255,0.05)", padding: "40px 5vw" }}>
       <div className="footer-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
@@ -885,7 +846,7 @@ function Footer() {
             { href: "https://instagram.com/fittrybe.uk", Icon: IconInstagram, label: "Follow Fittrybe on Instagram" },
             { href: "https://www.facebook.com/share/1AZ19Yqe2y/", Icon: IconFacebook, label: "Follow Fittrybe on Facebook" },
             { href: "https://twitter.com/fittrybe", Icon: IconTwitterX, label: "Follow Fittrybe on X (Twitter)" },
-            { href: "https://tiktok.com/@fittrybe", Icon: IconTiktok, label: "Follow Fittrybe on TikTok" },
+            // { href: "https://tiktok.com/@fittrybe", Icon: IconTiktok, label: "Follow Fittrybe on TikTok" },
           ].map(({ href, Icon, label }) => (
             <a key={href} href={href} className="social-icon-btn" aria-label={label} rel="noopener noreferrer" target="_blank">
               <Icon size={16} />
@@ -895,17 +856,18 @@ function Footer() {
       </div>
 
       <div style={{ marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.04)", textAlign: "center", fontSize: "0.72rem", color: "#2a2a2a", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-        © {new Date().getFullYear()} Fittrybe Ltd. All rights reserved. · London, United Kingdom
+        © {currentYear} Fittrybe Ltd. All rights reserved. · London, United Kingdom
       </div>
     </footer>
   );
 }
 
+const faqs = [];
 // ─── Root Client Component ────────────────────────────────────────────────────
 export default function LandingPageClient({ faqs }: { faqs: Array<{ question: string; answer: string }> }) {
   return (
     <>
-      <style>{globalStyles}</style>
+      <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
       <Navbar />
       <main id="main-content">
         <HeroSection />
