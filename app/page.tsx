@@ -13,6 +13,7 @@ import {
   useSpring,
   AnimatePresence,
   animate,
+  useMotionValueEvent,
 } from "framer-motion";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -178,6 +179,33 @@ const globalStyles = `
     .sticky-story-text { font-size: clamp(3rem, 16vw, 5rem) !important; }
     .footer-inner { flex-direction: column !important; align-items: flex-start !important; gap: 1.5rem !important; }
   }
+
+  @media (max-width: 1024px) {
+  .hero-section {
+    grid-template-columns: 1fr !important;
+    padding: 120px 6vw 80px !important;
+    text-align: center;
+    justify-items: center;
+  }
+  .hero-copy {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .hero-buttons { justify-content: center !important; }
+  .hero-phones { display: none !important; }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 110px 5vw 90px !important;
+    min-height: 100svh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+}
 `;
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
@@ -231,6 +259,185 @@ function Navbar() {
 
 // ─── 1. IMMERSIVE HERO ────────────────────────────────────────────────────────
 function HeroSection() {
+  return (
+    <section id="hero" style={{
+      minHeight: "100vh", display: "grid", gridTemplateColumns: "1fr 1fr",
+      alignItems: "center", padding: "140px 5vw 100px", gap: "4rem",
+      position: "relative", overflow: "hidden",
+    }} className="hero-section">
+
+      {/* Background Video */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden" }}>
+        <video autoPlay muted loop playsInline style={{
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          objectFit: "cover", objectPosition: "center",
+          opacity: 0.18,
+          filter: "saturate(0.4) brightness(0.7)",
+        }}>
+          <source src="/videos/hero.mp4" type="video/mp4" />
+        </video>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `
+            linear-gradient(to bottom, rgba(5,5,5,0.55) 0%, rgba(5,5,5,0.3) 40%, rgba(5,5,5,0.65) 75%, rgba(5,5,5,0.95) 100%),
+            linear-gradient(to right, rgba(5,5,5,0.7) 0%, rgba(5,5,5,0.0) 60%)
+          `,
+        }} />
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.6) 100%)",
+        }} />
+      </div>
+
+      {/* Lime glow */}
+      <div style={{
+        position: "absolute", width: 600, height: 600,
+        background: "radial-gradient(circle, rgba(182,255,0,0.05) 0%, transparent 70%)",
+        top: "50%", left: "30%", transform: "translate(-50%, -50%)", pointerEvents: "none",
+        animation: "glowPulse 4s ease-in-out infinite", zIndex: 1,
+      }} />
+
+      {/* Left copy */}
+      <div className="hero-copy" style={{ position: "relative", zIndex: 2 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "rgba(182,255,0,0.08)", border: "1px solid rgba(182,255,0,0.2)",
+            borderRadius: 100, padding: "6px 16px", marginBottom: "1.5rem",
+            fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em",
+            textTransform: "uppercase", color: "#B6FF00",
+          }}
+        >
+          <span style={{ width: 6, height: 6, background: "#B6FF00", borderRadius: "50%", animation: "blink 1.5s infinite" }} />
+          Coming Soon — Be First To Play
+        </motion.div>
+
+        <h1 style={{
+          fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900,
+          fontSize: "clamp(3.5rem, 7vw, 6.5rem)", lineHeight: 0.92,
+          letterSpacing: "-0.02em", textTransform: "uppercase", marginBottom: "1.5rem",
+        }}>
+          {["Find", "Your", "Game."].map((word, i) => (
+            <div key={word} style={{ overflow: "hidden", lineHeight: 0.95 }}>
+              <motion.div
+                initial={{ y: "110%" }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.35 + i * 0.14, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  display: "block",
+                  color: i === 1 ? "#B6FF00" : "#fff",
+                }}
+              >{word}</motion.div>
+            </div>
+          ))}
+        </h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85, duration: 0.6 }}
+          style={{
+            fontSize: "1.05rem", color: "#6B7280", lineHeight: 1.7, maxWidth: 420,
+            marginBottom: "2.5rem",
+          }}
+        >
+          Discover real sports sessions near you. Join a game, meet people worth playing with, and build a routine that sticks.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.6 }}
+          className="hero-buttons"
+          style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}
+        >
+          <a href="/waitlist" style={{
+            background: "#B6FF00", color: "#0D0D0D", padding: "0.85rem 2rem",
+            borderRadius: 8, fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: "1rem", fontWeight: 800, letterSpacing: "0.08em",
+            textTransform: "uppercase", textDecoration: "none",
+            display: "inline-flex", alignItems: "center", gap: "0.5rem",
+            transition: "transform 0.2s, box-shadow 0.2s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(182,255,0,0.25)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+          >Join Waitlist <IconArrowRight size={16} color="#0D0D0D" /></a>
+
+          <a href="#how" style={{
+            color: "#9CA3AF", padding: "0.85rem 2rem",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 8, fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: "1rem", fontWeight: 700, letterSpacing: "0.08em",
+            textTransform: "uppercase", textDecoration: "none",
+            display: "inline-flex", alignItems: "center", gap: "0.5rem",
+            transition: "border-color 0.2s, color 0.2s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#9CA3AF"; }}
+          >▶ How It Works</a>
+        </motion.div>
+      </div>
+
+      {/* Right — Video Phone Mockup */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        className="hero-phones"
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "relative", zIndex: 2, minHeight: 600,
+        }}
+      >
+        {/* Glow blob */}
+        <div style={{
+          position: "absolute", width: 440, height: 440,
+          background: "radial-gradient(circle, rgba(182,255,0,0.08) 0%, transparent 65%)",
+          filter: "blur(60px)", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)", zIndex: 0, pointerEvents: "none",
+        }} />
+
+        {/* Phone with video */}
+        <div style={{
+          position: "relative", zIndex: 3,
+          transform: "rotateY(-9deg) rotateX(4deg)",
+        }}>
+          <div style={{
+            width: 290, height: 600, background: "#0a0a0a", borderRadius: 44,
+            border: "1.5px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.4)",
+            position: "relative", overflow: "hidden",
+          }}>
+            <video
+              autoPlay muted loop playsInline
+              style={{
+                position: "absolute", inset: 0,
+                width: "100%", height: "100%",
+                objectFit: "cover", objectPosition: "top",
+                borderRadius: 44, display: "block",
+              }}
+            >
+              <source src="/videos/mockup.mp4" type="video/mp4" />
+            </video>
+            {/* Home indicator */}
+            <div style={{
+              position: "absolute", bottom: 10, left: "50%",
+              transform: "translateX(-50%)", width: 100, height: 4,
+              background: "rgba(255,255,255,0.3)", borderRadius: 4, zIndex: 15,
+            }} />
+          </div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+
+function HeroSectionOld() {
   return (
     <section id="hero" style={{
       minHeight: "100vh", position: "relative", overflow: "hidden",
@@ -363,6 +570,158 @@ const SCROLL_SLIDES = [
 ];
 
 function StickyScrollStory() {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  // Each slide occupies 1/3 of the scroll range
+  // Fade in over first 10%, hold, fade out over last 10% of its range
+  const useMakeOpacity = (start: number, end: number) =>
+    useTransform(
+      scrollYProgress,
+      [start, start + 0.06, end - 0.06, end],
+      [0, 1, 1, 0]
+    );
+
+  const opacity0 = useMakeOpacity(0, 0.33);
+  const opacity1 = useMakeOpacity(0.33, 0.66);
+  const opacity2 = useMakeOpacity(0.66, 1.0);
+  const opacities = [opacity0, opacity1, opacity2];
+
+  // Drive active dot from scroll position directly
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    if (v < 0.33) setActiveSlide(0);
+    else if (v < 0.66) setActiveSlide(1);
+    else setActiveSlide(2);
+  });
+
+  return (
+    <section ref={containerRef} style={{ height: "300vh", position: "relative" }}>
+      <div style={{
+        position: "sticky", top: 0, height: "100vh",
+        display: "flex", alignItems: "center",
+        overflow: "hidden", background: "#050505",
+      }}>
+        {/* Text slides — left side */}
+        <div style={{ position: "relative", flex: "0 0 50%", paddingLeft: "5vw", height: "100%", display: "flex", alignItems: "center" }}>
+          {SCROLL_SLIDES.map((slide, i) => (
+            <motion.div
+              key={slide.label}
+              style={{
+                opacity: opacities[i],
+                position: "absolute",
+                pointerEvents: "none",
+              }}
+            >
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900,
+                fontSize: "clamp(4rem, 10vw, 9rem)",
+                lineHeight: 0.88,
+                textTransform: "uppercase",
+                letterSpacing: "-0.03em",
+                color: "#fff",
+              }}>
+                <span style={{
+                  display: "block",
+                  fontSize: "0.32em",
+                  color: "#B6FF00",
+                  marginBottom: "0.5rem",
+                  letterSpacing: "0.08em",
+                }}>
+                  {slide.label}
+                </span>
+                {slide.word}
+                <span style={{
+                  display: "block",
+                  fontSize: "0.22em",
+                  color: "#4B5563",
+                  fontWeight: 500,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                  marginTop: "0.8rem",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  {slide.sub}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Phone mockup — right side */}
+        <div style={{
+          flex: "0 0 50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          height: "100%",
+        }}>
+          {/* Glow */}
+          <div style={{
+            position: "absolute",
+            width: 400, height: 400,
+            background: "radial-gradient(circle, rgba(182,255,0,0.07) 0%, transparent 65%)",
+            filter: "blur(40px)",
+            pointerEvents: "none",
+          }} />
+
+          <div style={{
+            width: 280, height: 580,
+            background: "#0a0a0a",
+            borderRadius: 44,
+            border: "1.5px solid rgba(255,255,255,0.09)",
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.03), 0 60px 120px rgba(0,0,0,0.9), 0 0 80px rgba(182,255,0,0.05)",
+            overflow: "hidden",
+            position: "relative",
+          }}>
+            {SCROLL_SLIDES.map((slide, i) => (
+              <motion.div
+                key={slide.img + i}
+                style={{ position: "absolute", inset: 0, opacity: opacities[i] }}
+              >
+                <Image
+                  src={slide.img}
+                  alt={slide.word}
+                  fill
+                  style={{ objectFit: "cover", objectPosition: "top" }}
+                />
+              </motion.div>
+            ))}
+            <div style={{
+              position: "absolute", bottom: 10, left: "50%",
+              transform: "translateX(-50%)", width: 90, height: 4,
+              background: "rgba(255,255,255,0.25)", borderRadius: 4, zIndex: 15,
+            }} />
+          </div>
+        </div>
+
+        {/* Progress dots */}
+        <div style={{
+          position: "absolute", bottom: 40, left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex", gap: 10, zIndex: 20,
+        }}>
+          {SCROLL_SLIDES.map((_, i) => (
+            <div key={i} style={{
+              width: i === activeSlide ? 24 : 6,
+              height: 6, borderRadius: 3,
+              background: i === activeSlide ? "#B6FF00" : "rgba(255,255,255,0.15)",
+              transition: "width 0.4s ease, background 0.4s ease",
+            }} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StickyScrollStoryOld() {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
 
