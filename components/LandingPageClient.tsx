@@ -571,8 +571,8 @@ function HeroSection() {
 
 // ─── 2. HOW IT WORKS (Sticky Scroll) ─────────────────────────────────────────
 const SCROLL_SLIDES = [
-  { label: "01", word: "EXPLORE", sub: "Find sports sessions near you", img: "/images/screen1.jpg", desc: "Browse live local sessions by sport, distance, and time. See who's playing, where, and when." },
-  { label: "02", word: "CONNECT", sub: "Meet your local sports tribe", img: "/images/screen2.jpg", desc: "Chat with players, build your network, and find people who share your playing style and schedule." },
+  { label: "01", word: "EXPLORE", sub: "Find sports sessions near you", img: "/images/explore.jpg", desc: "Browse live local sessions by sport, distance, and time. See who's playing, where, and when." },
+  { label: "02", word: "CONNECT", sub: "Meet your local sports tribe", img: "/images/connect.jpg", desc: "Chat with players, build your network, and find people who share your playing style and schedule." },
   { label: "03", word: "PLAY", sub: "Show up and stay active", img: "/images/screen1.jpg", desc: "Reserve your spot, show up, play sport, and build the active routine you've always wanted." },
 ];
 
