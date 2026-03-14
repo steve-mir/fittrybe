@@ -573,7 +573,7 @@ function HeroSection() {
 const SCROLL_SLIDES = [
   { label: "01", word: "EXPLORE", sub: "Find sports sessions near you", img: "/images/explore.jpg", desc: "Browse live local sessions by sport, distance, and time. See who's playing, where, and when." },
   { label: "02", word: "CONNECT", sub: "Meet your local sports tribe", img: "/images/connect.jpg", desc: "Chat with players, build your network, and find people who share your playing style and schedule." },
-  { label: "03", word: "PLAY", sub: "Show up and stay active", img: "/images/screen1.jpg", desc: "Reserve your spot, show up, play sport, and build the active routine you've always wanted." },
+  { label: "03", word: "PLAY", sub: "Show up and stay active", img: "/images/play.jpg", desc: "Reserve your spot, show up, play sport, and build the active routine you've always wanted." },
 ];
 
 function StickyScrollStory() {
@@ -754,7 +754,7 @@ function BentoGrid() {
           <div>
             <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem" }}>● LIVE COUNT</p>
             <p style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontSize: "clamp(3.5rem, 6vw, 5.5rem)", fontWeight: 900, lineHeight: 1, color: "#fff" }}>
-              <AnimatedCount target={waitlistCount || 240} suffix="+" />
+              <AnimatedCount target={waitlistCount + 100 || 240} suffix="+" />
             </p>
             <p style={{ fontSize: "0.85rem", color: "#4B5563", fontWeight: 500, marginTop: "0.5rem" }}>Players on the waitlist</p>
           </div>
