@@ -106,6 +106,10 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     // Partial Pre-Rendering for hybrid static/dynamic (Next.js 15+)
     // ppr: true,
+    // // Set Turbopack root to fix multiple lockfiles warning
+    // turbopack: {
+    //   root: process.cwd(),
+    // },
   },
 };
 

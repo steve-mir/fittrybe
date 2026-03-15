@@ -1,19 +1,19 @@
 /**
  * ─── Fittrybe — Waitlist Page Client Component ───────────────────────────────
  *
- * SEO/accessibility improvements vs original:
- *  • Proper <label htmlFor> linked to inputs (a11y + SEO signal)
- *  • Font CSS moved from @import → CSS variables
- *  • <main> wrapper with aria-label
- *  • Internal link back to landing page with keyword anchor text
- *  • <h1> is conversion-focused with primary keyword
+ * Changes vs previous version:
+ *  • Sports multi-select checkboxes added (stored as string[])
+ *  • Form submission moved to POST /api/waitlist (handles Firestore + Resend email)
+ *  • Client no longer imports firebase directly for writes (reads count only)
  */
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
+
+/* ─── Icons ─────────────────────────────────────────────────────────────────── */
 
 function IconCheck({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
   return (
@@ -29,6 +29,23 @@ function IconArrowLeft({ size = 16, color = "currentColor" }: { size?: number; c
     </svg>
   );
 }
+
+/* ─── Sports options ─────────────────────────────────────────────────────────── */
+
+const SPORTS = [
+  { id: "football",    label: "Football",    emoji: "⚽" },
+  { id: "basketball",  label: "Basketball",  emoji: "🏀" },
+  { id: "tennis",      label: "Tennis",      emoji: "🎾" },
+  { id: "running",     label: "Running",     emoji: "🏃" },
+  { id: "volleyball",  label: "Volleyball",  emoji: "🏐" },
+  { id: "swimming",    label: "Swimming",    emoji: "🏊" },
+  { id: "cycling",     label: "Cycling",     emoji: "🚴" },
+  { id: "badminton",   label: "Badminton",   emoji: "🏸" },
+  { id: "tabletennis", label: "Table Tennis",emoji: "🏓" },
+  { id: "other",       label: "Other",       emoji: "🏅" },
+];
+
+/* ─── Global styles ──────────────────────────────────────────────────────────── */
 
 const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -51,19 +68,63 @@ const GLOBAL_CSS = `
     -webkit-box-shadow: 0 0 0 1000px #111 inset !important;
     -webkit-text-fill-color: #fff !important;
   }
-  /* Focus-visible ring for keyboard nav */
   :focus-visible { outline: 2px solid #B6FF00; outline-offset: 3px; border-radius: 4px; }
+
+  /* ── Sport checkbox grid ── */
+  .sports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .sport-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    user-select: none;
+  }
+  .sport-option:hover {
+    border-color: rgba(182,255,0,0.3);
+    background: rgba(182,255,0,0.04);
+  }
+  .sport-option.selected {
+    border-color: rgba(182,255,0,0.55);
+    background: rgba(182,255,0,0.07);
+  }
+  .sport-checkbox {
+    width: 16px; height: 16px; flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.18s, background 0.18s;
+  }
+  .sport-option.selected .sport-checkbox {
+    background: #B6FF00;
+    border-color: #B6FF00;
+  }
+  .sport-emoji { font-size: 1rem; line-height: 1; }
+  .sport-label { font-size: 0.82rem; font-weight: 600; color: #d1d5db; }
+  .sport-option.selected .sport-label { color: #fff; }
 `;
 
+/* ─── Component ──────────────────────────────────────────────────────────────── */
+
 export default function WaitlistPageClient() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName]           = useState("");
+  const [email, setEmail]         = useState("");
+  const [sports, setSports]       = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [shake, setShake] = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+  const [shake, setShake]         = useState(false);
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
 
+  /* Fetch count on mount (read-only — no auth needed) */
   useEffect(() => {
     async function fetchCount() {
       try {
@@ -74,26 +135,57 @@ export default function WaitlistPageClient() {
     fetchCount();
   }, []);
 
+  /* Confetti */
   const fireConfetti = async () => {
     const confetti = (await import("canvas-confetti")).default;
     const colors = ["#B6FF00", "#ffffff", "#0D0D0D", "#6aff00"];
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors });
     setTimeout(() => {
-      confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0, y: 0.65 }, colors });
+      confetti({ particleCount: 60, angle: 60,  spread: 55, origin: { x: 0, y: 0.65 }, colors });
       confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.65 }, colors });
     }, 250);
   };
 
+  /* Toggle a sport on/off */
+  const toggleSport = (id: string) => {
+    setSports(prev =>
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
+  };
+
+  /* Submit */
   const handleSubmit = async () => {
     setError(null);
-    if (!name.trim()) { setError("Please enter your name."); triggerShake(); return; }
-    if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address."); triggerShake(); return; }
+
+    if (!name.trim())                          { setError("Please enter your name.");                    triggerShake(); return; }
+    if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address.");        triggerShake(); return; }
+    if (sports.length === 0)                   { setError("Please select at least one sport.");          triggerShake(); return; }
+
     setLoading(true);
     try {
-      const q = query(collection(db, "waitlist"), where("email", "==", email.toLowerCase().trim()));
-      const existing = await getDocs(q);
-      if (!existing.empty) { setError("You're already on the list! 🎉"); setLoading(false); return; }
-      await addDoc(collection(db, "waitlist"), { name: name.trim(), email: email.toLowerCase().trim(), createdAt: serverTimestamp() });
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name:   name.trim(),
+          email:  email.toLowerCase().trim(),
+          sports: sports.map(id => SPORTS.find(s => s.id === id)?.label ?? id),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 409) {
+        setError("You're already on the list! 🎉");
+        setLoading(false);
+        return;
+      }
+      if (!res.ok) {
+        setError(data.error ?? "Something went wrong. Please try again.");
+        setLoading(false);
+        return;
+      }
+
       setSubmitted(true);
       setWaitlistCount(prev => (prev !== null ? prev + 1 : null));
       await fireConfetti();
@@ -107,7 +199,7 @@ export default function WaitlistPageClient() {
 
   const triggerShake = () => { setShake(true); setTimeout(() => setShake(false), 600); };
 
-  const inputStyle = {
+  const inputStyle: React.CSSProperties = {
     width: "100%", background: "#111",
     border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
     padding: "0.85rem 1rem", color: "#fff",
@@ -115,11 +207,14 @@ export default function WaitlistPageClient() {
     transition: "border-color 0.2s",
   };
 
+  /* Derived label string for success screen */
+  const selectedSportLabels = sports.map(id => SPORTS.find(s => s.id === id)?.label ?? id);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
 
-      {/* Background */}
+      {/* Background glows */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, background: "radial-gradient(ellipse at 50% 30%, rgba(182,255,0,0.06) 0%, transparent 65%)", animation: "glowPulse 5s ease-in-out infinite" }} aria-hidden="true" />
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, background: "repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(255,255,255,0.007) 60px, rgba(255,255,255,0.007) 62px)" }} aria-hidden="true" />
 
@@ -141,6 +236,7 @@ export default function WaitlistPageClient() {
         padding: "100px 5vw 60px", position: "relative", zIndex: 1,
       }}>
         <div className="waitlist-card" style={{ width: "100%", maxWidth: 480 }}>
+
           {/* Logo */}
           <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
             <Link href="/" aria-label="Fittrybe — find local sports sessions near you" style={{
@@ -153,6 +249,7 @@ export default function WaitlistPageClient() {
           </div>
 
           {!submitted ? (
+            /* ── FORM ─────────────────────────────────────────────────────────── */
             <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "2.5rem" }}>
               <div style={{ textAlign: "center", marginBottom: "2rem" }}>
                 <div style={{
@@ -165,7 +262,6 @@ export default function WaitlistPageClient() {
                   Launching 2026
                 </div>
 
-                {/* H1: conversion-focused headline */}
                 <h1 style={{
                   fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontWeight: 900,
                   fontSize: "clamp(2rem, 6vw, 3rem)", lineHeight: 1, letterSpacing: "-0.02em",
@@ -183,8 +279,9 @@ export default function WaitlistPageClient() {
                 </p>
               </div>
 
-              {/* Form — proper labels for a11y + SEO */}
               <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+
+                {/* Name */}
                 <div>
                   <label htmlFor="waitlist-name" style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#4B5563", marginBottom: "0.4rem" }}>
                     Full Name
@@ -199,11 +296,12 @@ export default function WaitlistPageClient() {
                     onKeyDown={e => e.key === "Enter" && handleSubmit()}
                     style={inputStyle}
                     onFocus={e => (e.currentTarget.style.borderColor = "rgba(182,255,0,0.4)")}
-                    onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")}
+                    onBlur={e =>  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")}
                     aria-required="true"
                   />
                 </div>
 
+                {/* Email */}
                 <div>
                   <label htmlFor="waitlist-email" style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#4B5563", marginBottom: "0.4rem" }}>
                     Email Address
@@ -218,15 +316,51 @@ export default function WaitlistPageClient() {
                     onKeyDown={e => e.key === "Enter" && handleSubmit()}
                     style={inputStyle}
                     onFocus={e => (e.currentTarget.style.borderColor = "rgba(182,255,0,0.4)")}
-                    onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")}
+                    onBlur={e =>  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")}
                     aria-required="true"
                   />
                 </div>
 
+                {/* Sports */}
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#4B5563", marginBottom: "0.6rem" }}>
+                    Sports You Play
+                    <span style={{ color: "#374151", fontWeight: 400, textTransform: "none", letterSpacing: 0, marginLeft: "0.4rem", fontSize: "0.72rem" }}>
+                      (select all that apply)
+                    </span>
+                  </label>
+                  <div className="sports-grid" role="group" aria-label="Sports selection">
+                    {SPORTS.map(sport => {
+                      const isSelected = sports.includes(sport.id);
+                      return (
+                        <div
+                          key={sport.id}
+                          className={`sport-option${isSelected ? " selected" : ""}`}
+                          onClick={() => toggleSport(sport.id)}
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          tabIndex={0}
+                          onKeyDown={e => (e.key === " " || e.key === "Enter") && toggleSport(sport.id)}
+                        >
+                          <div className="sport-checkbox">
+                            {isSelected && <IconCheck size={10} color="#0D0D0D" />}
+                          </div>
+                          <span className="sport-emoji" aria-hidden="true">{sport.emoji}</span>
+                          <span className="sport-label">{sport.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Error */}
                 {error && (
-                  <p role="alert" style={{ fontSize: "0.82rem", color: "#ff6b6b", textAlign: "center", padding: "0.5rem 0" }}>{error}</p>
+                  <p role="alert" style={{ fontSize: "0.82rem", color: "#ff6b6b", textAlign: "center", padding: "0.5rem 0" }}>
+                    {error}
+                  </p>
                 )}
 
+                {/* Submit */}
                 <button
                   className={shake ? "shake" : ""}
                   onClick={handleSubmit}
@@ -252,7 +386,9 @@ export default function WaitlistPageClient() {
                 Free to join. No spam. Unsubscribe anytime.
               </p>
             </div>
+
           ) : (
+            /* ── SUCCESS ──────────────────────────────────────────────────────── */
             <div style={{ background: "#0a0a0a", border: "1px solid rgba(182,255,0,0.2)", borderRadius: 16, padding: "3rem 2.5rem", textAlign: "center" }}>
               <div className="check-icon" style={{ width: 72, height: 72, background: "rgba(182,255,0,0.1)", border: "2px solid rgba(182,255,0,0.3)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
                 <IconCheck size={32} color="#B6FF00" />
@@ -263,15 +399,34 @@ export default function WaitlistPageClient() {
               <p style={{ color: "#6B7280", fontSize: "0.95rem", lineHeight: 1.7, marginBottom: "0.5rem" }}>
                 Welcome to Fittrybe, <strong style={{ color: "#d1d5db" }}>{name}</strong>. 🎉
               </p>
-              <p style={{ color: "#4B5563", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "2rem" }}>
+              <p style={{ color: "#4B5563", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "1.25rem" }}>
                 We&apos;ll send early access details to <strong style={{ color: "#9CA3AF" }}>{email}</strong> when we launch local sports sessions in your city.
               </p>
+
+              {/* Selected sports recap */}
+              {selectedSportLabels.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center", marginBottom: "1.5rem" }}>
+                  {selectedSportLabels.map(label => (
+                    <span key={label} style={{ background: "rgba(182,255,0,0.07)", border: "1px solid rgba(182,255,0,0.18)", borderRadius: 100, padding: "0.3rem 0.75rem", fontSize: "0.78rem", fontWeight: 600, color: "#B6FF00" }}>
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Confirmation email note */}
+              <p style={{ color: "#374151", fontSize: "0.8rem", marginBottom: "1.75rem" }}>
+                📬 A confirmation email is on its way to your inbox.
+              </p>
+
               {waitlistCount !== null && (
                 <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(182,255,0,0.05)", border: "1px solid rgba(182,255,0,0.12)", borderRadius: 100, padding: "0.5rem 1rem", fontSize: "0.82rem", color: "#B6FF00", fontWeight: 600, marginBottom: "2rem" }}>
                   <span style={{ width: 6, height: 6, background: "#B6FF00", borderRadius: "50%", animation: "blink 1.5s infinite" }} aria-hidden="true" />
                   #{waitlistCount.toLocaleString()} on the waitlist
                 </div>
               )}
+
+              <br />
               <Link href="/" aria-label="Back to Fittrybe homepage — discover local sports sessions near you" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "#4B5563", textDecoration: "none", fontSize: "0.85rem", fontWeight: 600, transition: "color 0.2s" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "#9CA3AF")}
                 onMouseLeave={e => (e.currentTarget.style.color = "#4B5563")}
