@@ -273,7 +273,7 @@ export default function WaitlistPageClient() {
                   Be the first to discover real sports sessions near you when we launch in your city.{" "}
                   {waitlistCount !== null && (
                     <strong style={{ color: "#B6FF00" }}>
-                      {waitlistCount.toLocaleString()}+ already signed up.
+                      {(waitlistCount+100).toLocaleString()}+ already signed up.
                     </strong>
                   )}
                 </p>
@@ -422,7 +422,7 @@ export default function WaitlistPageClient() {
               {waitlistCount !== null && (
                 <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(182,255,0,0.05)", border: "1px solid rgba(182,255,0,0.12)", borderRadius: 100, padding: "0.5rem 1rem", fontSize: "0.82rem", color: "#B6FF00", fontWeight: 600, marginBottom: "2rem" }}>
                   <span style={{ width: 6, height: 6, background: "#B6FF00", borderRadius: "50%", animation: "blink 1.5s infinite" }} aria-hidden="true" />
-                  #{waitlistCount.toLocaleString()} on the waitlist
+                  #{(waitlistCount+100).toLocaleString()} on the waitlist
                 </div>
               )}
 
