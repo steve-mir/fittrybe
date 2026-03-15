@@ -2,9 +2,10 @@
  * ─── Fittrybe — Waitlist Page Client Component ───────────────────────────────
  *
  * Changes vs previous version:
- *  • Sports multi-select checkboxes added (stored as string[])
- *  • Form submission moved to POST /api/waitlist (handles Firestore + Resend email)
- *  • Client no longer imports firebase directly for writes (reads count only)
+ *  • Location text input added (after email)
+ *  • "I want to organise games" toggle card added (after sports grid)
+ *  • Both fields sent in POST /api/waitlist payload
+ *  • Success screen shows location + organiser status
  */
 "use client";
 
@@ -26,6 +27,24 @@ function IconArrowLeft({ size = 16, color = "currentColor" }: { size?: number; c
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M19 12H5M12 5l-7 7 7 7" />
+    </svg>
+  );
+}
+function IconMapPin({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+      <circle cx="12" cy="9" r="2.5" />
+    </svg>
+  );
+}
+function IconWhistle({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9" cy="12" r="5" />
+      <path d="M14 12h7" />
+      <path d="M18 9l3-3" />
+      <path d="M6 8l2-3" />
     </svg>
   );
 }
@@ -61,6 +80,7 @@ const GLOBAL_CSS = `
   @keyframes glowPulse { 0%,100%{opacity:.5} 50%{opacity:.9} }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
   @keyframes checkPop { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  @keyframes organiserGlow { 0%,100%{box-shadow:0 0 0 0 rgba(182,255,0,0)} 50%{box-shadow:0 0 16px 2px rgba(182,255,0,0.12)} }
   .waitlist-card { animation: fadeUp 0.6s ease forwards; }
   .shake { animation: shake 0.5s ease; }
   .check-icon { animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -110,21 +130,114 @@ const GLOBAL_CSS = `
   .sport-emoji { font-size: 1rem; line-height: 1; }
   .sport-label { font-size: 0.82rem; font-weight: 600; color: #d1d5db; }
   .sport-option.selected .sport-label { color: #fff; }
+
+  /* ── Location input wrapper ── */
+  .location-wrapper {
+    position: relative;
+  }
+  .location-wrapper .pin-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #4B5563;
+    transition: color 0.2s;
+  }
+  .location-wrapper:focus-within .pin-icon {
+    color: #B6FF00;
+  }
+  .location-input {
+    padding-left: 2.5rem !important;
+  }
+
+  /* ── Organiser toggle card ── */
+  .organiser-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1rem;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+  }
+  .organiser-card:hover {
+    border-color: rgba(182,255,0,0.25);
+    background: rgba(182,255,0,0.03);
+  }
+  .organiser-card.active {
+    border-color: rgba(182,255,0,0.5);
+    background: rgba(182,255,0,0.06);
+    animation: organiserGlow 2s ease-in-out infinite;
+  }
+  .organiser-icon-wrap {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .organiser-card.active .organiser-icon-wrap {
+    background: rgba(182,255,0,0.12);
+    border-color: rgba(182,255,0,0.3);
+  }
+  .organiser-text { flex: 1; }
+  .organiser-title {
+    font-size: 0.88rem; font-weight: 700; color: #d1d5db;
+    line-height: 1.2; margin-bottom: 0.18rem;
+  }
+  .organiser-card.active .organiser-title { color: #fff; }
+  .organiser-sub {
+    font-size: 0.74rem; color: #4B5563; line-height: 1.4;
+  }
+  .organiser-card.active .organiser-sub { color: #6B7280; }
+  /* pill toggle */
+  .toggle-pill {
+    width: 36px; height: 20px; flex-shrink: 0;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .organiser-card.active .toggle-pill {
+    background: #B6FF00;
+    border-color: #B6FF00;
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0.3;
+  }
+  .organiser-card.active .toggle-thumb {
+    transform: translateX(16px);
+    opacity: 1;
+  }
 `;
 
 /* ─── Component ──────────────────────────────────────────────────────────────── */
 
 export default function WaitlistPageClient() {
-  const [name, setName]           = useState("");
-  const [email, setEmail]         = useState("");
-  const [sports, setSports]       = useState<string[]>([]);
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState<string | null>(null);
-  const [shake, setShake]         = useState(false);
+  const [name, setName]                 = useState("");
+  const [email, setEmail]               = useState("");
+  const [location, setLocation]         = useState("");
+  const [sports, setSports]             = useState<string[]>([]);
+  const [wantsToOrganise, setWantsToOrganise] = useState(false);
+  const [submitted, setSubmitted]       = useState(false);
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState<string | null>(null);
+  const [shake, setShake]               = useState(false);
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
 
-  /* Fetch count on mount (read-only — no auth needed) */
+  /* Fetch count on mount */
   useEffect(() => {
     async function fetchCount() {
       try {
@@ -157,9 +270,10 @@ export default function WaitlistPageClient() {
   const handleSubmit = async () => {
     setError(null);
 
-    if (!name.trim())                          { setError("Please enter your name.");                    triggerShake(); return; }
-    if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address.");        triggerShake(); return; }
-    if (sports.length === 0)                   { setError("Please select at least one sport.");          triggerShake(); return; }
+    if (!name.trim())                          { setError("Please enter your name.");               triggerShake(); return; }
+    if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address.");   triggerShake(); return; }
+    if (!location.trim())                      { setError("Please enter your city or location.");   triggerShake(); return; }
+    if (sports.length === 0)                   { setError("Please select at least one sport.");     triggerShake(); return; }
 
     setLoading(true);
     try {
@@ -167,9 +281,11 @@ export default function WaitlistPageClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name:   name.trim(),
-          email:  email.toLowerCase().trim(),
-          sports: sports.map(id => SPORTS.find(s => s.id === id)?.label ?? id),
+          name:           name.trim(),
+          email:          email.toLowerCase().trim(),
+          location:       location.trim(),
+          sports:         sports.map(id => SPORTS.find(s => s.id === id)?.label ?? id),
+          wantsToOrganise,
         }),
       });
 
@@ -207,7 +323,6 @@ export default function WaitlistPageClient() {
     transition: "border-color 0.2s",
   };
 
-  /* Derived label string for success screen */
   const selectedSportLabels = sports.map(id => SPORTS.find(s => s.id === id)?.label ?? id);
 
   return (
@@ -273,7 +388,7 @@ export default function WaitlistPageClient() {
                   Be the first to discover real sports sessions near you when we launch in your city.{" "}
                   {waitlistCount !== null && (
                     <strong style={{ color: "#B6FF00" }}>
-                      {(waitlistCount+100).toLocaleString()}+ already signed up.
+                      {(waitlistCount + 100).toLocaleString()}+ already signed up.
                     </strong>
                   )}
                 </p>
@@ -321,6 +436,32 @@ export default function WaitlistPageClient() {
                   />
                 </div>
 
+                {/* ── Location (NEW) ── */}
+                <div>
+                  <label htmlFor="waitlist-location" style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#4B5563", marginBottom: "0.4rem" }}>
+                    Your City / Location
+                  </label>
+                  <div className="location-wrapper">
+                    <span className="pin-icon">
+                      <IconMapPin size={15} />
+                    </span>
+                    <input
+                      id="waitlist-location"
+                      type="text"
+                      placeholder="e.g. Birmingham, Liverpool, London…"
+                      value={location}
+                      autoComplete="address-level2"
+                      onChange={e => setLocation(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && handleSubmit()}
+                      className="location-input"
+                      style={inputStyle}
+                      onFocus={e => (e.currentTarget.style.borderColor = "rgba(182,255,0,0.4)")}
+                      onBlur={e =>  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")}
+                      aria-required="true"
+                    />
+                  </div>
+                </div>
+
                 {/* Sports */}
                 <div>
                   <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#4B5563", marginBottom: "0.6rem" }}>
@@ -350,6 +491,37 @@ export default function WaitlistPageClient() {
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+
+                {/* ── Organiser toggle (NEW) ── */}
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#4B5563", marginBottom: "0.6rem" }}>
+                    Your Role
+                  </label>
+                  <div
+                    className={`organiser-card${wantsToOrganise ? " active" : ""}`}
+                    onClick={() => setWantsToOrganise(prev => !prev)}
+                    role="switch"
+                    aria-checked={wantsToOrganise}
+                    tabIndex={0}
+                    onKeyDown={e => (e.key === " " || e.key === "Enter") && setWantsToOrganise(prev => !prev)}
+                    aria-label="I want to organise games"
+                  >
+                    <div className="organiser-icon-wrap">
+                      <IconWhistle size={18} color={wantsToOrganise ? "#B6FF00" : "#6B7280"} />
+                    </div>
+                    <div className="organiser-text">
+                      <div className="organiser-title">I want to organise games</div>
+                      <div className="organiser-sub">
+                        {wantsToOrganise
+                          ? "Great — we'll reach out with early organiser perks 🎉"
+                          : "Toggle on if you'd like to host sessions in your area"}
+                      </div>
+                    </div>
+                    <div className="toggle-pill" aria-hidden="true">
+                      <div className="toggle-thumb" />
+                    </div>
                   </div>
                 </div>
 
@@ -399,13 +571,35 @@ export default function WaitlistPageClient() {
               <p style={{ color: "#6B7280", fontSize: "0.95rem", lineHeight: 1.7, marginBottom: "0.5rem" }}>
                 Welcome to Fittrybe, <strong style={{ color: "#d1d5db" }}>{name}</strong>. 🎉
               </p>
-              <p style={{ color: "#4B5563", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "1.25rem" }}>
+              <p style={{ color: "#4B5563", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "0.75rem" }}>
                 We&apos;ll send early access details to <strong style={{ color: "#9CA3AF" }}>{email}</strong> when we launch local sports sessions in your city.
               </p>
 
-              {/* Selected sports recap */}
+              {/* Location recap */}
+              {location && (
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "#6B7280", fontSize: "0.82rem", marginBottom: "1rem" }}>
+                  <IconMapPin size={13} color="#4B5563" />
+                  <span>{location}</span>
+                </div>
+              )}
+
+              {/* Organiser badge */}
+              {wantsToOrganise && (
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                  background: "rgba(182,255,0,0.08)", border: "1px solid rgba(182,255,0,0.25)",
+                  borderRadius: 8, padding: "0.5rem 0.9rem", fontSize: "0.8rem",
+                  color: "#B6FF00", fontWeight: 700, marginBottom: "1rem",
+                  marginLeft: location ? "0.75rem" : 0,
+                }}>
+                  <IconWhistle size={14} color="#B6FF00" />
+                  Organiser — we&apos;ll be in touch
+                </div>
+              )}
+
+              {/* Sports recap */}
               {selectedSportLabels.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center", marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center", marginBottom: "1.5rem", marginTop: "0.5rem" }}>
                   {selectedSportLabels.map(label => (
                     <span key={label} style={{ background: "rgba(182,255,0,0.07)", border: "1px solid rgba(182,255,0,0.18)", borderRadius: 100, padding: "0.3rem 0.75rem", fontSize: "0.78rem", fontWeight: 600, color: "#B6FF00" }}>
                       {label}
@@ -414,7 +608,6 @@ export default function WaitlistPageClient() {
                 </div>
               )}
 
-              {/* Confirmation email note */}
               <p style={{ color: "#374151", fontSize: "0.8rem", marginBottom: "1.75rem" }}>
                 📬 A confirmation email is on its way to your inbox.
               </p>
@@ -422,7 +615,7 @@ export default function WaitlistPageClient() {
               {waitlistCount !== null && (
                 <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(182,255,0,0.05)", border: "1px solid rgba(182,255,0,0.12)", borderRadius: 100, padding: "0.5rem 1rem", fontSize: "0.82rem", color: "#B6FF00", fontWeight: 600, marginBottom: "2rem" }}>
                   <span style={{ width: 6, height: 6, background: "#B6FF00", borderRadius: "50%", animation: "blink 1.5s infinite" }} aria-hidden="true" />
-                  #{(waitlistCount+100).toLocaleString()} on the waitlist
+                  #{(waitlistCount + 100).toLocaleString()} on the waitlist
                 </div>
               )}
 
