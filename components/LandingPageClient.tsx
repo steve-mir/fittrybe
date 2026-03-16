@@ -524,6 +524,9 @@ function HeroSection() {
               background: "#080808",
               overflow: "hidden",
               position: "relative",
+              // ✅ Add these two Safari fixes:
+              WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+              transform: "translateZ(0)",
             }}>
               {/* Dynamic Island */}
               {/* <div style={{
@@ -652,6 +655,9 @@ function StickyScrollStory() {
                 width: "100%", height: "100%",
                 background: "#0d0d0d", borderRadius: 46, overflow: "hidden", position: "relative",
                 boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
+                // ✅ Add these two Safari fixes:
+                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+                transform: "translateZ(0)",
               }}>
                 {/* Dynamic Island */}
                 {/* <div className="sticky-di" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 96, height: 28, background: "#000", borderRadius: 18, zIndex: 20, boxShadow: "0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
