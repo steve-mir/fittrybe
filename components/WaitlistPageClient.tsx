@@ -10,6 +10,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
@@ -226,12 +227,12 @@ const GLOBAL_CSS = `
 /* ─── Component ──────────────────────────────────────────────────────────────── */
 
 export default function WaitlistPageClient() {
+  const router = useRouter();
   const [name, setName]                 = useState("");
   const [email, setEmail]               = useState("");
   const [location, setLocation]         = useState("");
   const [sports, setSports]             = useState<string[]>([]);
   const [wantsToOrganise, setWantsToOrganise] = useState(false);
-  const [submitted, setSubmitted]       = useState(false);
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState<string | null>(null);
   const [shake, setShake]               = useState(false);
@@ -247,17 +248,6 @@ export default function WaitlistPageClient() {
     }
     fetchCount();
   }, []);
-
-  /* Confetti */
-  const fireConfetti = async () => {
-    const confetti = (await import("canvas-confetti")).default;
-    const colors = ["#B6FF00", "#ffffff", "#0D0D0D", "#6aff00"];
-    confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors });
-    setTimeout(() => {
-      confetti({ particleCount: 60, angle: 60,  spread: 55, origin: { x: 0, y: 0.65 }, colors });
-      confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.65 }, colors });
-    }, 250);
-  };
 
   /* Toggle a sport on/off */
   const toggleSport = (id: string) => {
@@ -302,9 +292,17 @@ export default function WaitlistPageClient() {
         return;
       }
 
-      setSubmitted(true);
-      setWaitlistCount(prev => (prev !== null ? prev + 1 : null));
-      await fireConfetti();
+      const newCount = waitlistCount !== null ? waitlistCount + 1 : null;
+      const sportLabels = sports.map(id => SPORTS.find(s => s.id === id)?.label ?? id);
+      const qs = new URLSearchParams({
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+        location: location.trim(),
+        sports: sportLabels.join(","),
+        organiser: wantsToOrganise ? "1" : "0",
+        ...(newCount !== null ? { count: String(newCount) } : {}),
+      });
+      router.push(`/waitlist/success?${qs.toString()}`);
     } catch (err) {
       setError("Something went wrong. Please try again.");
       console.error(err);
@@ -322,8 +320,6 @@ export default function WaitlistPageClient() {
     fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)", fontSize: "0.95rem", outline: "none",
     transition: "border-color 0.2s",
   };
-
-  const selectedSportLabels = sports.map(id => SPORTS.find(s => s.id === id)?.label ?? id);
 
   return (
     <>
@@ -363,9 +359,7 @@ export default function WaitlistPageClient() {
             </Link>
           </div>
 
-          {!submitted ? (
-            /* ── FORM ─────────────────────────────────────────────────────────── */
-            <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "2.5rem" }}>
+          <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "2.5rem" }}>
               <div style={{ textAlign: "center", marginBottom: "2rem" }}>
                 <div style={{
                   display: "inline-flex", alignItems: "center", gap: "0.5rem",
@@ -558,76 +552,6 @@ export default function WaitlistPageClient() {
                 Free to join. No spam. Unsubscribe anytime.
               </p>
             </div>
-
-          ) : (
-            /* ── SUCCESS ──────────────────────────────────────────────────────── */
-            <div style={{ background: "#0a0a0a", border: "1px solid rgba(182,255,0,0.2)", borderRadius: 16, padding: "3rem 2.5rem", textAlign: "center" }}>
-              <div className="check-icon" style={{ width: 72, height: 72, background: "rgba(182,255,0,0.1)", border: "2px solid rgba(182,255,0,0.3)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
-                <IconCheck size={32} color="#B6FF00" />
-              </div>
-              <h1 style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontWeight: 900, fontSize: "clamp(1.8rem, 5vw, 2.5rem)", textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "0.75rem" }}>
-                You&apos;re <span style={{ color: "#B6FF00" }}>In!</span>
-              </h1>
-              <p style={{ color: "#6B7280", fontSize: "0.95rem", lineHeight: 1.7, marginBottom: "0.5rem" }}>
-                Welcome to Fittrybe, <strong style={{ color: "#d1d5db" }}>{name}</strong>. 🎉
-              </p>
-              <p style={{ color: "#4B5563", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "0.75rem" }}>
-                We&apos;ll send early access details to <strong style={{ color: "#9CA3AF" }}>{email}</strong> when we launch local sports sessions in your city.
-              </p>
-
-              {/* Location recap */}
-              {location && (
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "#6B7280", fontSize: "0.82rem", marginBottom: "1rem" }}>
-                  <IconMapPin size={13} color="#4B5563" />
-                  <span>{location}</span>
-                </div>
-              )}
-
-              {/* Organiser badge */}
-              {wantsToOrganise && (
-                <div style={{
-                  display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                  background: "rgba(182,255,0,0.08)", border: "1px solid rgba(182,255,0,0.25)",
-                  borderRadius: 8, padding: "0.5rem 0.9rem", fontSize: "0.8rem",
-                  color: "#B6FF00", fontWeight: 700, marginBottom: "1rem",
-                  marginLeft: location ? "0.75rem" : 0,
-                }}>
-                  <IconWhistle size={14} color="#B6FF00" />
-                  Organiser — we&apos;ll be in touch
-                </div>
-              )}
-
-              {/* Sports recap */}
-              {selectedSportLabels.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center", marginBottom: "1.5rem", marginTop: "0.5rem" }}>
-                  {selectedSportLabels.map(label => (
-                    <span key={label} style={{ background: "rgba(182,255,0,0.07)", border: "1px solid rgba(182,255,0,0.18)", borderRadius: 100, padding: "0.3rem 0.75rem", fontSize: "0.78rem", fontWeight: 600, color: "#B6FF00" }}>
-                      {label}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <p style={{ color: "#374151", fontSize: "0.8rem", marginBottom: "1.75rem" }}>
-                📬 A confirmation email is on its way to your inbox.
-              </p>
-
-              {waitlistCount !== null && (
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(182,255,0,0.05)", border: "1px solid rgba(182,255,0,0.12)", borderRadius: 100, padding: "0.5rem 1rem", fontSize: "0.82rem", color: "#B6FF00", fontWeight: 600, marginBottom: "2rem" }}>
-                  <span style={{ width: 6, height: 6, background: "#B6FF00", borderRadius: "50%", animation: "blink 1.5s infinite" }} aria-hidden="true" />
-                  #{(waitlistCount + 100).toLocaleString()} on the waitlist
-                </div>
-              )}
-
-              <br />
-              <Link href="/" aria-label="Back to Fittrybe homepage — discover local sports sessions near you" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "#4B5563", textDecoration: "none", fontSize: "0.85rem", fontWeight: 600, transition: "color 0.2s" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#9CA3AF")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#4B5563")}
-              >
-                <IconArrowLeft size={14} /> Explore the Fittrybe App
-              </Link>
-            </div>
-          )}
         </div>
       </main>
     </>

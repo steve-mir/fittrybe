@@ -109,6 +109,7 @@ export const seoConfig = {
   // ─── Analytics ──────────────────────────────────────────────────────────────
   analytics: {
     ga4MeasurementId: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID ?? "",
+    metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "",
   },
 
   // ─── Robots Defaults ────────────────────────────────────────────────────────
