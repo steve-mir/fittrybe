@@ -27,20 +27,26 @@ function getResendClient() {
 
 async function sendConfirmationEmail(name: string, to: string, sports: string[]) {
   const resend = getResendClient();
-  if (!resend) return;
+  if (!resend) {
+    console.warn("[Resend] Skipping — no API key");
+    return;
+  }
 
-  try {
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL ?? "Fittrybe <hello@fittrybe.com>",
-      to,
-      subject: `You're on the Fittrybe waitlist, ${name.split(" ")[0]}! 🎉`,
-      html: buildEmailHtml(name, sports),
-    });
-  } catch (err) {
-    console.error("[Resend] Failed to send confirmation email:", err);
+  console.log("[Resend] Sending confirmation to:", to);
+
+  const { data, error } = await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL ?? "Fittrybe <onboarding@resend.dev>", // safe fallback
+    to,
+    subject: `You're on the Fittrybe waitlist, ${name.split(" ")[0]}! 🎉`,
+    html: buildEmailHtml(name, sports),
+  });
+
+  if (error) {
+    console.error("[Resend] Error:", error);
+  } else {
+    console.log("[Resend] Sent successfully:", data?.id);
   }
 }
-
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 
 function isValidEmail(email: string) {
@@ -199,8 +205,8 @@ export async function POST(req: NextRequest) {
       createdAt: serverTimestamp(),
     });
 
-    // ── Send confirmation email (fire-and-forget) ─────────────────────────────
-    void sendConfirmationEmail(cleanName, cleanEmail, sports);
+    // ── Send confirmation email ───────────────────────────────────────────────
+    await sendConfirmationEmail(cleanName, cleanEmail, sports);
 
     return NextResponse.json({ success: true, id: docRef.id }, { status: 201 });
   } catch (err) {
