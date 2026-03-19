@@ -25,7 +25,7 @@ function getResendClient() {
   return new Resend(apiKey);
 }
 
-async function sendConfirmationEmail(name: string, to: string, sports: string[]) {
+async function sendConfirmationEmail(name: string, to: string) {
   const resend = getResendClient();
   if (!resend) {
     console.warn("[Resend] Skipping — no API key");
@@ -35,10 +35,10 @@ async function sendConfirmationEmail(name: string, to: string, sports: string[])
   console.log("[Resend] Sending confirmation to:", to);
 
   const { data, error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "Fittrybe <onboarding@resend.dev>", // safe fallback
+    from: process.env.RESEND_FROM_EMAIL ?? "Fittrybe <onboarding@resend.dev>",
     to,
     subject: `You're on the Fittrybe waitlist, ${name.split(" ")[0]}! 🎉`,
-    html: buildEmailHtml(name, sports),
+    html: buildEmailHtml(name),
   });
 
   if (error) {
@@ -53,10 +53,7 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function buildEmailHtml(name: string, sports: string[]): string {
-  const sportsList = sports.length
-    ? sports.map(s => `<li style="margin:4px 0;">${s}</li>`).join("")
-    : "<li>All sports</li>";
+function buildEmailHtml(name: string): string {
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -92,24 +89,6 @@ function buildEmailHtml(name: string, sports: string[]): string {
               <p style="margin:0;font-size:15px;color:#6B7280;line-height:1.7;">
                 Welcome to the Fittrybe waitlist. We'll notify you<br/>the moment we launch local sports sessions in your city.
               </p>
-            </td>
-          </tr>
-
-          <!-- Sports card -->
-          <tr>
-            <td style="padding:32px 40px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(182,255,0,0.04);border:1px solid rgba(182,255,0,0.12);border-radius:12px;">
-                <tr>
-                  <td style="padding:20px 24px;">
-                    <p style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#B6FF00;">
-                      Your Sports
-                    </p>
-                    <ul style="margin:0;padding:0 0 0 18px;font-size:14px;color:#d1d5db;line-height:1.8;">
-                      ${sportsList}
-                    </ul>
-                  </td>
-                </tr>
-              </table>
             </td>
           </tr>
 
@@ -170,11 +149,7 @@ function buildEmailHtml(name: string, sports: string[]): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, sports } = body as {
-      name?: string;
-      email?: string;
-      sports?: string[];
-    };
+    const { name, email } = body as { name?: string; email?: string };
 
     // ── Validate ──────────────────────────────────────────────────────────────
     if (!name?.trim()) {
@@ -182,9 +157,6 @@ export async function POST(req: NextRequest) {
     }
     if (!email?.trim() || !isValidEmail(email)) {
       return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
-    }
-    if (!sports || sports.length === 0) {
-      return NextResponse.json({ error: "Please select at least one sport." }, { status: 400 });
     }
 
     const cleanEmail = email.toLowerCase().trim();
@@ -201,12 +173,11 @@ export async function POST(req: NextRequest) {
     const docRef = await addDoc(collection(db, "waitlist"), {
       name: cleanName,
       email: cleanEmail,
-      sports,
       createdAt: serverTimestamp(),
     });
 
     // ── Send confirmation email ───────────────────────────────────────────────
-    await sendConfirmationEmail(cleanName, cleanEmail, sports);
+    await sendConfirmationEmail(cleanName, cleanEmail);
 
     return NextResponse.json({ success: true, id: docRef.id }, { status: 201 });
   } catch (err) {

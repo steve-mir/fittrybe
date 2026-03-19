@@ -24,24 +24,6 @@ function IconArrowLeft({ size = 16, color = "currentColor" }: { size?: number; c
     </svg>
   );
 }
-function IconMapPin({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-      <circle cx="12" cy="9" r="2.5" />
-    </svg>
-  );
-}
-function IconWhistle({ size = 18, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="9" cy="12" r="5" />
-      <path d="M14 12h7" />
-      <path d="M18 9l3-3" />
-      <path d="M6 8l2-3" />
-    </svg>
-  );
-}
 
 const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,24 +38,14 @@ const GLOBAL_CSS = `
 
 export default function WaitlistSuccessClient() {
   const params = useSearchParams();
-
-  const name       = params.get("name") ?? "";
-  const email      = params.get("email") ?? "";
-  const location   = params.get("location") ?? "";
-  const sports     = params.get("sports") ? params.get("sports")!.split(",") : [];
-  const organiser  = params.get("organiser") === "1";
-  const count      = params.get("count") ? Number(params.get("count")) : null;
+  const name  = params.get("name") ?? "";
+  const email = params.get("email") ?? "";
+  const count = params.get("count") ? Number(params.get("count")) : null;
 
   useEffect(() => {
-    // Meta Pixel — CompleteRegistration
     if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", "CompleteRegistration", {
-        content_name: "Waitlist Signup",
-        status: true,
-      });
+      window.fbq("track", "CompleteRegistration", { content_name: "Waitlist Signup", status: true });
     }
-
-    // Confetti
     (async () => {
       const confetti = (await import("canvas-confetti")).default;
       const colors = ["#B6FF00", "#ffffff", "#0D0D0D", "#6aff00"];
@@ -94,7 +66,6 @@ export default function WaitlistSuccessClient() {
       <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 5vw", position: "relative", zIndex: 1 }}>
         <div className="success-card" style={{ width: "100%", maxWidth: 480 }}>
 
-          {/* Logo */}
           <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
             <Link href="/" style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontWeight: 900, fontSize: "1.8rem", letterSpacing: "-0.02em", textDecoration: "none" }}>
               <span style={{ color: "#fff" }}>fit</span>
@@ -117,36 +88,9 @@ export default function WaitlistSuccessClient() {
             </p>
 
             {email && (
-              <p style={{ color: "#4B5563", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "0.75rem" }}>
+              <p style={{ color: "#4B5563", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
                 We&apos;ll send early access details to <strong style={{ color: "#9CA3AF" }}>{email}</strong> when we launch local sports sessions in your city.
               </p>
-            )}
-
-            {/* Location + organiser badges */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center", marginBottom: "1rem" }}>
-              {location && (
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "#6B7280", fontSize: "0.82rem" }}>
-                  <IconMapPin size={13} color="#4B5563" />
-                  <span>{location}</span>
-                </div>
-              )}
-              {organiser && (
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(182,255,0,0.08)", border: "1px solid rgba(182,255,0,0.25)", borderRadius: 8, padding: "0.5rem 0.9rem", fontSize: "0.8rem", color: "#B6FF00", fontWeight: 700 }}>
-                  <IconWhistle size={14} color="#B6FF00" />
-                  Organiser — we&apos;ll be in touch
-                </div>
-              )}
-            </div>
-
-            {/* Sports tags */}
-            {sports.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center", marginBottom: "1.5rem" }}>
-                {sports.map(label => (
-                  <span key={label} style={{ background: "rgba(182,255,0,0.07)", border: "1px solid rgba(182,255,0,0.18)", borderRadius: 100, padding: "0.3rem 0.75rem", fontSize: "0.78rem", fontWeight: 600, color: "#B6FF00" }}>
-                    {label}
-                  </span>
-                ))}
-              </div>
             )}
 
             <p style={{ color: "#374151", fontSize: "0.8rem", marginBottom: "1.75rem" }}>
