@@ -1,71 +1,28 @@
 /**
- * ─── Fittrybe — Blog Post Page (Programmatic SEO Foundation) ─────────────────
- *
- * Architecture for future programmatic SEO pages.
- * When you create blog content, this page auto-generates:
- *  • Unique title + meta description per post
- *  • Canonical URL per post
- *  • Article JSON-LD schema
- *  • Dynamic OG image per post
- *  • Sitemap entry (via sitemap.ts)
- *
- * To activate:
- *  1. Create a data source (CMS, markdown files, database)
- *  2. Implement getBlogPost() and getAllBlogSlugs() below
- *  3. Update /app/sitemap.ts to include blog slugs
- *  4. Remove the notFound() call
+ * ─── Fittrybe — Blog Post Page ────────────────────────────────────────────────
+ * Wired to Firestore via lib/posts.ts.
+ * generateStaticParams pre-renders all published posts at build time.
  */
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { getBlogPost, getAllBlogSlugs } from "@/lib/posts";
 import { seoConfig, buildOGImageUrl, buildCanonicalUrl } from "@/lib/seo-config";
-import { buildWebPageSchema, buildGraphSchema, buildBreadcrumbSchema } from "@/lib/structured-data";
+import {
+  buildWebPageSchema,
+  buildGraphSchema,
+  buildBreadcrumbSchema,
+} from "@/lib/structured-data";
+import BlogPostContent from "@/components/BlogPostContent";
 
-// ─── Type definitions ─────────────────────────────────────────────────────────
-interface BlogPost {
-  slug: string;
-  title: string;
-  description: string;
-  content: string;
-  publishedAt: string;
-  updatedAt?: string;
-  author?: { name: string; url?: string };
-  tags?: string[];
-  image?: string;
-}
+export const revalidate = 60;
 
-// ─── Data fetching stubs ──────────────────────────────────────────────────────
-// Replace these with your actual data source when ready.
-
-async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  // TODO: fetch from your CMS / filesystem / database
-  // Example with markdown files:
-  //   const fs = require('fs');
-  //   const matter = require('gray-matter');
-  //   const file = fs.readFileSync(`content/blog/${slug}.md`, 'utf8');
-  //   const { data, content } = matter(file);
-  //   return { slug, content, ...data };
-  //
-  // Example with Contentful:
-  //   const entry = await contentful.getEntries({ 'fields.slug': slug, content_type: 'blogPost' });
-  //   return entry.items[0] ? mapEntry(entry.items[0]) : null;
-
-  void slug; // suppress unused warning
-  return null; // remove this when implementing
-}
-
-async function getAllBlogSlugs(): Promise<string[]> {
-  // TODO: return all slugs for static generation
-  return [];
-}
-
-// ─── Static params (tells Next.js which slugs to pre-render) ─────────────────
 export async function generateStaticParams() {
   const slugs = await getAllBlogSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
-// ─── Dynamic metadata per post ────────────────────────────────────────────────
 export async function generateMetadata({
   params,
 }: {
@@ -80,13 +37,9 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.description,
-    keywords: [...(seoConfig.keywords.slice(0, 5)), ...(post.tags ?? [])],
-    authors: post.author
-      ? [{ name: post.author.name, url: post.author.url }]
-      : [{ name: seoConfig.author.name }],
-    alternates: {
-      canonical: canonicalUrl,
-    },
+    keywords: [...seoConfig.keywords.slice(0, 5), ...(post.tags ?? [])],
+    authors: [{ name: post.author?.name ?? seoConfig.author.name }],
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       type: "article",
       url: canonicalUrl,
@@ -94,11 +47,11 @@ export async function generateMetadata({
       description: post.description,
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt ?? post.publishedAt,
-      authors: post.author ? [post.author.url ?? seoConfig.siteUrl] : [seoConfig.siteUrl],
+      authors: [seoConfig.siteUrl],
       tags: post.tags,
       images: [
         {
-          url: buildOGImageUrl({ title: post.title, description: post.description }),
+          url: post.coverImage || buildOGImageUrl({ title: post.title, description: post.description }),
           width: 1200,
           height: 630,
           alt: post.title,
@@ -109,12 +62,11 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: [buildOGImageUrl({ title: post.title })],
+      images: [post.coverImage || buildOGImageUrl({ title: post.title })],
     },
   };
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default async function BlogPostPage({
   params,
 }: {
@@ -123,7 +75,6 @@ export default async function BlogPostPage({
   const { slug } = await params;
   const post = await getBlogPost(slug);
 
-  // Return 404 until real data is wired up
   if (!post) notFound();
 
   const canonicalUrl = buildCanonicalUrl(`/blog/${slug}`);
@@ -138,11 +89,12 @@ export default async function BlogPostPage({
       url: canonicalUrl,
       datePublished: post.publishedAt,
       dateModified: post.updatedAt ?? post.publishedAt,
-      author: post.author
-        ? { "@type": "Person", name: post.author.name, url: post.author.url }
-        : { "@id": `${seoConfig.siteUrl}/#organization` },
+      author: {
+        "@type": "Person",
+        name: post.author?.name ?? seoConfig.author.name,
+      },
       publisher: { "@id": `${seoConfig.siteUrl}/#organization` },
-      image: buildOGImageUrl({ title: post.title }),
+      image: post.coverImage || buildOGImageUrl({ title: post.title }),
       isPartOf: { "@id": `${seoConfig.siteUrl}/#website` },
       keywords: post.tags?.join(", "),
     },
@@ -165,35 +117,101 @@ export default async function BlogPostPage({
     ]),
   ]);
 
+  const publishDate = new Date(post.publishedAt).toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: pageJsonLd }}
       />
-      <main>
-        <article itemScope itemType="https://schema.org/Article">
-          {/* Semantic HTML structure optimised for AI crawlers */}
-          <header>
-            <h1 itemProp="headline">{post.title}</h1>
-            <p itemProp="description">{post.description}</p>
-            <time itemProp="datePublished" dateTime={post.publishedAt}>
-              {new Date(post.publishedAt).toLocaleDateString("en-GB", {
-                year: "numeric", month: "long", day: "numeric",
-              })}
-            </time>
+
+      <main className="min-h-screen bg-[#050505] text-white">
+        <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-4xl mx-auto">
+          <Link
+            href="/"
+            className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-black tracking-tight text-[#B6FF00]"
+          >
+            FITTRYBE
+          </Link>
+          <Link
+            href="/blog"
+            className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)]"
+          >
+            ← All articles
+          </Link>
+        </nav>
+
+        <article
+          className="max-w-4xl mx-auto px-6 py-12"
+          itemScope
+          itemType="https://schema.org/Article"
+        >
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {post.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#B6FF00]/10 text-[#B6FF00]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <header className="mb-10">
+            <h1
+              itemProp="headline"
+              className="font-[family-name:var(--font-barlow-condensed)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4"
+            >
+              {post.title}
+            </h1>
+            <p
+              itemProp="description"
+              className="text-xl text-white/60 mb-6 font-[family-name:var(--font-dm-sans)]"
+            >
+              {post.description}
+            </p>
+            <div className="flex items-center gap-4 text-sm text-white/40 font-[family-name:var(--font-dm-sans)]">
+              <span itemProp="author">{post.author?.name ?? "Fittrybe"}</span>
+              <span>·</span>
+              <time itemProp="datePublished" dateTime={post.publishedAt}>
+                {publishDate}
+              </time>
+            </div>
           </header>
 
+          {post.coverImage && (
+            <div className="mb-10 rounded-2xl overflow-hidden aspect-[16/9]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={post.coverImage}
+                alt={post.title}
+                className="w-full h-full object-cover"
+                itemProp="image"
+              />
+            </div>
+          )}
+
           <div itemProp="articleBody">
-            {/* Render your markdown/rich text content here */}
-            {post.content}
+            <BlogPostContent html={post.content} />
           </div>
 
-          {/* Internal link back to home (keyword-rich anchor) */}
-          <footer>
-            <a href="/waitlist">
-              Find local sports sessions near you — join Fittrybe
-            </a>
+          <footer className="mt-16 p-8 bg-white/5 border border-white/10 rounded-2xl text-center">
+            <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+              Ready to find local sports sessions near you?
+            </p>
+            <Link
+              href="/waitlist"
+              className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+            >
+              Join Fittrybe — Find Your Game
+            </Link>
           </footer>
         </article>
       </main>

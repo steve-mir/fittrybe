@@ -5,6 +5,7 @@
 
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, DM_Sans } from "next/font/google";
+import "./globals.css";
 import { seoConfig } from "@/lib/seo-config";
 import {
   buildOrganizationSchema,

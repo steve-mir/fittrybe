@@ -24,3 +24,110 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ─── Blog article typography (prose-fittrybe) ──────────────────────────────── */
+.prose-fittrybe {
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-dm-sans), Arial, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  max-width: 70ch;
+}
+
+.prose-fittrybe h1,
+.prose-fittrybe h2,
+.prose-fittrybe h3 {
+  font-family: var(--font-barlow-condensed), Arial, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.15;
+}
+
+.prose-fittrybe h1 { font-size: 2.25rem; }
+.prose-fittrybe h2 { font-size: 1.75rem; }
+.prose-fittrybe h3 { font-size: 1.35rem; }
+
+.prose-fittrybe p {
+  margin-top: 0;
+  margin-bottom: 1.25em;
+}
+
+.prose-fittrybe a {
+  color: #B6FF00;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-fittrybe a:hover { opacity: 0.8; }
+
+.prose-fittrybe strong { color: #fff; font-weight: 700; }
+.prose-fittrybe em { color: rgba(255,255,255,0.75); }
+
+.prose-fittrybe ul,
+.prose-fittrybe ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.25em;
+}
+.prose-fittrybe li { margin-bottom: 0.4em; }
+.prose-fittrybe ul { list-style-type: disc; }
+.prose-fittrybe ol { list-style-type: decimal; }
+
+.prose-fittrybe blockquote {
+  border-left: 3px solid #B6FF00;
+  margin-left: 0;
+  padding-left: 1.25em;
+  color: rgba(255,255,255,0.55);
+  font-style: italic;
+  margin-bottom: 1.25em;
+}
+
+.prose-fittrybe code {
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-size: 0.875em;
+  color: #B6FF00;
+  font-family: monospace;
+}
+
+.prose-fittrybe pre {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 1.25em;
+  overflow-x: auto;
+  margin-bottom: 1.25em;
+}
+.prose-fittrybe pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.prose-fittrybe hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin: 2.5em 0;
+}
+
+.prose-fittrybe img {
+  border-radius: 12px;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0;
+}
+
+/* Tiptap editor overrides */
+.ProseMirror {
+  outline: none;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: rgba(255,255,255,0.2);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
