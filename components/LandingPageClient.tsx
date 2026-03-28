@@ -104,7 +104,10 @@ const globalStyles = `*, *::before, *::after { box-sizing: border-box; margin: 0
     33% { transform: translateY(-18px) rotate(5deg); }
     66% { transform: translateY(8px) rotate(-3deg); }
   }
-  @keyframes flipIn {
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
     0% { transform: rotateX(-90deg) translateY(8px); opacity: 0; }
     100% { transform: rotateX(0deg) translateY(0px); opacity: 1; }
   }
@@ -284,6 +287,18 @@ function Navbar() {
         <span style={{ color: "#B6FF00" }}>trybe</span>
       </Link>
 
+      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+        <Link href="/blog" aria-label="Read the Fittrybe blog" style={{
+          color: "#9CA3AF",
+          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
+          textTransform: "uppercase", textDecoration: "none",
+          transition: "color 0.2s",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#9CA3AF"; }}
+        >Blog</Link>
+
       <a href="/waitlist" aria-label="Join the Fittrybe waitlist for early access" style={{
         background: "#B6FF00", color: "#0D0D0D",
         padding: "0.45rem 1.3rem", borderRadius: 6,
@@ -295,6 +310,7 @@ function Navbar() {
         onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(182,255,0,0.3)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
         onMouseLeave={e => { e.currentTarget.style.boxShadow = ""; e.currentTarget.style.transform = ""; }}
       >Join Waitlist</a>
+      </div>
     </motion.nav>
   );
 }
@@ -897,7 +913,154 @@ function BentoGrid() {
   );
 }
 
-// ─── 4. FOOTER ────────────────────────────────────────────────────────────────
+// ─── 5. BLOG PREVIEW ─────────────────────────────────────────────────────────
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  coverImage?: string;
+  publishedAt?: { seconds: number } | string | null;
+  category?: string;
+}
+
+function BlogPreviewSection() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Dynamically import Firestore query helpers to avoid bundle bloat
+    import("firebase/firestore").then(({ getDocs, collection: col, query, orderBy, limit }) => {
+      getDocs(query(col(db, "posts"), orderBy("publishedAt", "desc"), limit(3)))
+        .then(snap => {
+          const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as BlogPost));
+          setPosts(data);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    });
+  }, []);
+
+  // Don't render section at all if no posts and not loading
+  if (!loading && posts.length === 0) return null;
+
+  const formatDate = (raw: BlogPost["publishedAt"]) => {
+    if (!raw) return "";
+    const d = typeof raw === "string" ? new Date(raw) : new Date((raw as { seconds: number }).seconds * 1000);
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  return (
+    <section aria-label="Latest from the Fittrybe blog" style={{ padding: "100px 5vw", background: "#080808", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7 }}
+        style={{ marginBottom: "3rem", display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}
+      >
+        <div>
+          <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "0.6rem" }}>● FROM THE BLOG</p>
+          <h2 style={{
+            fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+            fontSize: "clamp(2.2rem, 5vw, 4rem)", fontWeight: 900,
+            textTransform: "uppercase", letterSpacing: "-0.02em",
+          }}>
+            LATEST <span style={{ color: "#B6FF00" }}>READS</span>
+          </h2>
+        </div>
+        <Link href="/blog" style={{
+          color: "#9CA3AF", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
+          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.07em", textTransform: "uppercase",
+          transition: "color 0.2s",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#B6FF00"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#9CA3AF"; }}
+        >
+          View All Posts <IconArrowRight size={14} />
+        </Link>
+      </motion.div>
+
+      {loading ? (
+        // Skeleton loader matching card dimensions
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16, maxWidth: 1200, margin: "0 auto" }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{ borderRadius: 20, background: "#0D0D0D", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", height: 340 }}>
+              <div style={{ height: 180, background: "linear-gradient(90deg, #111 25%, #181818 50%, #111 75%)", backgroundSize: "200% 100%", animation: "shimmer 1.5s infinite" }} />
+              <div style={{ padding: "1.25rem" }}>
+                <div style={{ height: 12, width: "40%", background: "#181818", borderRadius: 6, marginBottom: 12 }} />
+                <div style={{ height: 20, width: "90%", background: "#181818", borderRadius: 6, marginBottom: 8 }} />
+                <div style={{ height: 14, width: "70%", background: "#181818", borderRadius: 6 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16, maxWidth: 1200, margin: "0 auto" }}>
+          {posts.map((post, i) => (
+            <motion.article
+              key={post.id}
+              className="bento-card"
+              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.55, delay: i * 0.1 }}
+              onClick={() => router.push(`/blog/${post.slug}`)}
+              style={{ cursor: "pointer", display: "flex", flexDirection: "column", overflow: "hidden" }}
+              aria-label={`Read blog post: ${post.title}`}
+            >
+              {/* Cover image / fallback */}
+              <div style={{ height: 190, background: post.coverImage ? "transparent" : "linear-gradient(135deg, #0f1a00 0%, #0d0d0d 100%)", position: "relative", overflow: "hidden", flexShrink: 0 }}>
+                {post.coverImage ? (
+                  <Image src={post.coverImage} alt={post.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover" }} />
+                ) : (
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontSize: "3rem", opacity: 0.15 }}>📝</span>
+                  </div>
+                )}
+                {/* Category badge */}
+                {post.category && (
+                  <span style={{
+                    position: "absolute", top: 14, left: 14,
+                    background: "rgba(182,255,0,0.12)", border: "1px solid rgba(182,255,0,0.25)",
+                    color: "#B6FF00", fontSize: "0.6rem", fontWeight: 700,
+                    letterSpacing: "0.1em", textTransform: "uppercase",
+                    padding: "4px 10px", borderRadius: 100,
+                  }}>{post.category}</span>
+                )}
+              </div>
+
+              <div style={{ padding: "1.25rem 1.5rem 1.5rem", display: "flex", flexDirection: "column", flex: 1 }}>
+                {post.publishedAt && (
+                  <p style={{ fontSize: "0.68rem", color: "#4B5563", fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+                    {formatDate(post.publishedAt)}
+                  </p>
+                )}
+                <h3 style={{
+                  fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                  fontSize: "1.2rem", fontWeight: 800, textTransform: "uppercase",
+                  letterSpacing: "-0.01em", lineHeight: 1.2, color: "#fff",
+                  marginBottom: "0.6rem", flex: 1,
+                  display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                }}>{post.title}</h3>
+                {post.excerpt && (
+                  <p style={{
+                    fontSize: "0.82rem", color: "#6B7280", lineHeight: 1.6,
+                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                    marginBottom: "1rem",
+                  }}>{post.excerpt}</p>
+                )}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#B6FF00", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginTop: "auto" }}>
+                  Read More <IconArrowRight size={12} color="#B6FF00" />
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+
 function Footer() {
   // Use lazy initializer to get current year without causing hydration issues
   const [currentYear] = useState<number>(() => new Date().getFullYear());
@@ -919,6 +1082,7 @@ function Footer() {
             // { label: "Terms of Service", href: "/terms" },
             // { label: "Contact Us", href: "mailto:hello@fittrybe.com" },
             { label: "Join Waitlist", href: "/waitlist" },
+            { label: "Blog", href: "/blog" },
           ].map(link => (
             <a key={link.label} href={link.href} className="footer-link">{link.label}</a>
           ))}
@@ -956,6 +1120,7 @@ export default function LandingPageClient({ faqs }: { faqs: Array<{ question: st
         <HeroSection />
         <StickyScrollStory />
         <BentoGrid />
+        <BlogPreviewSection />
         {/* <FAQSection faqs={faqs} /> */}
       </main>
       <Footer />
