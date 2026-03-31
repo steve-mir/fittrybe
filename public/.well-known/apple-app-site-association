@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAMID.com.fittrybe.app",
+        "appID": "563BVG79L9.com.fittrybe.app",
         "paths": ["/session/*", "/*"]
       }
     ]
