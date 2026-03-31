@@ -3,6 +3,8 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.fittrybe.app",
-    "sha256_cert_fingerprints": ["YOUR_SHA256_HERE"]
+    "sha256_cert_fingerprints": [
+      "6B:02:71:D2:96:37:82:D2:B2:8A:A9:23:7C:A1:CD:B6:76:79:D9:37:53:4A:33:0D:C5:35:54:32:82:75:FE:3F"
+    ]
   }
 }]
