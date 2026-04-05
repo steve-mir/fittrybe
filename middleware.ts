@@ -1,6 +1,6 @@
 // middleware.ts — Protect all /admin/* routes
 // Uses a session cookie set at login to gate access server-side.
-// Firebase Auth is client-side only, so we use a lightweight cookie check
+// Supabase Auth is client-side only, so we use a lightweight cookie check
 // and rely on client-side auth guards for full token verification.
 
 import { NextResponse } from "next/server";
@@ -11,8 +11,8 @@ const ADMIN_SESSION_COOKIE = "fittrybe_admin_session";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin routes (but NOT /admin/login)
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+  // Only protect /admin routes (but NOT /admin/login or /admin/signup)
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login") && !pathname.startsWith("/admin/signup")) {
     const session = request.cookies.get(ADMIN_SESSION_COOKIE);
 
     if (!session?.value) {

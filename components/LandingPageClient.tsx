@@ -16,8 +16,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import {
   motion,
@@ -745,8 +744,17 @@ const SPORT_EMOJIS = [
 function BentoGrid() {
   const [waitlistCount, setWaitlistCount] = useState(0);
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "waitlist"), snap => { setWaitlistCount(snap.size); });
-    return () => unsubscribe();
+    const fetchCount = async () => {
+      try {
+        const { count } = await supabase.from("waitlist").select("*", { count: "exact", head: true });
+        setWaitlistCount(count || 0);
+      } catch (error) {
+        console.error("Error fetching waitlist count:", error);
+      }
+    };
+    fetchCount();
+    const channel = supabase.channel("waitlist-changes").on("postgres_changes", { event: "*", schema: "public", table: "waitlist" }, () => fetchCount()).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return (
@@ -930,16 +938,16 @@ function BlogPreviewSection() {
   const router = useRouter();
 
   useEffect(() => {
-    // Dynamically import Firestore query helpers to avoid bundle bloat
-    import("firebase/firestore").then(({ getDocs, collection: col, query, orderBy, limit }) => {
-      getDocs(query(col(db, "posts"), orderBy("publishedAt", "desc"), limit(3)))
-        .then(snap => {
-          const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as BlogPost));
-          setPosts(data);
-        })
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    });
+    (async () => {
+      try {
+        const { data } = await supabase.from("blogs").select("*").order("publishedAt", { ascending: false }).limit(3);
+        if (data) setPosts(data as BlogPost[]);
+      } catch {
+        // Handle error silently
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   // Don't render section at all if no posts and not loading

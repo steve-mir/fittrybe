@@ -12,8 +12,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Resend } from "resend";
 
 function getResendClient() {
@@ -163,23 +162,33 @@ export async function POST(req: NextRequest) {
     const cleanName = name.trim();
 
     // ── Duplicate check ───────────────────────────────────────────────────────
-    const q = query(collection(db, "waitlist"), where("email", "==", cleanEmail));
-    const existing = await getDocs(q);
-    if (!existing.empty) {
+    const { data: existing } = await supabase
+      .from("waitlist")
+      .select("id")
+      .eq("email", cleanEmail)
+      .single();
+
+    if (existing) {
       return NextResponse.json({ error: "already_exists" }, { status: 409 });
     }
 
-    // ── Write to Firestore ────────────────────────────────────────────────────
-    const docRef = await addDoc(collection(db, "waitlist"), {
-      name: cleanName,
-      email: cleanEmail,
-      createdAt: serverTimestamp(),
-    });
+    // ── Write to Supabase ─────────────────────────────────────────────────────
+    const { data: docRef, error: insertError } = await supabase
+      .from("waitlist")
+      .insert({
+        name: cleanName,
+        email: cleanEmail,
+        createdAt: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+
+    if (insertError) throw insertError;
 
     // ── Send confirmation email ───────────────────────────────────────────────
     await sendConfirmationEmail(cleanName, cleanEmail);
 
-    return NextResponse.json({ success: true, id: docRef.id }, { status: 201 });
+    return NextResponse.json({ success: true, id: docRef?.id }, { status: 201 });
   } catch (err) {
     console.error("[/api/waitlist] Unexpected error:", err);
     return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });

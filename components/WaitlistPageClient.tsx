@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 function IconArrowLeft({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -49,8 +48,8 @@ export default function WaitlistPageClient() {
   useEffect(() => {
     async function fetchCount() {
       try {
-        const snapshot = await getDocs(collection(db, "waitlist"));
-        setWaitlistCount(snapshot.size);
+        const { count } = await supabase.from("waitlist").select("*", { count: "exact", head: true });
+        setWaitlistCount(count || 0);
       } catch { /* silently fail */ }
     }
     fetchCount();

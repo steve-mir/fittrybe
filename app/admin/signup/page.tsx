@@ -1,40 +1,47 @@
-// app/admin/login/page.tsx — Admin login form
+// app/admin/signup/page.tsx — Admin account creation
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { signIn, getIdToken } from "@/lib/auth";
-import { Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { signUp } from "@/lib/auth";
+import Link from "next/link";
 
-function LoginForm() {
+export default function AdminSignupPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/admin";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin() {
+  async function handleSignup() {
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const user = await signIn(email, password);
-      // Get the access token and store as a session cookie
-      const token = await getIdToken();
-      // Set session cookie (expires in 1 hour)
-      document.cookie = `fittrybe_admin_session=${token}; path=/; max-age=3600; SameSite=Strict`;
-      router.push(redirect);
-    } catch {
-      setError("Invalid email or password. Please try again.");
+      await signUp(email, password);
+      router.push("/admin/login");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create account. Please try again.";
+      setError(errorMessage || "Failed to create account. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter") handleLogin();
+    if (e.key === "Enter") handleSignup();
   }
 
   return (
@@ -53,7 +60,7 @@ function LoginForm() {
         {/* Card */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
           <h1 className="text-2xl font-bold text-white mb-6 font-[family-name:var(--font-barlow-condensed)]">
-            Sign in
+            Create Account
           </h1>
 
           {error && (
@@ -89,28 +96,44 @@ function LoginForm() {
                 onKeyDown={handleKeyDown}
                 placeholder="••••••••"
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-[#B6FF00]/50 transition-colors font-[family-name:var(--font-dm-sans)]"
-                autoComplete="current-password"
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5 font-[family-name:var(--font-dm-sans)]">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-[#B6FF00]/50 transition-colors font-[family-name:var(--font-dm-sans)]"
+                autoComplete="new-password"
               />
             </div>
 
             <button
-              onClick={handleLogin}
-              disabled={loading || !email || !password}
+              onClick={handleSignup}
+              disabled={loading || !email || !password || !confirmPassword}
               className="w-full py-3 bg-[#B6FF00] text-black font-bold rounded-xl hover:bg-[#B6FF00]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide mt-2"
             >
-              {loading ? "Signing in…" : "Sign In"}
+              {loading ? "Creating Account…" : "Create Account"}
             </button>
+          </div>
+
+          <div className="mt-6 text-center">
+            <Link
+              href="/admin/login"
+              className="text-sm text-white/60 hover:text-[#B6FF00] transition-colors font-[family-name:var(--font-dm-sans)]"
+            >
+              Already have an account? Sign in
+            </Link>
           </div>
         </div>
       </div>
     </main>
-  );
-}
-
-export default function AdminLoginPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-[#050505]" />}>
-      <LoginForm />
-    </Suspense>
   );
 }

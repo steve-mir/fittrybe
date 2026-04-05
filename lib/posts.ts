@@ -1,36 +1,9 @@
-// lib/posts.ts — Firestore CRUD for blog posts
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  Timestamp,
-  serverTimestamp,
-} from "firebase/firestore";
-import { db } from "./firebase";
+// lib/posts.ts — Supabase CRUD for blog posts
+import { supabase } from "./supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface BlogPost {
-  slug: string;
-  title: string;
-  description: string;
-  content: string;         // HTML from Tiptap
-  coverImage: string;      // Firebase Storage URL
-  tags: string[];
-  author: { name: string };
-  status: "draft" | "published";
-  publishedAt: string;     // ISO string (converted from Timestamp)
-  updatedAt: string;       // ISO string
-}
-
-export interface BlogPostFirestore {
   slug: string;
   title: string;
   description: string;
@@ -39,23 +12,43 @@ export interface BlogPostFirestore {
   tags: string[];
   author: { name: string };
   status: "draft" | "published";
-  publishedAt: Timestamp | null;
-  updatedAt: Timestamp;
+  publishedAt: string;
+  updatedAt: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Mappers (DB row ↔ app type) ─────────────────────────────────────────────
 
-const POSTS_COLLECTION = "posts";
-
-function toPost(id: string, data: BlogPostFirestore): BlogPost {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToPost(row: any): BlogPost & { id: string } {
   return {
-    ...data,
-    publishedAt: data.publishedAt
-      ? data.publishedAt.toDate().toISOString()
-      : new Date().toISOString(),
-    updatedAt: data.updatedAt
-      ? data.updatedAt.toDate().toISOString()
-      : new Date().toISOString(),
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    content: row.content,
+    coverImage: row.cover_image ?? "",
+    tags: row.tags ?? [],
+    author: row.author ?? { name: "Fittrybe" },
+    status: row.status,
+    publishedAt: row.published_at ?? "",
+    updatedAt: row.updated_at ?? "",
+  };
+}
+
+type RowInput = Partial<PostInput> & { publishedAt?: string | null; updatedAt?: string };
+
+function postInputToRow(input: RowInput) {
+  return {
+    ...(input.slug !== undefined && { slug: input.slug }),
+    ...(input.title !== undefined && { title: input.title }),
+    ...(input.description !== undefined && { description: input.description }),
+    ...(input.content !== undefined && { content: input.content }),
+    ...(input.coverImage !== undefined && { cover_image: input.coverImage }),
+    ...(input.tags !== undefined && { tags: input.tags }),
+    ...(input.author !== undefined && { author: input.author }),
+    ...(input.status !== undefined && { status: input.status }),
+    ...(input.publishedAt !== undefined && { published_at: input.publishedAt }),
+    ...(input.updatedAt !== undefined && { updated_at: input.updatedAt }),
   };
 }
 
@@ -63,26 +56,27 @@ function toPost(id: string, data: BlogPostFirestore): BlogPost {
 
 /** Fetch a single published post by slug. Returns null if not found. */
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const q = query(
-    collection(db, POSTS_COLLECTION),
-    where("slug", "==", slug),
-    where("status", "==", "published")
-  );
-  const snap = await getDocs(q);
-  if (snap.empty) return null;
-  const docSnap = snap.docs[0];
-  return toPost(docSnap.id, docSnap.data() as BlogPostFirestore);
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single();
+
+  if (error || !data) return null;
+  return rowToPost(data);
 }
 
-/** Fetch all published posts ordered by publishedAt descending. */
+/** Fetch all published posts ordered by published_at descending. */
 export async function getPublishedPosts(): Promise<BlogPost[]> {
-  const q = query(
-    collection(db, POSTS_COLLECTION),
-    where("status", "==", "published"),
-    orderBy("publishedAt", "desc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => toPost(d.id, d.data() as BlogPostFirestore));
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("status", "published")
+    .order("published_at", { ascending: false });
+
+  if (error || !data) return [];
+  return data.map(rowToPost);
 }
 
 /** Return slugs of all published posts (for generateStaticParams). */
@@ -95,27 +89,25 @@ export async function getAllBlogSlugs(): Promise<string[]> {
 
 /** Fetch ALL posts (draft + published) for the admin dashboard. */
 export async function getAllPostsAdmin(): Promise<(BlogPost & { id: string })[]> {
-  const q = query(
-    collection(db, POSTS_COLLECTION),
-    orderBy("updatedAt", "desc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({
-    id: d.id,
-    ...toPost(d.id, d.data() as BlogPostFirestore),
-  }));
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("*")
+    .order("updated_at", { ascending: false });
+
+  if (error || !data) return [];
+  return data.map(rowToPost);
 }
 
 /** Fetch a single post by slug (any status) for the admin editor. */
 export async function getPostBySlugAdmin(slug: string): Promise<(BlogPost & { id: string }) | null> {
-  const q = query(
-    collection(db, POSTS_COLLECTION),
-    where("slug", "==", slug)
-  );
-  const snap = await getDocs(q);
-  if (snap.empty) return null;
-  const d = snap.docs[0];
-  return { id: d.id, ...toPost(d.id, d.data() as BlogPostFirestore) };
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !data) return null;
+  return rowToPost(data);
 }
 
 // ─── Admin writes ─────────────────────────────────────────────────────────────
@@ -133,43 +125,69 @@ export interface PostInput {
 
 /** Create a new post. Returns the new document ID. */
 export async function createPost(input: PostInput): Promise<string> {
-  const now = serverTimestamp();
-  const ref = await addDoc(collection(db, POSTS_COLLECTION), {
+  const now = new Date().toISOString();
+  const row = postInputToRow({
     ...input,
-    publishedAt: input.status === "published" ? Timestamp.now() : null,
+    publishedAt: input.status === "published" ? now : null,
     updatedAt: now,
   });
-  return ref.id;
+
+  const { data, error } = await supabase
+    .from("blogs")
+    .insert(row)
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  return data.id;
 }
 
-/** Update an existing post by Firestore document ID. */
+/** Update an existing post by document ID. */
 export async function updatePost(id: string, input: Partial<PostInput>): Promise<void> {
-  const ref = doc(db, POSTS_COLLECTION, id);
-  const existing = (await getDoc(ref)).data() as BlogPostFirestore | undefined;
+  const { data: existing } = await supabase
+    .from("blogs")
+    .select("status")
+    .eq("id", id)
+    .single();
 
-  const isPublishing =
-    input.status === "published" &&
-    existing?.status !== "published";
+  const isPublishing = input.status === "published" && existing?.status !== "published";
+  const now = new Date().toISOString();
 
-  await updateDoc(ref, {
+  const row = postInputToRow({
     ...input,
-    ...(isPublishing && { publishedAt: Timestamp.now() }),
-    updatedAt: serverTimestamp(),
+    ...(isPublishing && { publishedAt: now }),
+    updatedAt: now,
   });
+
+  const { error } = await supabase
+    .from("blogs")
+    .update(row)
+    .eq("id", id);
+
+  if (error) throw error;
 }
 
-/** Delete a post by Firestore document ID. */
+/** Delete a post by document ID. */
 export async function deletePost(id: string): Promise<void> {
-  await deleteDoc(doc(db, POSTS_COLLECTION, id));
+  const { error } = await supabase.from("blogs").delete().eq("id", id);
+  if (error) throw error;
 }
 
 /** Toggle a post's status between draft and published. */
 export async function togglePublish(id: string, currentStatus: "draft" | "published"): Promise<void> {
   const newStatus = currentStatus === "published" ? "draft" : "published";
-  const ref = doc(db, POSTS_COLLECTION, id);
-  await updateDoc(ref, {
+  const now = new Date().toISOString();
+
+  const row = postInputToRow({
     status: newStatus,
-    ...(newStatus === "published" && { publishedAt: Timestamp.now() }),
-    updatedAt: serverTimestamp(),
+    ...(newStatus === "published" && { publishedAt: now }),
+    updatedAt: now,
   });
+
+  const { error } = await supabase
+    .from("blogs")
+    .update(row)
+    .eq("id", id);
+
+  if (error) throw error;
 }
