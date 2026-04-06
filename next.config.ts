@@ -1,37 +1,36 @@
 /**
  * ─── Fittrybe — Next.js Config ────────────────────────────────────────────────
  *
- * SEO & Performance optimisations:
- *  • Strict Content-Security-Policy headers (security = trust signal)
- *  • Cache-Control headers for static assets (CDN performance)
- *  • X-Robots-Tag header control
- *  • Compression enabled
- *  • Image optimisation configuration
- *  • Bundle analyser ready
+ * SEO FIXES:
+ *  1. Added Supabase storage hostname to remotePatterns so cover images
+ *     can be served via Next.js image optimisation (and not blocked)
+ *  2. Added X-Robots-Tag header to /api/* routes to prevent indexing of
+ *     API endpoints (good hygiene, prevents crawl budget waste)
  */
 
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // ── Compression ──────────────────────────────────────────────────────────────
   compress: true,
-
-  // ── Power Pages + Route Handlers ─────────────────────────────────────────────
-  poweredByHeader: false, // Remove X-Powered-By (security best practice)
+  poweredByHeader: false,
 
   // ── Image Optimisation ────────────────────────────────────────────────────────
   images: {
-    // Serve modern formats: WebP/AVIF (smaller files = faster LCP)
     formats: ["image/avif", "image/webp"],
-    // Responsive breakpoints used by next/image <Image> sizes prop
     deviceSizes: [375, 640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Cache optimised images on CDN for 1 year
     minimumCacheTTL: 31536000,
-    // Allow external image sources when needed (e.g. CMS images)
     remotePatterns: [
-      // Add CDN domains here when images are hosted externally
-      // { protocol: "https", hostname: "cdn.fittrybe.com" },
+      // ── Supabase Storage (cover images uploaded via admin) ────────────────
+      // Replace YOUR_PROJECT_REF with your actual Supabase project ref
+      // e.g. "abcdefghijklmnop.supabase.co"
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      // ── If you later use a custom CDN or Cloudinary, add it here ─────────
+      // { protocol: "https", hostname: "cdn.fittrybe.co.uk" },
     ],
   },
 
@@ -42,20 +41,15 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
-          // Prevent MIME type sniffing
           { key: "X-Content-Type-Options", value: "nosniff" },
-          // Prevent clickjacking
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          // Force HTTPS
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          // Referrer policy (privacy + security)
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Permissions policy (reduce attack surface)
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
         ],
       },
 
-      // ── Static assets — long cache for CDN ──────────────────────────────────
+      // ── Static assets ────────────────────────────────────────────────────────
       {
         source: "/(.*)\\.(jpg|jpeg|png|gif|webp|avif|svg|ico|woff|woff2|ttf|eot)",
         headers: [
@@ -71,15 +65,27 @@ const nextConfig: NextConfig = {
         ],
       },
 
-      // ── OG image API — cache at edge ─────────────────────────────────────────
+      // ── OG image API — cache at edge for social crawlers ─────────────────────
+      // 24h cache is long enough for WhatsApp/Facebook to store the preview;
+      // revalidate in the background so stale previews refresh over time.
       {
         source: "/api/og(.*)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=3600" },
+          { key: "Content-Type", value: "image/png" },
         ],
       },
 
-      // ── Sitemap + robots — short cache (weekly) ──────────────────────────────
+      // ── Other API routes — no indexing ───────────────────────────────────────
+      {
+        source: "/api/((?!og).*)",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
+
+      // ── Sitemap + robots ─────────────────────────────────────────────────────
       {
         source: "/(sitemap.xml|robots.txt)",
         headers: [
@@ -89,27 +95,12 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // ── Redirects ─────────────────────────────────────────────────────────────────
-  // Add canonical redirects here to prevent duplicate content
   async redirects() {
-    return [
-      // Redirect trailing slashes to canonical path (except root)
-      // Note: Next.js handles most of this automatically with trailingSlash config
-      // Add custom redirects as needed:
-      // { source: "/join", destination: "/waitlist", permanent: true },
-    ];
+    return [];
   },
 
-  // ── Experimental features ──────────────────────────────────────────────────
   experimental: {
-    // Optimise CSS delivery (reduces render-blocking CSS)
     optimizeCss: true,
-    // Partial Pre-Rendering for hybrid static/dynamic (Next.js 15+)
-    // ppr: true,
-    // // Set Turbopack root to fix multiple lockfiles warning
-    // turbopack: {
-    //   root: process.cwd(),
-    // },
   },
 };
 

@@ -4,13 +4,27 @@
  * Single source of truth for all SEO metadata, structured data,
  * social links, and site-wide config. Import this wherever metadata
  * or schema markup is generated to keep everything in sync.
+ *
+ * SEO FIXES:
+ *  1. siteUrl uses NEXT_PUBLIC_SITE_URL env var so it works on both
+ *     fittrybe.co.uk (production) and Vercel preview URLs — this is the
+ *     most common cause of broken OG previews (wrong domain in og:url)
+ *  2. defaultOGImage.url is now absolute and derived from siteUrl
+ *  3. buildOGImageUrl always returns an absolute URL
  */
 
 // ─── Core Site Identity ───────────────────────────────────────────────────────
+
+// Read from env so Vercel preview deployments also get correct canonical URLs.
+// Set NEXT_PUBLIC_SITE_URL=https://fittrybe.co.uk in your Vercel project settings.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+  "https://fittrybe.co.uk";
+
 export const seoConfig = {
   // Identity
   siteName: "Fittrybe",
-  siteUrl: "https://fittrybe.com",
+  siteUrl: SITE_URL,
   siteLocale: "en_GB",
   siteLanguage: "en",
 
@@ -55,8 +69,8 @@ export const seoConfig = {
   // Author / Publisher
   author: {
     name: "Fittrybe",
-    url: "https://fittrybe.com",
-    email: "hello@fittrybe.com",
+    url: SITE_URL,
+    email: "hello@fittrybe.co.uk",
   },
 
   creator: "Fittrybe",
@@ -67,16 +81,20 @@ export const seoConfig = {
   applicationName: "Fittrybe",
 
   // ─── Image Assets ───────────────────────────────────────────────────────────
-  defaultOGImage: {
-    url: "https://fittrybe.com/og/default.png",
-    width: 1200,
-    height: 630,
-    alt: "Fittrybe — Find Your Game. Play With Your City.",
-    type: "image/png",
+  // IMPORTANT: These must be absolute URLs — social crawlers cannot resolve
+  // relative paths. We derive them from SITE_URL for correctness.
+  get defaultOGImage() {
+    return {
+      url: `${SITE_URL}/api/og?title=${encodeURIComponent("Find Your Game. Play With Your City.")}`,
+      width: 1200,
+      height: 630,
+      alt: "Fittrybe — Find Your Game. Play With Your City.",
+      type: "image/png",
+    };
   },
 
   logo: {
-    url: "https://fittrybe.com/logo.png",
+    url: `${SITE_URL}/logo.png`,
     width: 512,
     height: 512,
   },
@@ -99,7 +117,6 @@ export const seoConfig = {
   },
 
   // ─── Verification Codes ─────────────────────────────────────────────────────
-  // Fill in once verified in respective Search Consoles
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "",
     bing: process.env.NEXT_PUBLIC_BING_SITE_AUTH ?? "",
@@ -126,38 +143,42 @@ export const seoConfig = {
   },
 
   // ─── Pages ──────────────────────────────────────────────────────────────────
-  pages: {
-    home: {
-      path: "/",
-      url: "https://fittrybe.com",
-      title: "Fittrybe — Find Your Game. Play With Your City.",
-      description:
-        "Fittrybe is a location-based social sports app. Discover real sports sessions near you, reserve your spot in one tap, and meet your tribe. Football, basketball, badminton, tennis and more.",
-    },
-    waitlist: {
-      path: "/waitlist",
-      url: "https://fittrybe.com/waitlist",
-      title: "Join the Fittrybe Waitlist — Get Early Access",
-      description:
-        "Be the first to play when Fittrybe launches in your city. Join the waitlist now and get early access to the social sports app that connects real players near you.",
-    },
+  get pages() {
+    return {
+      home: {
+        path: "/",
+        url: SITE_URL,
+        title: "Fittrybe — Find Your Game. Play With Your City.",
+        description:
+          "Fittrybe is a location-based social sports app. Discover real sports sessions near you, reserve your spot in one tap, and meet your tribe. Football, basketball, badminton, tennis and more.",
+      },
+      waitlist: {
+        path: "/waitlist",
+        url: `${SITE_URL}/waitlist`,
+        title: "Join the Fittrybe Waitlist — Get Early Access",
+        description:
+          "Be the first to play when Fittrybe launches in your city. Join the waitlist now and get early access to the social sports app that connects real players near you.",
+      },
+    };
   },
 } as const;
 
 // ─── Helper: build full canonical URL ─────────────────────────────────────────
 export function buildCanonicalUrl(path: string): string {
   const normalised = path.startsWith("/") ? path : `/${path}`;
-  return `${seoConfig.siteUrl}${normalised}`;
+  return `${SITE_URL}${normalised}`;
 }
 
-// ─── Helper: build OG image URL (for dynamic routes) ─────────────────────────
+// ─── Helper: build OG image URL — ALWAYS returns an absolute URL ──────────────
+// This is critical: relative URLs in og:image are NOT resolved by most
+// social crawlers (WhatsApp, Facebook, Telegram). Always absolute.
 export function buildOGImageUrl(params?: {
   title?: string;
   description?: string;
   path?: string;
 }): string {
   if (!params) return seoConfig.defaultOGImage.url;
-  const base = `${seoConfig.siteUrl}/api/og`;
+  const base = `${SITE_URL}/api/og`;
   const query = new URLSearchParams();
   if (params.title) query.set("title", params.title);
   if (params.description) query.set("description", params.description);

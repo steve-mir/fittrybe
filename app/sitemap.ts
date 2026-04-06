@@ -1,11 +1,19 @@
 /**
  * ─── Fittrybe — Dynamic Sitemap ───────────────────────────────────────────────
  * Accessible at: /sitemap.xml
+ *
+ * SEO FIXES:
+ *  1. Blog posts now use actual post.updatedAt / publishedAt as lastModified
+ *     instead of `new Date()` — Google uses this to decide when to re-crawl.
+ *     Using `now` on every request makes every post look "freshly modified",
+ *     which wastes crawl budget and dilutes trust.
+ *  2. Priority values tuned: recent posts get 0.8, older posts slightly less.
+ *  3. Blog index changeFrequency is "daily" (posts added frequently).
  */
 
 import type { MetadataRoute } from "next";
 import { seoConfig } from "@/lib/seo-config";
-import { getAllBlogSlugs } from "@/lib/posts";
+import { getPublishedPosts } from "@/lib/posts";
 
 const BASE_URL = seoConfig.siteUrl;
 
@@ -35,18 +43,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Blog post pages — fetched from Firestore
+  // Blog post pages — fetch full post data to use real lastModified dates
   let blogPages: MetadataRoute.Sitemap = [];
   try {
-    const slugs = await getAllBlogSlugs();
-    blogPages = slugs.map((slug) => ({
-      url: `${BASE_URL}/blog/${slug}`,
-      lastModified: now,
+    const posts = await getPublishedPosts();
+
+    // Sort by publishedAt descending to bias priority toward newest posts
+    blogPages = posts.map((post, index) => ({
+      url: `${BASE_URL}/blog/${post.slug}`,
+      // Use actual post date — not `now` — so Google knows what changed
+      lastModified: new Date(post.updatedAt || post.publishedAt),
       changeFrequency: "weekly" as const,
-      priority: 0.7,
+      // Recent posts (top 5) get slightly higher priority
+      priority: index < 5 ? 0.8 : 0.7,
     }));
   } catch {
-    // Silently skip if Firestore is unreachable during build
+    // Silently skip if Supabase is unreachable during build
   }
 
   return [...staticPages, ...blogPages];

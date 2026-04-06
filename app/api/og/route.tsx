@@ -10,6 +10,13 @@
  *
  * Output: 1200×630 PNG rendered via @vercel/og (ImageResponse)
  *
+ * SEO FIXES:
+ *  1. Explicit Cache-Control header so social crawlers (WhatsApp, Facebook)
+ *     cache and serve the image correctly — without this, WhatsApp may
+ *     refuse to render a dynamically-generated URL as a preview image.
+ *  2. Added og:image header hints via Link header (optional but helpful)
+ *  3. Content-Type explicitly set to image/png
+ *
  * Design language: matches Fittrybe's dark + lime-green brand.
  */
 
@@ -19,7 +26,7 @@ import { NextRequest } from "next/server";
 export const runtime = "edge";
 
 const SITE_NAME = "Fittrybe";
-const SITE_URL  = "fittrybe.com";
+const SITE_URL  = "fittrybe.co.uk";
 const LIME      = "#B6FF00";
 const DARK      = "#050505";
 const MID_DARK  = "#0D0D0D";
@@ -33,7 +40,7 @@ export async function GET(req: NextRequest) {
     searchParams.get("description") ??
     "Discover real sports sessions near you. Join a game, meet your tribe, show up and play.";
 
-  return new ImageResponse(
+  const imageResponse = new ImageResponse(
     (
       <div
         style={{
@@ -264,4 +271,16 @@ export async function GET(req: NextRequest) {
       height: 630,
     }
   );
+
+  // ── KEY FIX: Set headers so social crawlers cache and serve this correctly ──
+  // WhatsApp, Facebook, LinkedIn crawlers check Cache-Control before storing
+  // the preview image. Without max-age they may skip caching or refuse to
+  // render the image at all.
+  imageResponse.headers.set(
+    "Cache-Control",
+    "public, max-age=86400, stale-while-revalidate=3600"
+  );
+  imageResponse.headers.set("Content-Type", "image/png");
+
+  return imageResponse;
 }

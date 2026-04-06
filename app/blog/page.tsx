@@ -1,9 +1,21 @@
 // app/blog/page.tsx — Blog index: SEO hub listing all published posts
+//
+// SEO FIXES:
+//  1. Added og:image to the blog index (was missing entirely)
+//  2. Added twitter image card
+//  3. Added og:locale and og:site_name
+
 import type { Metadata } from "next";
 import { getPublishedPosts } from "@/lib/posts";
-import { buildCanonicalUrl } from "@/lib/seo-config";
+import { buildCanonicalUrl, seoConfig } from "@/lib/seo-config";
 import BlogCard from "@/components/BlogCard";
 import Link from "next/link";
+
+const blogOGImage = `${seoConfig.siteUrl}/api/og?title=${encodeURIComponent(
+  "The Fittrybe Blog"
+)}&description=${encodeURIComponent(
+  "Sports tips, fitness guides, and community stories for grassroots players."
+)}`;
 
 export const metadata: Metadata = {
   title: "Blog — Sports Tips, Fitness Guides & Community Stories | Fittrybe",
@@ -15,9 +27,29 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: buildCanonicalUrl("/blog"),
+    siteName: seoConfig.siteName,
+    locale: seoConfig.siteLocale,
     title: "Fittrybe Blog — Sports, Fitness & Community",
     description:
       "Tips on finding local sports sessions, fitness guides, and community stories from the Fittrybe team.",
+    images: [
+      {
+        url: blogOGImage,
+        secureUrl: blogOGImage,
+        width: 1200,
+        height: 630,
+        alt: "Fittrybe Blog — Sports, Fitness & Community",
+        type: "image/png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: seoConfig.twitterHandle,
+    title: "Fittrybe Blog — Sports, Fitness & Community",
+    description:
+      "Tips on finding local sports sessions, fitness guides, and community stories from the Fittrybe team.",
+    images: [blogOGImage],
   },
 };
 

@@ -1,14 +1,22 @@
 /**
  * ─── Fittrybe — Blog Post Page ────────────────────────────────────────────────
- * Wired to Firestore via lib/posts.ts.
+ * Wired to Supabase via lib/posts.ts.
  * generateStaticParams pre-renders all published posts at build time.
+ *
+ * SEO FIXES:
+ *  1. OG image is always an ABSOLUTE URL (WhatsApp / crawlers require this)
+ *  2. Fallback OG image uses the dynamic /api/og route with absolute base
+ *  3. twitter:image also always absolute
+ *  4. Added og:image:secure_url for WhatsApp compatibility
+ *  5. readingTime added to structured data
+ *  6. article:author and article:section added as extra OG tags
  */
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getBlogPost, getAllBlogSlugs } from "@/lib/posts";
-import { seoConfig, buildOGImageUrl, buildCanonicalUrl } from "@/lib/seo-config";
+import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
 import {
   buildWebPageSchema,
   buildGraphSchema,
@@ -23,6 +31,23 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
+/** Always returns an absolute HTTPS URL for the OG image. */
+function resolveOGImage(post: {
+  coverImage?: string;
+  title: string;
+  description: string;
+}): string {
+  if (post.coverImage && post.coverImage.startsWith("http")) {
+    return post.coverImage;
+  }
+  // Fall back to the dynamic branded card — must be absolute for crawlers
+  const params = new URLSearchParams({
+    title: post.title,
+    description: post.description,
+  });
+  return `${seoConfig.siteUrl}/api/og?${params.toString()}`;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -33,6 +58,7 @@ export async function generateMetadata({
   if (!post) return { title: "Post Not Found" };
 
   const canonicalUrl = buildCanonicalUrl(`/blog/${slug}`);
+  const ogImage = resolveOGImage(post);
 
   return {
     title: post.title,
@@ -40,31 +66,46 @@ export async function generateMetadata({
     keywords: [...seoConfig.keywords.slice(0, 5), ...(post.tags ?? [])],
     authors: [{ name: post.author?.name ?? seoConfig.author.name }],
     alternates: { canonical: canonicalUrl },
+
     openGraph: {
       type: "article",
       url: canonicalUrl,
+      siteName: seoConfig.siteName,
+      locale: seoConfig.siteLocale,
       title: post.title,
       description: post.description,
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt ?? post.publishedAt,
-      authors: [seoConfig.siteUrl],
+      authors: [post.author?.name ?? seoConfig.author.name],
       tags: post.tags,
+      // Single image object — absolute URL, correct dimensions
       images: [
         {
-          url: post.coverImage || buildOGImageUrl({ title: post.title, description: post.description }),
+          url: ogImage,
+          secureUrl: ogImage,          // ← WhatsApp prefers this
           width: 1200,
           height: 630,
           alt: post.title,
+          type: post.coverImage?.startsWith("http") ? "image/jpeg" : "image/png",
         },
       ],
     },
+
     twitter: {
       card: "summary_large_image",
+      site: seoConfig.twitterHandle,
+      creator: seoConfig.twitterHandle,
       title: post.title,
       description: post.description,
-      images: [post.coverImage || buildOGImageUrl({ title: post.title })],
+      images: [ogImage],              // ← must be absolute
     },
   };
+}
+
+/** Rough reading time estimate (200 wpm average). */
+function estimateReadingTime(html: string): number {
+  const words = html.replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
 }
 
 export default async function BlogPostPage({
@@ -78,6 +119,8 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   const canonicalUrl = buildCanonicalUrl(`/blog/${slug}`);
+  const ogImage = resolveOGImage(post);
+  const readingTime = estimateReadingTime(post.content);
 
   const pageJsonLd = buildGraphSchema([
     {
@@ -94,9 +137,20 @@ export default async function BlogPostPage({
         name: post.author?.name ?? seoConfig.author.name,
       },
       publisher: { "@id": `${seoConfig.siteUrl}/#organization` },
-      image: post.coverImage || buildOGImageUrl({ title: post.title }),
+      image: {
+        "@type": "ImageObject",
+        url: ogImage,
+        width: 1200,
+        height: 630,
+      },
       isPartOf: { "@id": `${seoConfig.siteUrl}/#website` },
       keywords: post.tags?.join(", "),
+      timeRequired: `PT${readingTime}M`,
+      inLanguage: seoConfig.siteLanguage,
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalUrl,
+      },
     },
     buildWebPageSchema({
       url: canonicalUrl,
@@ -183,6 +237,8 @@ export default async function BlogPostPage({
               <time itemProp="datePublished" dateTime={post.publishedAt}>
                 {publishDate}
               </time>
+              <span>·</span>
+              <span>{readingTime} min read</span>
             </div>
           </header>
 
