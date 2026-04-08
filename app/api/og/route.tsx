@@ -39,6 +39,15 @@ export async function GET(req: NextRequest) {
   const description =
     searchParams.get("description") ??
     "Discover real sports sessions near you. Join a game, meet your tribe, show up and play.";
+  const sport = searchParams.get("sport") ?? ""; // e.g. "football", "cycling"
+  const date  = searchParams.get("date")  ?? ""; // e.g. "Sat, 13 Mar 2026"
+  const price = searchParams.get("price") ?? ""; // e.g. "Free" or "£5.00"
+
+  const SPORT_EMOJI: Record<string, string> = {
+    football: "⚽", basketball: "🏀", cycling: "🚴", running: "🏃",
+    badminton: "🏸", tennis: "🎾", gym: "🏋️", cricket: "🏏",
+  };
+  const emoji = sport ? (SPORT_EMOJI[sport.toLowerCase()] ?? "🏅") : null;
 
   const imageResponse = new ImageResponse(
     (
@@ -167,7 +176,9 @@ export async function GET(req: NextRequest) {
                 textTransform: "uppercase",
               }}
             >
-              Social Sports App — Coming Soon
+              {emoji
+                ? `${emoji}  ${sport.charAt(0).toUpperCase() + sport.slice(1)} Session`
+                : "Social Sports App — Coming Soon"}
             </span>
           </div>
 
@@ -198,6 +209,46 @@ export async function GET(req: NextRequest) {
           >
             {description}
           </div>
+
+          {/* Event meta chips — only rendered when date/price passed */}
+          {(date || price) && (
+            <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
+              {date && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: MID_DARK,
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    borderRadius: 8,
+                    padding: "8px 16px",
+                    fontSize: 15,
+                    color: "#fff",
+                    fontWeight: 600,
+                  }}
+                >
+                  📅  {date}
+                </div>
+              )}
+              {price && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: price === "Free" ? "rgba(182,255,0,0.10)" : MID_DARK,
+                    border: price === "Free" ? "1px solid rgba(182,255,0,0.30)" : "1px solid rgba(255,255,255,0.10)",
+                    borderRadius: 8,
+                    padding: "8px 16px",
+                    fontSize: 15,
+                    color: price === "Free" ? LIME : "#fff",
+                    fontWeight: 700,
+                  }}
+                >
+                  {price}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Bottom bar ── */}

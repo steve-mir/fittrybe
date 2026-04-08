@@ -14,6 +14,7 @@
 import type { MetadataRoute } from "next";
 import { seoConfig } from "@/lib/seo-config";
 import { getPublishedPosts } from "@/lib/posts";
+import { getUpcomingEvents } from "@/lib/events";
 
 const BASE_URL = seoConfig.siteUrl;
 
@@ -41,6 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.8,
     },
+    {
+      url: `${BASE_URL}/events`,
+      lastModified: now,
+      changeFrequency: "hourly", // Sessions are time-sensitive — crawl frequently
+      priority: 0.9,
+    },
   ];
 
   // Blog post pages — fetch full post data to use real lastModified dates
@@ -61,5 +68,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Silently skip if Supabase is unreachable during build
   }
 
-  return [...staticPages, ...blogPages];
+  // Event (session) pages — time-sensitive, use starts_at as lastModified
+  let eventPages: MetadataRoute.Sitemap = [];
+  try {
+    const events = await getUpcomingEvents();
+    eventPages = events.map((event) => ({
+      url: `${BASE_URL}/events/${event.id}`,
+      lastModified: new Date(event.startsAt),
+      changeFrequency: "daily" as const,
+      priority: event.isFeatured ? 0.9 : 0.8,
+    }));
+  } catch {
+    // Silently skip if Supabase is unreachable during build
+  }
+
+  return [...staticPages, ...blogPages, ...eventPages];
 }
