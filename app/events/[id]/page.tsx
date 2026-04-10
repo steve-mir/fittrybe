@@ -12,7 +12,7 @@ import {
   formatPrice,
 } from "@/lib/events";
 import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
-import { buildBreadcrumbSchema, buildGraphSchema, buildWebPageSchema } from "@/lib/structured-data";
+import { buildBreadcrumbSchema, buildEventSchema, buildGraphSchema, buildWebPageSchema } from "@/lib/structured-data";
 
 export const revalidate = 60;
 
@@ -53,7 +53,20 @@ export async function generateMetadata({
 
   const canonicalUrl = buildCanonicalUrl(`/events/${id}`);
   const ogImage = resolveOGImage(event);
-  const description = `${sportEmoji(event.sportId)} ${event.sportId.charAt(0).toUpperCase() + event.sportId.slice(1)} session at ${event.placeName || event.locationLabel} — ${formatEventDate(event.startsAt)} at ${formatEventTime(event.startsAt)}. ${formatPrice(event.joinPricePence)} entry. ${event.spotsLeft} spot${event.spotsLeft !== 1 ? "s" : ""} left.`;
+  const spotsText =
+    event.spotsLeft <= 0
+      ? "Session full"
+      : event.spotsLeft <= 3
+      ? `Only ${event.spotsLeft} spot${event.spotsLeft === 1 ? "" : "s"} left`
+      : `${event.spotsLeft} spots available`;
+
+  const description = `${sportEmoji(event.sportId)} ${
+    event.sportId.charAt(0).toUpperCase() + event.sportId.slice(1)
+  } session at ${event.placeName || event.locationLabel}, ${
+    event.locationArea
+  } — ${formatEventDate(event.startsAt)} at ${formatEventTime(
+    event.startsAt
+  )}. ${spotsText}. ${formatPrice(event.joinPricePence)} entry. Book via Fittrybe.`;
 
   return {
     title: `${event.title} — ${formatEventDate(event.startsAt)} | Fittrybe`,
@@ -108,42 +121,21 @@ export default async function EventDetailPage({
   const isLowSpots = event.spotsLeft > 0 && event.spotsLeft <= 3;
 
   const pageJsonLd = buildGraphSchema([
-    {
-      "@context": "https://schema.org",
-      "@type": "SportsEvent",
-      "@id": `${canonicalUrl}/#event`,
-      name: event.title,
-      description: `${event.sportId} session at ${event.placeName}`,
-      url: canonicalUrl,
-      startDate: event.startsAt,
-      location: {
-        "@type": "Place",
-        name: event.placeName || event.locationLabel,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: event.placeVicinity,
-          addressLocality: event.locationArea,
-          addressCountry: "GB",
-        },
-        geo: event.placeLat
-          ? {
-              "@type": "GeoCoordinates",
-              latitude: event.placeLat,
-              longitude: event.placeLng,
-            }
-          : undefined,
-      },
-      organizer: {
-        "@type": "Organization",
-        name: seoConfig.siteName,
-        url: seoConfig.siteUrl,
-      },
-      image: ogImage,
-      eventStatus: event.isCancelled
-        ? "https://schema.org/EventCancelled"
-        : "https://schema.org/EventScheduled",
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    },
+    buildEventSchema({
+      title: event.title,
+      description: event.description ?? null,
+      startsAt: event.startsAt,
+      placeName: event.placeName || event.locationLabel,
+      placeVicinity: event.placeVicinity,
+      locationArea: event.locationArea,
+      placeLat: event.placeLat,
+      placeLng: event.placeLng,
+      joinPricePence: event.joinPricePence,
+      spotsLeft: event.spotsLeft,
+      isCancelled: event.isCancelled,
+      ogImage,
+      canonicalUrl,
+    }),
     buildWebPageSchema({
       url: canonicalUrl,
       title: event.title,
@@ -161,9 +153,11 @@ export default async function EventDetailPage({
     ]),
   ]);
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    event.placeName || event.locationLabel
-  )}&query_place_id=${event.id}`;
+  // Use place name + area for a clean, reliable Maps search (no invalid UUIDs)
+  const mapsQuery = encodeURIComponent(
+    `${event.placeName || event.locationLabel} ${event.locationArea}`
+  );
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
     <>
@@ -261,6 +255,20 @@ export default async function EventDetailPage({
                 className="w-full h-full object-cover"
               />
             </div>
+          )}
+
+          {/* Session description (host-provided) */}
+          {event.description && (
+            <section className="mb-10">
+              <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold uppercase tracking-tight text-white mb-4">
+                About This Session
+              </h2>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 font-[family-name:var(--font-dm-sans)]">
+                <p className="text-white/80 text-base leading-relaxed whitespace-pre-line">
+                  {event.description}
+                </p>
+              </div>
+            </section>
           )}
 
           {/* Location */}

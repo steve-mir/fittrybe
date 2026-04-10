@@ -38,6 +38,7 @@ export interface FittrybeEvent {
   isFeatured: boolean;
   hostId: string;
   createdAt: string;
+  description: string | null;
 }
 
 // ─── Mappers ──────────────────────────────────────────────────────────────────
@@ -70,6 +71,7 @@ function rowToEvent(row: any): FittrybeEvent {
     isFeatured: row.is_featured ?? false,
     hostId: row.host_id,
     createdAt: row.created_at,
+    description: row.description ?? null,
   };
 }
 

@@ -246,3 +246,104 @@ export const LANDING_FAQS = [
       "Fittrybe will initially launch in major UK cities including London, Manchester, Birmingham, and Bristol. Global expansion is planned for 2026 and beyond.",
   },
 ];
+
+// ─── SportsEvent ──────────────────────────────────────────────────────────────
+export function buildEventSchema({
+  title,
+  description,
+  startsAt,
+  placeName,
+  placeVicinity,
+  locationArea,
+  placeLat,
+  placeLng,
+  joinPricePence,
+  spotsLeft,
+  isCancelled,
+  ogImage,
+  canonicalUrl,
+}: {
+  title: string;
+  description: string | null;
+  startsAt: string;
+  placeName: string;
+  placeVicinity: string;
+  locationArea: string;
+  placeLat: string;
+  placeLng: string;
+  joinPricePence: number;
+  spotsLeft: number;
+  isCancelled: boolean;
+  ogImage: string;
+  canonicalUrl: string;
+}) {
+  const availability =
+    spotsLeft <= 0
+      ? "https://schema.org/SoldOut"
+      : spotsLeft <= 3
+      ? "https://schema.org/LimitedAvailability"
+      : "https://schema.org/InStock";
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "@id": `${canonicalUrl}/#event`,
+    name: title,
+    ...(description ? { description } : {}),
+    url: canonicalUrl,
+    startDate: startsAt,
+    location: {
+      "@type": "Place",
+      name: placeName,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: placeVicinity,
+        addressLocality: locationArea,
+        addressCountry: "GB",
+      },
+      ...(placeLat
+        ? {
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: placeLat,
+              longitude: placeLng,
+            },
+          }
+        : {}),
+    },
+    offers: {
+      "@type": "Offer",
+      price: joinPricePence === 0 ? "0" : (joinPricePence / 100).toFixed(2),
+      priceCurrency: "GBP",
+      availability,
+      url: canonicalUrl,
+    },
+    organizer: {
+      "@type": "Organization",
+      name: seoConfig.siteName,
+      url: seoConfig.siteUrl,
+    },
+    image: ogImage,
+    eventStatus: isCancelled
+      ? "https://schema.org/EventCancelled"
+      : "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  };
+}
+
+// ─── ItemList (for events listing page) ──────────────────────────────────────
+export function buildItemListSchema(
+  events: Array<{ id: string }>,
+  baseUrl: string
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Upcoming Sports Sessions",
+    itemListElement: events.map((event, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${baseUrl}/events/${event.id}`,
+    })),
+  };
+}
