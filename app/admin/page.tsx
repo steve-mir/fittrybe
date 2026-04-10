@@ -1,231 +1,126 @@
-// app/admin/page.tsx — Admin dashboard: all posts table
+// app/admin/page.tsx — Dashboard overview
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAllPostsAdmin, deletePost, togglePublish } from "@/lib/posts";
-import { signOut, onAuthChange } from "@/lib/auth";
-import type { BlogPost } from "@/lib/posts";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { onAuthChange } from "@/lib/auth";
+import { PageHeader, StatCard, SectionNote } from "@/components/admin/AdminUI";
 
-type AdminPost = BlogPost & { id: string };
+interface Stats {
+  totalUsers: number;
+  sessionsLive: number;
+  newUsersToday: number;
+  openReports: number;
+  totalRevenuePence: number;
+  sessionsThisWeek: number;
+}
 
-export default function AdminDashboard() {
+export default function AdminOverview() {
   const router = useRouter();
-  const [posts, setPosts] = useState<AdminPost[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const fetchPosts = useCallback(async () => {
+  useEffect(() => {
+    const unsub = onAuthChange((user) => {
+      if (!user) { router.push("/admin/login"); return; }
+      fetchStats();
+    });
+    return unsub;
+  }, [router]);
+
+  async function fetchStats() {
     try {
-      const data = await getAllPostsAdmin();
-      setPosts(data);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const [usersRes, liveRes, todayRes, reportsRes, revenueRes, weekSessionsRes] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("sessions").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", today.toISOString()),
+        supabase.from("user_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+        supabase.from("wallet_transactions").select("amount_pence").eq("type", "deposit"),
+        supabase.from("sessions").select("id", { count: "exact", head: true }).gte("created_at", weekAgo.toISOString()),
+      ]);
+
+      const revenue = (revenueRes.data ?? []).reduce((sum: number, r: { amount_pence: number }) => sum + (r.amount_pence ?? 0), 0);
+
+      setStats({
+        totalUsers: usersRes.count ?? 0,
+        sessionsLive: liveRes.count ?? 0,
+        newUsersToday: todayRes.count ?? 0,
+        openReports: reportsRes.count ?? 0,
+        totalRevenuePence: revenue,
+        sessionsThisWeek: weekSessionsRes.count ?? 0,
+      });
     } catch (e) {
-      console.error("Failed to fetch posts", e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    // Verify auth on mount
-    const unsub = onAuthChange((user) => {
-      if (!user) {
-        router.push("/admin/login");
-        return;
-      }
-      fetchPosts();
-    });
-    return unsub;
-  }, [router, fetchPosts]);
-
-  async function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    setActionLoading(id);
-    try {
-      await deletePost(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
-    } catch (e) {
-      console.error(e);
-      alert("Failed to delete post.");
-    } finally {
-      setActionLoading(null);
-    }
   }
 
-  async function handleTogglePublish(post: AdminPost) {
-    setActionLoading(post.id);
-    try {
-      await togglePublish(post.id, post.status);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === post.id
-            ? {
-                ...p,
-                status: p.status === "published" ? "draft" : "published",
-              }
-            : p
-        )
-      );
-    } catch (e) {
-      console.error(e);
-      alert("Failed to update status.");
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
-  async function handleSignOut() {
-    await signOut();
-    document.cookie = "fittrybe_admin_session=; path=/; max-age=0";
-    router.push("/admin/login");
-  }
+  const QUICK_LINKS = [
+    { href: "/admin/users", label: "User Management", desc: "Search & manage all accounts" },
+    { href: "/admin/sessions", label: "Session Management", desc: "All sessions across 6 sports" },
+    { href: "/admin/payments", label: "Payments & Financials", desc: "Transaction ledger & payouts" },
+    { href: "/admin/moderation", label: "Moderation Queue", desc: "Reports & strikes", alert: stats?.openReports },
+    { href: "/admin/reviews", label: "Reviews & Trust", desc: "Ratings & reliability scores" },
+    { href: "/admin/hosts", label: "Hosts", desc: "Pro accounts & earnings" },
+    { href: "/admin/notifications", label: "Notifications", desc: "Push & email comms" },
+    { href: "/admin/content", label: "Content", desc: "Posts, stories & media" },
+    { href: "/admin/analytics", label: "Analytics", desc: "Platform growth & health" },
+    { href: "/admin/posts", label: "Blog Posts", desc: "Marketing site blog" },
+  ];
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white">
-      {/* Header */}
-      <header className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-black text-[#B6FF00]">
-              FITTRYBE
-            </span>
-            <span className="text-white/40 text-sm font-[family-name:var(--font-dm-sans)]">
-              / Admin
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/blog"
-              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)]"
-            >
-              View blog ↗
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className="text-sm px-4 py-2 border border-white/10 rounded-lg text-white/60 hover:text-white hover:border-white/30 transition-colors font-[family-name:var(--font-dm-sans)]"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="max-w-5xl mx-auto">
+      <PageHeader title="Overview" desc="Platform pulse at a glance" />
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Title row */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-black font-[family-name:var(--font-barlow-condensed)] uppercase">
-            Blog Posts
-          </h1>
+      {loading ? (
+        <div className="text-white/30 text-sm font-[family-name:var(--font-dm-sans)]">Loading stats…</div>
+      ) : stats ? (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+            <StatCard label="Total Users" value={stats.totalUsers.toLocaleString()} />
+            <StatCard label="Sessions Live" value={stats.sessionsLive} accent={stats.sessionsLive > 0} />
+            <StatCard label="New Today" value={stats.newUsersToday} />
+            <StatCard label="Open Reports" value={stats.openReports} accent={stats.openReports > 0} sub={stats.openReports > 0 ? "Need attention" : undefined} />
+            <StatCard label="Sessions This Week" value={stats.sessionsThisWeek} />
+            <StatCard label="Total Revenue" value={`£${(stats.totalRevenuePence / 100).toFixed(2)}`} accent />
+          </div>
+
+          {stats.openReports > 0 && (
+            <SectionNote>
+              ⚠️ {stats.openReports} open moderation report{stats.openReports !== 1 ? "s" : ""} pending review.{" "}
+              <Link href="/admin/moderation" className="text-[#B6FF00] underline underline-offset-2">Go to Moderation →</Link>
+            </SectionNote>
+          )}
+        </>
+      ) : null}
+
+      <h2 className="text-xs font-medium text-white/30 uppercase tracking-widest mb-4 font-[family-name:var(--font-dm-sans)]">
+        Admin Sections
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {QUICK_LINKS.map((l) => (
           <Link
-            href="/admin/posts/new"
-            className="px-5 py-2.5 bg-[#B6FF00] text-black font-bold rounded-xl hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-sm uppercase tracking-wide"
+            key={l.href}
+            href={l.href}
+            className="relative flex flex-col gap-1 p-4 rounded-xl border border-white/8 bg-white/3 hover:bg-white/5 hover:border-white/15 transition-all group"
           >
-            + New Post
+            {l.alert && l.alert > 0 ? (
+              <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-red-400" />
+            ) : null}
+            <span className="text-sm font-medium text-white group-hover:text-[#B6FF00] transition-colors font-[family-name:var(--font-dm-sans)]">
+              {l.label}
+            </span>
+            <span className="text-xs text-white/40 font-[family-name:var(--font-dm-sans)]">{l.desc}</span>
           </Link>
-        </div>
-
-        {/* Table */}
-        {loading ? (
-          <div className="text-white/40 py-20 text-center font-[family-name:var(--font-dm-sans)]">
-            Loading posts…
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-white/10 rounded-2xl">
-            <p className="text-white/40 mb-4 font-[family-name:var(--font-dm-sans)]">
-              No posts yet.
-            </p>
-            <Link
-              href="/admin/posts/new"
-              className="text-[#B6FF00] hover:underline text-sm font-[family-name:var(--font-dm-sans)]"
-            >
-              Create your first post →
-            </Link>
-          </div>
-        ) : (
-          <div className="border border-white/10 rounded-2xl overflow-hidden">
-            <table className="w-full text-sm font-[family-name:var(--font-dm-sans)]">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="text-left px-6 py-4 text-white/60 font-medium">Title</th>
-                  <th className="text-left px-4 py-4 text-white/60 font-medium hidden md:table-cell">
-                    Slug
-                  </th>
-                  <th className="text-left px-4 py-4 text-white/60 font-medium">Status</th>
-                  <th className="text-left px-4 py-4 text-white/60 font-medium hidden lg:table-cell">
-                    Updated
-                  </th>
-                  <th className="px-6 py-4" />
-                </tr>
-              </thead>
-              <tbody>
-                {posts.map((post, i) => (
-                  <tr
-                    key={post.id}
-                    className={`border-b border-white/5 hover:bg-white/5 transition-colors ${
-                      i === posts.length - 1 ? "border-b-0" : ""
-                    }`}
-                  >
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-white line-clamp-1">{post.title}</p>
-                      <p className="text-white/40 text-xs mt-0.5 line-clamp-1">{post.description}</p>
-                    </td>
-                    <td className="px-4 py-4 hidden md:table-cell text-white/50 font-mono text-xs">
-                      {post.slug}
-                    </td>
-                    <td className="px-4 py-4">
-                      <button
-                        onClick={() => handleTogglePublish(post)}
-                        disabled={actionLoading === post.id}
-                        className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${
-                          post.status === "published"
-                            ? "bg-[#B6FF00]/10 text-[#B6FF00] hover:bg-[#B6FF00]/20"
-                            : "bg-white/10 text-white/50 hover:bg-white/20"
-                        } disabled:opacity-50`}
-                      >
-                        {actionLoading === post.id
-                          ? "…"
-                          : post.status === "published"
-                          ? "Published"
-                          : "Draft"}
-                      </button>
-                    </td>
-                    <td className="px-4 py-4 hidden lg:table-cell text-white/40 text-xs">
-                      {new Date(post.updatedAt).toLocaleDateString("en-GB")}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3 justify-end">
-                        <Link
-                          href={`/admin/posts/${post.slug}/edit`}
-                          className="text-white/60 hover:text-white transition-colors text-xs"
-                        >
-                          Edit
-                        </Link>
-                        {post.status === "published" && (
-                          <Link
-                            href={`/blog/${post.slug}`}
-                            target="_blank"
-                            className="text-white/60 hover:text-[#B6FF00] transition-colors text-xs"
-                          >
-                            View ↗
-                          </Link>
-                        )}
-                        <button
-                          onClick={() => handleDelete(post.id, post.title)}
-                          disabled={actionLoading === post.id}
-                          className="text-red-400/60 hover:text-red-400 transition-colors text-xs disabled:opacity-50"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        ))}
       </div>
-    </main>
+    </div>
   );
 }
