@@ -1086,9 +1086,8 @@ function Footer() {
 
         <nav aria-label="Footer navigation" style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
           {[
-            // { label: "Privacy Policy", href: "/privacy" },
-            // { label: "Terms of Service", href: "/terms" },
-            // { label: "Contact Us", href: "mailto:hello@fittrybe.com" },
+            { label: "Privacy Policy", href: "/privacy" },
+            { label: "Terms of Use", href: "/terms" },
             { label: "Join Waitlist", href: "/waitlist" },
             { label: "Blog", href: "/blog" },
           ].map(link => (
