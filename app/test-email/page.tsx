@@ -211,7 +211,7 @@ export default function TestEmailPage() {
           }}>
             Make sure your .env.local has:<br/>
             RESEND_API_KEY=your_api_key_here<br/>
-            RESEND_FROM_EMAIL=Fittrybe &lt;hello@fittrybe.com&gt;
+            RESEND_FROM_EMAIL=Fittrybe &lt;hello@fittrybe.co.uk&gt;
           </p>
         </div>
       </div>

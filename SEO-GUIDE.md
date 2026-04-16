@@ -35,16 +35,16 @@ This guide documents all SEO changes and how to validate them.
 # Build and inspect metadata output
 npm run build
 # Check Open Graph tags on rendered HTML
-curl https://fittrybe.com | grep 'og:'
+curl https://fittrybe.co.uk | grep 'og:'
 ```
 
 ---
 
 ### 2. Metadata API
 **Test URLs:**
-- https://metatags.io/?url=https://fittrybe.com
-- https://metatags.io/?url=https://fittrybe.com/waitlist
-- https://socialsharepreview.com/?url=https://fittrybe.com
+- https://metatags.io/?url=https://fittrybe.co.uk
+- https://metatags.io/?url=https://fittrybe.co.uk/waitlist
+- https://socialsharepreview.com/?url=https://fittrybe.co.uk
 
 **What to check:**
 - ✅ Title matches `seoConfig.pages.home.title`
@@ -58,13 +58,13 @@ curl https://fittrybe.com | grep 'og:'
 ### 3. Structured Data (JSON-LD)
 **Test:** Google Rich Results Test
 - https://search.google.com/test/rich-results
-- Enter `https://fittrybe.com` → should detect: Organization, WebSite, MobileApplication, FAQPage
-- Enter `https://fittrybe.com/waitlist` → should detect: WebPage, BreadcrumbList
+- Enter `https://fittrybe.co.uk` → should detect: Organization, WebSite, MobileApplication, FAQPage
+- Enter `https://fittrybe.co.uk/waitlist` → should detect: WebPage, BreadcrumbList
 
 **Manual check:**
 ```bash
 # Inspect the page source for JSON-LD scripts
-curl https://fittrybe.com | grep -A 100 'application/ld+json'
+curl https://fittrybe.co.uk | grep -A 100 'application/ld+json'
 ```
 
 **Schema.org validator:**
@@ -74,7 +74,7 @@ curl https://fittrybe.com | grep -A 100 'application/ld+json'
 ---
 
 ### 4. OG Image Generation
-**Test URL:** https://fittrybe.com/api/og?title=Find+Your+Game
+**Test URL:** https://fittrybe.co.uk/api/og?title=Find+Your+Game
 - Should render a 1200×630 PNG
 - Test custom titles: `/api/og?title=Join+the+Waitlist&description=Get+early+access`
 
@@ -86,19 +86,19 @@ curl https://fittrybe.com | grep -A 100 'application/ld+json'
 ---
 
 ### 5. Sitemap
-**Test URL:** https://fittrybe.com/sitemap.xml
+**Test URL:** https://fittrybe.co.uk/sitemap.xml
 - Should return valid XML
 - Validate at: https://www.xml-sitemaps.com/validate-xml-sitemap.html
 
 **Submit to Search Consoles:**
-1. Google Search Console → Sitemaps → Add `https://fittrybe.com/sitemap.xml`
+1. Google Search Console → Sitemaps → Add `https://fittrybe.co.uk/sitemap.xml`
 2. Bing Webmaster Tools → Sitemaps → Submit URL
 
 ---
 
 ### 6. Robots.txt
-**Test URL:** https://fittrybe.com/robots.txt
-- Should list `Sitemap: https://fittrybe.com/sitemap.xml`
+**Test URL:** https://fittrybe.co.uk/robots.txt
+- Should list `Sitemap: https://fittrybe.co.uk/sitemap.xml`
 - Should allow GPTBot, PerplexityBot, ClaudeBot
 - Validate at: https://www.google.com/webmasters/tools/robots-testing-tool
 
@@ -106,7 +106,7 @@ curl https://fittrybe.com | grep -A 100 'application/ld+json'
 
 ### 7. Core Web Vitals
 **Test tools:**
-- PageSpeed Insights: https://pagespeed.web.dev/?url=https://fittrybe.com
+- PageSpeed Insights: https://pagespeed.web.dev/?url=https://fittrybe.co.uk
 - Chrome DevTools → Lighthouse → Performance
 - WebPageTest: https://www.webpagetest.org/
 
@@ -131,9 +131,9 @@ curl https://fittrybe.com | grep -A 100 'application/ld+json'
 ```bash
 # Install axe CLI
 npm install -g @axe-core/cli
-axe https://fittrybe.com --exit
+axe https://fittrybe.co.uk --exit
 ```
-**Or use:** https://wave.webaim.org/report#/https://fittrybe.com
+**Or use:** https://wave.webaim.org/report#/https://fittrybe.co.uk
 
 **What to check:**
 - ✅ All images have `alt` text
@@ -150,16 +150,16 @@ axe https://fittrybe.com --exit
 
 #### Google Search Console
 1. Go to https://search.google.com/search-console/
-2. Add property: `https://fittrybe.com`
+2. Add property: `https://fittrybe.co.uk`
 3. Verify via HTML meta tag:
    - Add `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=xxxxx` to `.env.local`
    - Deploy → Google auto-verifies
-4. Submit sitemap: `https://fittrybe.com/sitemap.xml`
+4. Submit sitemap: `https://fittrybe.co.uk/sitemap.xml`
 5. Monitor: Coverage, Core Web Vitals, Rich Results
 
 #### Bing Webmaster Tools
 1. Go to https://www.bing.com/webmasters/
-2. Add site: `https://fittrybe.com`
+2. Add site: `https://fittrybe.co.uk`
 3. Verify via meta tag: `NEXT_PUBLIC_BING_SITE_AUTH=xxxxx`
 4. Submit sitemap
 

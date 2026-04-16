@@ -8,7 +8,7 @@
  *
  * Required env vars:
  *   RESEND_API_KEY      — from resend.com dashboard
- *   RESEND_FROM_EMAIL   — e.g. "Fittrybe <hello@fittrybe.com>"  (must be a verified domain)
+ *   RESEND_FROM_EMAIL   — e.g. "Fittrybe <hello@fittrybe.co.uk>"  (must be a verified domain)
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -117,7 +117,7 @@ function buildEmailHtml(name: string): string {
           <!-- CTA -->
           <tr>
             <td style="padding:32px 40px;text-align:center;">
-              <a href="https://fittrybe.com" style="display:inline-block;background:#B6FF00;color:#0D0D0D;font-size:14px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:14px 32px;border-radius:8px;">
+              <a href="https://fittrybe.co.uk" style="display:inline-block;background:#B6FF00;color:#0D0D0D;font-size:14px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:14px 32px;border-radius:8px;">
                 Explore Fittrybe →
               </a>
             </td>
