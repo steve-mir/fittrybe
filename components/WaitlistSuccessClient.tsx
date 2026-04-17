@@ -4,12 +4,6 @@ import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void;
-  }
-}
-
 function IconCheck({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -43,9 +37,8 @@ export default function WaitlistSuccessClient() {
   const count = params.get("count") ? Number(params.get("count")) : null;
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", "CompleteRegistration", { content_name: "Waitlist Signup", status: true });
-    }
+    // Lead event tracking moved to server-side CAPI in /api/waitlist
+    // This page now only handles visual celebration
     (async () => {
       const confetti = (await import("canvas-confetti")).default;
       const colors = ["#B6FF00", "#ffffff", "#0D0D0D", "#6aff00"];
