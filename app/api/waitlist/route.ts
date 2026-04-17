@@ -1,19 +1,26 @@
 /**
  * ─── POST /api/waitlist ───────────────────────────────────────────────────────
  *
- * 1. Validates payload (name, email, sports)
- * 2. Checks for duplicate email in Firestore
- * 3. Writes new waitlist doc
+ * 1. Validates payload (name, email)
+ * 2. Checks for duplicate email in Supabase
+ * 3. Writes new waitlist row
  * 4. Sends branded confirmation email via Resend
+ * 5. Fires Meta Conversions API `Lead` event server-side
  *
  * Required env vars:
- *   RESEND_API_KEY      — from resend.com dashboard
- *   RESEND_FROM_EMAIL   — e.g. "Fittrybe <hello@fittrybe.co.uk>"  (must be a verified domain)
+ *   RESEND_API_KEY          — from resend.com dashboard
+ *   RESEND_FROM_EMAIL       — e.g. "Fittrybe <hello@fittrybe.co.uk>"  (must be a verified domain)
+ *   META_PIXEL_ID           — Meta Pixel ID (1461832162343936)
+ *   META_CAPI_ACCESS_TOKEN  — Generated from Events Manager → Settings → Conversions API
+ *   META_CAPI_TEST_EVENT_CODE — Optional: for testing only (remove in production)
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { Resend } from "resend";
+import crypto from "crypto";
+
+/* ─── Resend (email) ──────────────────────────────────────────────────────── */
 
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY;
@@ -46,14 +53,96 @@ async function sendConfirmationEmail(name: string, to: string) {
     console.log("[Resend] Sent successfully:", data?.id);
   }
 }
-/* ─── helpers ─────────────────────────────────────────────────────────────── */
+
+/* ─── Meta Conversions API (Lead event) ──────────────────────────────────── */
+
+const sha256 = (value: string): string =>
+  crypto.createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
+
+async function sendLeadToMeta(
+  email: string,
+  fullName: string,
+  req: NextRequest
+): Promise<void> {
+  const pixelId = process.env.META_PIXEL_ID;
+  const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
+  const testEventCode = process.env.META_CAPI_TEST_EVENT_CODE;
+
+  if (!pixelId || !accessToken) {
+    console.warn("[Meta CAPI] Missing env vars — skipping Lead event");
+    return;
+  }
+
+  const [firstName, ...rest] = fullName.trim().split(/\s+/);
+  const lastName = rest.join(" ");
+
+  const userAgent = req.headers.get("user-agent") ?? "";
+  const clientIp =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "";
+
+  // Meta's browser pixel sets _fbp and _fbc cookies — forward them to improve match quality
+  const fbp = req.cookies.get("_fbp")?.value;
+  const fbc = req.cookies.get("_fbc")?.value;
+
+  const payload = {
+    data: [
+      {
+        event_name: "Lead",
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: `lead_${email}_${Date.now()}`, // for deduplication
+        action_source: "website",
+        event_source_url: "https://fittrybe.co.uk/waitlist",
+        user_data: {
+          em: [sha256(email)],
+          ...(firstName ? { fn: [sha256(firstName)] } : {}),
+          ...(lastName ? { ln: [sha256(lastName)] } : {}),
+          ...(clientIp ? { client_ip_address: clientIp } : {}),
+          ...(userAgent ? { client_user_agent: userAgent } : {}),
+          ...(fbp ? { fbp } : {}),
+          ...(fbc ? { fbc } : {}),
+        },
+        custom_data: {
+          content_name: "Waitlist Signup",
+          content_category: "waitlist",
+          currency: "GBP",
+          value: 0,
+        },
+      },
+    ],
+    ...(testEventCode ? { test_event_code: testEventCode } : {}),
+  };
+
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error("[Meta CAPI] Non-OK response:", response.status, errBody);
+    } else {
+      console.log("[Meta CAPI] Lead event sent for:", email);
+    }
+  } catch (err) {
+    // Don't fail the signup if tracking fails
+    console.error("[Meta CAPI] Lead event threw:", err);
+  }
+}
+
+/* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function buildEmailHtml(name: string): string {
-
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -143,7 +232,7 @@ function buildEmailHtml(name: string): string {
 </html>`;
 }
 
-/* ─── route handler ───────────────────────────────────────────────────────── */
+/* ─── Route handler ───────────────────────────────────────────────────────── */
 
 export async function POST(req: NextRequest) {
   try {
@@ -185,8 +274,12 @@ export async function POST(req: NextRequest) {
 
     if (insertError) throw insertError;
 
-    // ── Send confirmation email ───────────────────────────────────────────────
-    await sendConfirmationEmail(cleanName, cleanEmail);
+    // ── Side effects: email + Meta CAPI (fire-and-forget, don't block response) ──
+    // Run in parallel for faster response time
+    await Promise.all([
+      sendConfirmationEmail(cleanName, cleanEmail),
+      sendLeadToMeta(cleanEmail, cleanName, req),
+    ]);
 
     return NextResponse.json({ success: true, id: docRef?.id }, { status: 201 });
   } catch (err) {
