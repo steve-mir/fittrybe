@@ -15,6 +15,10 @@ interface Stats {
   openReports: number;
   totalRevenuePence: number;
   sessionsThisWeek: number;
+  bannedUsers: number;
+  pendingRefunds: number;
+  pendingPayouts: number;
+  waitlistCount: number;
 }
 
 export default function AdminOverview() {
@@ -36,13 +40,21 @@ export default function AdminOverview() {
       today.setHours(0, 0, 0, 0);
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-      const [usersRes, liveRes, todayRes, reportsRes, revenueRes, weekSessionsRes] = await Promise.all([
+      const [
+        usersRes, liveRes, todayRes, reportsRes,
+        revenueRes, weekSessionsRes, bannedRes,
+        refundRes, payoutRes, waitlistRes,
+      ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("sessions").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("sessions").select("id", { count: "exact", head: true }).in("status", ["active", "live"]),
         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", today.toISOString()),
-        supabase.from("user_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+        supabase.from("user_reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("wallet_transactions").select("amount_pence").eq("type", "deposit"),
         supabase.from("sessions").select("id", { count: "exact", head: true }).gte("created_at", weekAgo.toISOString()),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_banned", true),
+        supabase.from("refund_events").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("payout_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("waitlist").select("id", { count: "exact", head: true }),
       ]);
 
       const revenue = (revenueRes.data ?? []).reduce((sum: number, r: { amount_pence: number }) => sum + (r.amount_pence ?? 0), 0);
@@ -54,6 +66,10 @@ export default function AdminOverview() {
         openReports: reportsRes.count ?? 0,
         totalRevenuePence: revenue,
         sessionsThisWeek: weekSessionsRes.count ?? 0,
+        bannedUsers: bannedRes.count ?? 0,
+        pendingRefunds: refundRes.count ?? 0,
+        pendingPayouts: payoutRes.count ?? 0,
+        waitlistCount: waitlistRes.count ?? 0,
       });
     } catch (e) {
       console.error(e);
@@ -63,39 +79,56 @@ export default function AdminOverview() {
   }
 
   const QUICK_LINKS = [
-    { href: "/admin/users", label: "User Management", desc: "Search & manage all accounts" },
-    { href: "/admin/sessions", label: "Session Management", desc: "All sessions across 6 sports" },
-    { href: "/admin/payments", label: "Payments & Financials", desc: "Transaction ledger & payouts" },
-    { href: "/admin/moderation", label: "Moderation Queue", desc: "Reports & strikes", alert: stats?.openReports },
-    { href: "/admin/reviews", label: "Reviews & Trust", desc: "Ratings & reliability scores" },
+    { href: "/admin/users", label: "Users", desc: "Directory, bans, verification" },
+    { href: "/admin/sessions", label: "Sessions", desc: "All sessions across sports" },
+    { href: "/admin/venues", label: "Venues", desc: "Partner venue management" },
+    { href: "/admin/payments", label: "Payments", desc: "Transactions, refunds, payouts", alert: stats?.pendingRefunds },
+    { href: "/admin/moderation", label: "Moderation", desc: "Reports, strikes, blocks", alert: stats?.openReports },
+    { href: "/admin/reviews", label: "Reviews", desc: "Ratings & reliability" },
     { href: "/admin/hosts", label: "Hosts", desc: "Pro accounts & earnings" },
-    { href: "/admin/notifications", label: "Notifications", desc: "Push & email comms" },
-    { href: "/admin/content", label: "Content", desc: "Posts, stories & media" },
+    { href: "/admin/content", label: "Content", desc: "Posts, stories, match reports" },
+    { href: "/admin/chats", label: "Chats", desc: "Session & direct chat oversight" },
+    { href: "/admin/engagement", label: "Engagement", desc: "Challenges, invites, reliability log" },
+    { href: "/admin/notifications", label: "Notifications", desc: "Push, email, broadcast" },
     { href: "/admin/analytics", label: "Analytics", desc: "Platform growth & health" },
     { href: "/admin/posts", label: "Blog Posts", desc: "Marketing site blog" },
+    { href: "/admin/settings", label: "Settings", desc: "App config & help content" },
   ];
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <PageHeader title="Overview" desc="Platform pulse at a glance" />
 
       {loading ? (
         <div className="text-white/30 text-sm font-[family-name:var(--font-dm-sans)]">Loading stats…</div>
       ) : stats ? (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <StatCard label="Total Users" value={stats.totalUsers.toLocaleString()} />
             <StatCard label="Sessions Live" value={stats.sessionsLive} accent={stats.sessionsLive > 0} />
             <StatCard label="New Today" value={stats.newUsersToday} />
+            <StatCard label="This Week" value={stats.sessionsThisWeek} sub="Sessions created" />
+            <StatCard label="Revenue" value={`£${(stats.totalRevenuePence / 100).toFixed(2)}`} accent />
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
             <StatCard label="Open Reports" value={stats.openReports} accent={stats.openReports > 0} sub={stats.openReports > 0 ? "Need attention" : undefined} />
-            <StatCard label="Sessions This Week" value={stats.sessionsThisWeek} />
-            <StatCard label="Total Revenue" value={`£${(stats.totalRevenuePence / 100).toFixed(2)}`} accent />
+            <StatCard label="Pending Refunds" value={stats.pendingRefunds} accent={stats.pendingRefunds > 0} />
+            <StatCard label="Pending Payouts" value={stats.pendingPayouts} accent={stats.pendingPayouts > 0} />
+            <StatCard label="Banned Users" value={stats.bannedUsers} accent={stats.bannedUsers > 0} />
+            <StatCard label="Waitlist" value={stats.waitlistCount.toLocaleString()} />
           </div>
 
           {stats.openReports > 0 && (
             <SectionNote>
               ⚠️ {stats.openReports} open moderation report{stats.openReports !== 1 ? "s" : ""} pending review.{" "}
               <Link href="/admin/moderation" className="text-[#B6FF00] underline underline-offset-2">Go to Moderation →</Link>
+            </SectionNote>
+          )}
+          {stats.pendingRefunds > 0 && (
+            <SectionNote>
+              💸 {stats.pendingRefunds} refund{stats.pendingRefunds !== 1 ? "s" : ""} awaiting approval.{" "}
+              <Link href="/admin/payments" className="text-[#B6FF00] underline underline-offset-2">Go to Payments →</Link>
             </SectionNote>
           )}
         </>

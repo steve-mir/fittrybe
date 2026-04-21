@@ -9,14 +9,18 @@ const NAV = [
   { href: "/admin", label: "Overview", icon: "⬡", exact: true },
   { href: "/admin/users", label: "Users", icon: "◎" },
   { href: "/admin/sessions", label: "Sessions", icon: "◈" },
+  { href: "/admin/venues", label: "Venues", icon: "▨" },
   { href: "/admin/payments", label: "Payments", icon: "◇" },
   { href: "/admin/moderation", label: "Moderation", icon: "◬" },
   { href: "/admin/reviews", label: "Reviews", icon: "◉" },
-  { href: "/admin/notifications", label: "Notifications", icon: "◍" },
-  { href: "/admin/content", label: "Content", icon: "▦" },
   { href: "/admin/hosts", label: "Hosts", icon: "◑" },
+  { href: "/admin/content", label: "Content", icon: "▦" },
+  { href: "/admin/chats", label: "Chats", icon: "▢" },
+  { href: "/admin/engagement", label: "Engagement", icon: "◐" },
+  { href: "/admin/notifications", label: "Notifications", icon: "◍" },
   { href: "/admin/analytics", label: "Analytics", icon: "◰" },
   { href: "/admin/posts", label: "Blog", icon: "▤" },
+  { href: "/admin/settings", label: "Settings", icon: "⚙" },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
