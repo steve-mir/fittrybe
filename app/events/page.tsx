@@ -4,6 +4,7 @@ import { buildCanonicalUrl, seoConfig } from "@/lib/seo-config";
 import { buildItemListSchema } from "@/lib/structured-data";
 import EventCard from "@/components/EventCard";
 import Link from "next/link";
+import Image from "next/image";
 
 // Revalidate every 60 seconds so new sessions appear without a full rebuild
 export const revalidate = 60;
@@ -124,9 +125,17 @@ export default async function EventsIndexPage({
         <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
           <Link
             href="/"
-            className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-black tracking-tight text-[#B6FF00]"
+            aria-label="Fittrybe — return to homepage"
+            className="inline-flex items-center"
           >
-            FITTRYBE
+            <Image
+              src="/wordmark-white.png"
+              alt="Fittrybe"
+              width={132}
+              height={50}
+              priority
+              className="h-7 w-auto"
+            />
           </Link>
           <div className="flex items-center gap-4">
             <Link

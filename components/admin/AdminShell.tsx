@@ -15,6 +15,7 @@ const NAV = [
   { href: "/admin/moderation", label: "Moderation", icon: "◬" },
   { href: "/admin/reviews", label: "Reviews", icon: "◉" },
   { href: "/admin/hosts", label: "Hosts", icon: "◑" },
+  { href: "/admin/verifications", label: "Verifications", icon: "◔" },
   { href: "/admin/content", label: "Content", icon: "▦" },
   { href: "/admin/chats", label: "Chats", icon: "▢" },
   { href: "/admin/engagement", label: "Engagement", icon: "◐" },
@@ -58,9 +59,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className="px-5 py-5 border-b border-white/8">
           <div className="flex items-center gap-2">
             <Image src="/logo-mark.png" alt="" width={24} height={24} priority />
-            <span className="font-[family-name:var(--font-barlow-condensed)] text-xl font-black text-[#B6FF00]">
-              FITTRYBE
-            </span>
+            <Image
+              src="/wordmark-white.png"
+              alt="Fittrybe"
+              width={94}
+              height={36}
+              priority
+              className="h-5 w-auto"
+            />
             <span className="text-white/30 text-xs font-[family-name:var(--font-dm-sans)] border border-white/10 rounded px-1.5 py-0.5">
               ADMIN
             </span>
@@ -120,8 +126,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </button>
           <div className="flex items-center gap-2">
             <Image src="/logo-mark.png" alt="" width={22} height={22} />
-            <span className="font-[family-name:var(--font-barlow-condensed)] text-lg font-black text-[#B6FF00]">
-              FITTRYBE ADMIN
+            <Image
+              src="/wordmark-white.png"
+              alt="Fittrybe"
+              width={86}
+              height={32}
+              className="h-[18px] w-auto"
+            />
+            <span className="text-white/40 text-xs font-[family-name:var(--font-dm-sans)] uppercase tracking-wider">
+              Admin
             </span>
           </div>
         </div>

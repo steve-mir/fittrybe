@@ -27,6 +27,7 @@ export const runtime = "edge";
 
 const SITE_NAME = "Fittrybe";
 const SITE_URL  = "fittrybe.co.uk";
+const SITE_ORIGIN = "https://fittrybe.co.uk";
 const LIME      = "#B6FF00";
 const DARK      = "#050505";
 const MID_DARK  = "#0D0D0D";
@@ -98,19 +99,15 @@ export async function GET(req: NextRequest) {
             zIndex: 2,
           }}
         >
-          {/* Logo wordmark */}
-          <div
-            style={{
-              display: "flex",
-              fontWeight: 900,
-              fontSize: 36,
-              letterSpacing: "-1px",
-              textTransform: "uppercase",
-            }}
-          >
-            <span style={{ color: "#fff" }}>fit</span>
-            <span style={{ color: LIME }}>trybe</span>
-          </div>
+          {/* Logo wordmark — official brand asset */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${SITE_ORIGIN}/wordmark-white.png`}
+            alt={SITE_NAME}
+            width={150}
+            height={56}
+            style={{ display: "block", height: 40, width: "auto" }}
+          />
 
           {/* Spacer */}
           <div style={{ flex: 1 }} />

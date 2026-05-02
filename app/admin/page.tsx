@@ -86,6 +86,7 @@ export default function AdminOverview() {
     { href: "/admin/moderation", label: "Moderation", desc: "Reports, strikes, blocks", alert: stats?.openReports },
     { href: "/admin/reviews", label: "Reviews", desc: "Ratings & reliability" },
     { href: "/admin/hosts", label: "Hosts", desc: "Pro accounts & earnings" },
+    { href: "/admin/verifications", label: "Verifications", desc: "Pro host applicant approvals" },
     { href: "/admin/content", label: "Content", desc: "Posts, stories, match reports" },
     { href: "/admin/chats", label: "Chats", desc: "Session & direct chat oversight" },
     { href: "/admin/engagement", label: "Engagement", desc: "Challenges, invites, reliability log" },

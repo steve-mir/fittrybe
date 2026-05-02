@@ -168,8 +168,8 @@ function buildEmailHtml(name: string): string {
           <!-- Logo + hero -->
           <tr>
             <td style="padding:40px 40px 0;text-align:center;">
-              <p style="margin:0 0 24px;font-size:32px;font-weight:900;letter-spacing:-0.02em;text-transform:uppercase;line-height:1;">
-                <span style="color:#fff;">fit</span><span style="color:#B6FF00;">trybe</span>
+              <p style="margin:0 0 24px;line-height:1;">
+                <img src="https://fittrybe.co.uk/wordmark-white.png" alt="Fittrybe" width="160" height="60" style="display:inline-block;height:36px;width:auto;border:0;" />
               </p>
               <h1 style="margin:0 0 12px;font-size:36px;font-weight:900;letter-spacing:-0.02em;text-transform:uppercase;line-height:1.1;color:#fff;">
                 You're <span style="color:#B6FF00;">In,</span><br/>${name.split(" ")[0]}! 🎉

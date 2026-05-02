@@ -15,6 +15,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getBlogPost, getAllBlogSlugs } from "@/lib/posts";
 import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
 import {
@@ -188,9 +189,17 @@ export default async function BlogPostPage({
         <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-4xl mx-auto">
           <Link
             href="/"
-            className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-black tracking-tight text-[#B6FF00]"
+            aria-label="Fittrybe — return to homepage"
+            className="inline-flex items-center"
           >
-            FITTRYBE
+            <Image
+              src="/wordmark-white.png"
+              alt="Fittrybe"
+              width={132}
+              height={50}
+              priority
+              className="h-7 w-auto"
+            />
           </Link>
           <Link
             href="/blog"

@@ -45,15 +45,20 @@ function LoginForm() {
         <div className="text-center mb-10">
           <Image
             src="/logo-mark.png"
-            alt="Fittrybe"
+            alt=""
             width={64}
             height={64}
             priority
             className="mx-auto mb-3"
           />
-          <span className="font-[family-name:var(--font-barlow-condensed)] text-4xl font-black tracking-tight text-[#B6FF00]">
-            FITTRYBE
-          </span>
+          <Image
+            src="/wordmark-white.png"
+            alt="Fittrybe"
+            width={212}
+            height={80}
+            priority
+            className="mx-auto h-10 w-auto"
+          />
           <p className="text-white/40 text-sm mt-2 font-[family-name:var(--font-dm-sans)]">
             Admin Dashboard
           </p>

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 function IconCheck({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
   return (
@@ -60,9 +61,15 @@ export default function WaitlistSuccessClient() {
         <div className="success-card" style={{ width: "100%", maxWidth: 480 }}>
 
           <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
-            <Link href="/" style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontWeight: 900, fontSize: "1.8rem", letterSpacing: "-0.02em", textDecoration: "none" }}>
-              <span style={{ color: "#fff" }}>fit</span>
-              <span style={{ color: "#B6FF00" }}>trybe</span>
+            <Link href="/" aria-label="Fittrybe — return to homepage" style={{ display: "inline-block", textDecoration: "none" }}>
+              <Image
+                src="/wordmark-white.png"
+                alt="Fittrybe"
+                width={132}
+                height={50}
+                priority
+                style={{ display: "block", height: "30px", width: "auto" }}
+              />
             </Link>
           </div>
 
