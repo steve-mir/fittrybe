@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, onAuthChange } from "@/lib/auth";
@@ -56,6 +57,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/8">
           <div className="flex items-center gap-2">
+            <Image src="/logo-mark.png" alt="" width={24} height={24} priority />
             <span className="font-[family-name:var(--font-barlow-condensed)] text-xl font-black text-[#B6FF00]">
               FITTRYBE
             </span>
@@ -116,9 +118,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           >
             ☰
           </button>
-          <span className="font-[family-name:var(--font-barlow-condensed)] text-lg font-black text-[#B6FF00]">
-            FITTRYBE ADMIN
-          </span>
+          <div className="flex items-center gap-2">
+            <Image src="/logo-mark.png" alt="" width={22} height={22} />
+            <span className="font-[family-name:var(--font-barlow-condensed)] text-lg font-black text-[#B6FF00]">
+              FITTRYBE ADMIN
+            </span>
+          </div>
         </div>
 
         <div className="p-6 lg:p-8">{children}</div>

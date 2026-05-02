@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getIdToken } from "@/lib/auth";
 import { Suspense } from "react";
@@ -42,6 +43,14 @@ function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-10">
+          <Image
+            src="/logo-mark.png"
+            alt="Fittrybe"
+            width={64}
+            height={64}
+            priority
+            className="mx-auto mb-3"
+          />
           <span className="font-[family-name:var(--font-barlow-condensed)] text-4xl font-black tracking-tight text-[#B6FF00]">
             FITTRYBE
           </span>

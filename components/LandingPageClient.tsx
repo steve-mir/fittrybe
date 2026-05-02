@@ -279,11 +279,15 @@ function Navbar() {
       }}
     >
       <Link href="/" aria-label="Fittrybe — return to homepage" style={{
+        display: "flex", alignItems: "center", gap: "0.5rem",
         fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
         fontWeight: 900, fontSize: "1.7rem", letterSpacing: "-0.02em", textDecoration: "none",
       }}>
-        <span style={{ color: "#fff" }}>fit</span>
-        <span style={{ color: "#B6FF00" }}>trybe</span>
+        <Image src="/logo-mark.png" alt="" width={32} height={32} priority style={{ display: "block" }} />
+        <span>
+          <span style={{ color: "#fff" }}>fit</span>
+          <span style={{ color: "#B6FF00" }}>trybe</span>
+        </span>
       </Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
@@ -1077,11 +1081,15 @@ function Footer() {
     <footer style={{ background: "#0D0D0D", borderTop: "1px solid rgba(255,255,255,0.05)", padding: "40px 5vw" }}>
       <div className="footer-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
         <Link href="/" aria-label="Fittrybe homepage" style={{
+          display: "flex", alignItems: "center", gap: "0.5rem",
           fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
           fontWeight: 900, fontSize: "1.6rem", letterSpacing: "-0.02em", textDecoration: "none",
         }}>
-          <span style={{ color: "#fff" }}>fit</span>
-          <span style={{ color: "#B6FF00" }}>trybe</span>
+          <Image src="/logo-mark.png" alt="" width={28} height={28} style={{ display: "block" }} />
+          <span>
+            <span style={{ color: "#fff" }}>fit</span>
+            <span style={{ color: "#B6FF00" }}>trybe</span>
+          </span>
         </Link>
 
         <nav aria-label="Footer navigation" style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>

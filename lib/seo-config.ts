@@ -97,6 +97,7 @@ export const seoConfig = {
     url: `${SITE_URL}/logo.png`,
     width: 512,
     height: 512,
+    alt: "Fittrybe logo",
   },
 
   favicon: "/favicon.ico",
