@@ -40,6 +40,25 @@ const labelStyle: React.CSSProperties = {
   marginBottom: "0.4rem",
 };
 
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.61z" />
+      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.32A9 9 0 0 0 9 18z" />
+      <path fill="#FBBC05" d="M3.97 10.71a5.4 5.4 0 0 1 0-3.42V4.97H.96a9 9 0 0 0 0 8.06l3-2.32z" />
+      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.34l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .96 4.96l3 2.33A5.36 5.36 0 0 1 9 3.58z" />
+    </svg>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+    </svg>
+  );
+}
+
 export default function DeleteAccountClient() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -49,6 +68,7 @@ export default function DeleteAccountClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [signingIn, setSigningIn] = useState(false);
+  const [oauthBusy, setOauthBusy] = useState<"google" | "apple" | null>(null);
 
   // confirm form
   const [confirmText, setConfirmText] = useState("");
@@ -97,6 +117,23 @@ export default function DeleteAccountClient() {
       return;
     }
     setPassword("");
+  }
+
+  async function handleOAuth(provider: "google" | "apple") {
+    setError(null);
+    setOauthBusy(provider);
+    const { error: err } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/account/delete`,
+      },
+    });
+    if (err) {
+      setOauthBusy(null);
+      setError(err.message);
+      triggerShake();
+    }
+    // On success the browser is redirected away — no further state change here.
   }
 
   async function handleDelete() {
@@ -232,8 +269,70 @@ export default function DeleteAccountClient() {
               /* ── Step 1: sign in ────────────────────────────────────────── */
               <>
                 <p style={{ fontSize: "0.85rem", color: "#9CA3AF", marginBottom: "1.25rem" }}>
-                  Sign in to confirm you own this account.
+                  Sign in to confirm you own this account. Use the same method
+                  you used to sign up (Google, Apple, or email).
                 </p>
+
+                {/* OAuth buttons */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1rem" }}>
+                  <button
+                    onClick={() => handleOAuth("google")}
+                    disabled={oauthBusy !== null || signingIn}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.6rem",
+                      width: "100%",
+                      background: "#fff",
+                      color: "#0D0D0D",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "0.85rem 1rem",
+                      fontSize: "0.92rem",
+                      fontWeight: 600,
+                      cursor: oauthBusy !== null || signingIn ? "not-allowed" : "pointer",
+                      opacity: oauthBusy === "google" ? 0.7 : 1,
+                    }}
+                  >
+                    <GoogleIcon />
+                    {oauthBusy === "google" ? "Redirecting…" : "Continue with Google"}
+                  </button>
+
+                  <button
+                    onClick={() => handleOAuth("apple")}
+                    disabled={oauthBusy !== null || signingIn}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.6rem",
+                      width: "100%",
+                      background: "#000",
+                      color: "#fff",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      borderRadius: 8,
+                      padding: "0.85rem 1rem",
+                      fontSize: "0.92rem",
+                      fontWeight: 600,
+                      cursor: oauthBusy !== null || signingIn ? "not-allowed" : "pointer",
+                      opacity: oauthBusy === "apple" ? 0.7 : 1,
+                    }}
+                  >
+                    <AppleIcon />
+                    {oauthBusy === "apple" ? "Redirecting…" : "Continue with Apple"}
+                  </button>
+                </div>
+
+                {/* Divider */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "0.5rem 0 1rem" }}>
+                  <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+                  <span style={{ fontSize: "0.7rem", color: "#4B5563", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                    or with email
+                  </span>
+                  <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+                </div>
+
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
                   <div>
                     <label htmlFor="del-email" style={labelStyle}>Email</label>
@@ -268,7 +367,7 @@ export default function DeleteAccountClient() {
 
                   <button
                     onClick={handleSignIn}
-                    disabled={signingIn}
+                    disabled={signingIn || oauthBusy !== null}
                     style={{
                       width: "100%",
                       background: signingIn ? "rgba(182,255,0,0.6)" : "#B6FF00",
@@ -281,7 +380,7 @@ export default function DeleteAccountClient() {
                       letterSpacing: "0.08em",
                       textTransform: "uppercase",
                       color: "#0D0D0D",
-                      cursor: signingIn ? "not-allowed" : "pointer",
+                      cursor: signingIn || oauthBusy !== null ? "not-allowed" : "pointer",
                     }}
                   >
                     {signingIn ? "Signing in…" : "Sign in to continue"}
