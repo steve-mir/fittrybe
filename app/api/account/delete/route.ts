@@ -25,9 +25,10 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 async function resolveUser(req: NextRequest) {
   const authHeader = req.headers.get("authorization") ?? "";
@@ -87,7 +88,16 @@ export async function POST(req: NextRequest) {
   }
 
   const uid = user.id;
-  const sb = supabaseAdmin;
+  let sb: ReturnType<typeof getSupabaseAdmin>;
+  try {
+    sb = getSupabaseAdmin();
+  } catch (err) {
+    console.error("[delete-account] admin client init failed:", err);
+    return NextResponse.json(
+      { error: "Server is not configured for account deletion." },
+      { status: 500 },
+    );
+  }
 
   // ── 1. Find sessions hosted by this user, plus their children ─────────────
   const { data: hostedSessions } = await sb
