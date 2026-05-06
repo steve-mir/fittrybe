@@ -139,6 +139,12 @@ export default async function EventsIndexPage({
           </Link>
           <div className="flex items-center gap-4">
             <Link
+              href="/sports"
+              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] hidden sm:block"
+            >
+              Sports
+            </Link>
+            <Link
               href="/blog"
               className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] hidden sm:block"
             >

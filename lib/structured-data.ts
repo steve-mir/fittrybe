@@ -36,6 +36,27 @@ export function buildOrganizationSchema() {
     description: seoConfig.description,
     email: seoConfig.author.email,
     foundingDate: "2024",
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "GB",
+      addressLocality: "London",
+    },
+    areaServed: {
+      "@type": "Country",
+      name: "United Kingdom",
+    },
+    knowsAbout: [
+      "social sports",
+      "grassroots sports",
+      "football",
+      "basketball",
+      "tennis",
+      "badminton",
+      "running",
+      "cycling",
+      "five-a-side",
+      "sports community",
+    ],
     numberOfEmployees: {
       "@type": "QuantitativeValue",
       minValue: 1,
@@ -46,11 +67,16 @@ export function buildOrganizationSchema() {
       "@type": "ContactPoint",
       contactType: "customer support",
       email: seoConfig.author.email,
+      areaServed: "GB",
+      availableLanguage: ["en-GB"],
     },
   };
 }
 
 // ─── WebSite ──────────────────────────────────────────────────────────────────
+// NOTE: SearchAction removed — pointing it at /search?q= when no search page
+// exists violates Google's structured-data guidelines (target must resolve
+// to a working SERP). Re-add when/if site search is implemented.
 export function buildWebSiteSchema() {
   return {
     "@context": "https://schema.org",
@@ -63,14 +89,6 @@ export function buildWebSiteSchema() {
       "@id": `${seoConfig.siteUrl}/#organization`,
     },
     inLanguage: seoConfig.siteLanguage,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${seoConfig.siteUrl}/search?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
   };
 }
 
@@ -99,13 +117,9 @@ export function buildAppSchema() {
       availability: "https://schema.org/PreOrder",
       priceValidUntil: "2026-12-31",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5",
-      ratingCount: "1",
-      bestRating: "5",
-      worstRating: "1",
-    },
+    // NOTE: aggregateRating intentionally omitted until we have real reviews.
+    // Fake/self-issued ratings violate Google guidelines and can trigger a
+    // manual action. Re-add via app store reviews / verified user surveys.
     screenshot: seoConfig.defaultOGImage.url,
     featureList: [
       "Discover local sports sessions",

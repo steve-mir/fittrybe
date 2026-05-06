@@ -293,6 +293,26 @@ function Navbar() {
       </Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+        <Link href="/sports" aria-label="Browse sports on Fittrybe" style={{
+          color: "#9CA3AF",
+          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
+          textTransform: "uppercase", textDecoration: "none",
+          transition: "color 0.2s",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#9CA3AF"; }}
+        >Sports</Link>
+        <Link href="/events" aria-label="View upcoming sports sessions" style={{
+          color: "#9CA3AF",
+          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
+          textTransform: "uppercase", textDecoration: "none",
+          transition: "color 0.2s",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#9CA3AF"; }}
+        >Sessions</Link>
         <Link href="/blog" aria-label="Read the Fittrybe blog" style={{
           color: "#9CA3AF",
           fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
@@ -1075,6 +1095,128 @@ function BlogPreviewSection() {
 }
 
 
+// ─── FAQ Section ──────────────────────────────────────────────────────────────
+// Visible counterpart to the FAQPage JSON-LD already injected from app/page.tsx.
+// Google requires the FAQ content to be present in the rendered HTML for the
+// schema to be valid — without this section, the schema is non-compliant.
+function FAQSection({
+  faqs,
+}: {
+  faqs: Array<{ question: string; answer: string }>;
+}) {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  if (!faqs?.length) return null;
+
+  return (
+    <section
+      aria-label="Frequently asked questions"
+      style={{
+        padding: "80px 5vw",
+        maxWidth: 880,
+        margin: "0 auto",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <header style={{ textAlign: "center", marginBottom: "3rem" }}>
+        <span
+          style={{
+            display: "inline-block",
+            color: "#B6FF00",
+            fontSize: "0.7rem",
+            fontWeight: 800,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            marginBottom: "0.75rem",
+          }}
+        >
+          FAQ
+        </span>
+        <h2
+          style={{
+            fontFamily:
+              "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+            fontSize: "clamp(2rem, 5vw, 3rem)",
+            fontWeight: 900,
+            textTransform: "uppercase",
+            letterSpacing: "-0.01em",
+            color: "#fff",
+            lineHeight: 1.05,
+          }}
+        >
+          Questions, answered.
+        </h2>
+      </header>
+
+      <dl style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        {faqs.map((faq, i) => {
+          const isOpen = openIndex === i;
+          const panelId = `faq-panel-${i}`;
+          const buttonId = `faq-button-${i}`;
+          return (
+            <div className="faq-item" key={faq.question}>
+              <dt>
+                <button
+                  id={buttonId}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => setOpenIndex(isOpen ? null : i)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "1rem",
+                    padding: "1.4rem 0",
+                    background: "transparent",
+                    border: "none",
+                    color: "#fff",
+                    fontFamily:
+                      "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                    fontWeight: 700,
+                    fontSize: "1.05rem",
+                    letterSpacing: "0.01em",
+                    textTransform: "uppercase",
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span>{faq.question}</span>
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s ease",
+                      color: "#B6FF00",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <IconChevronDown size={18} />
+                  </span>
+                </button>
+              </dt>
+              <dd
+                id={panelId}
+                role="region"
+                aria-labelledby={buttonId}
+                hidden={!isOpen}
+                style={{
+                  padding: isOpen ? "0 0 1.4rem 0" : 0,
+                  color: "#9CA3AF",
+                  fontSize: "0.92rem",
+                  lineHeight: 1.65,
+                  margin: 0,
+                }}
+              >
+                {faq.answer}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+    </section>
+  );
+}
+
 function Footer() {
   // Use lazy initializer to get current year without causing hydration issues
   const [currentYear] = useState<number>(() => new Date().getFullYear());
@@ -1097,10 +1239,12 @@ function Footer() {
 
         <nav aria-label="Footer navigation" style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
           {[
+            { label: "Sports", href: "/sports" },
+            { label: "Sessions", href: "/events" },
+            { label: "Blog", href: "/blog" },
+            { label: "Join Waitlist", href: "/waitlist" },
             { label: "Privacy Policy", href: "/privacy" },
             { label: "Terms of Use", href: "/terms" },
-            { label: "Join Waitlist", href: "/waitlist" },
-            { label: "Blog", href: "/blog" },
           ].map(link => (
             <a key={link.label} href={link.href} className="footer-link">{link.label}</a>
           ))}
@@ -1127,9 +1271,12 @@ function Footer() {
   );
 }
 
-const faqs = [];
 // ─── Root Client Component ────────────────────────────────────────────────────
-export default function LandingPageClient({ faqs }: { faqs: Array<{ question: string; answer: string }> }) {
+export default function LandingPageClient({
+  faqs,
+}: {
+  faqs: Array<{ question: string; answer: string }>;
+}) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
@@ -1139,7 +1286,7 @@ export default function LandingPageClient({ faqs }: { faqs: Array<{ question: st
         <StickyScrollStory />
         <BentoGrid />
         <BlogPreviewSection />
-        {/* <FAQSection faqs={faqs} /> */}
+        <FAQSection faqs={faqs} />
       </main>
       <Footer />
     </>

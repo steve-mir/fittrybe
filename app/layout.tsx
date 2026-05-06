@@ -5,6 +5,7 @@
 
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, DM_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { seoConfig } from "@/lib/seo-config";
 import {
@@ -44,7 +45,12 @@ export const metadata: Metadata = {
   publisher: seoConfig.publisher,
   alternates: {
     canonical: seoConfig.siteUrl,
-    languages: { "en-GB": seoConfig.siteUrl, "en-US": seoConfig.siteUrl },
+    // Site is en-GB only — declaring en-US would create duplicate-content
+    // signals. Use x-default so search engines don't assume a region.
+    languages: {
+      "en-GB": seoConfig.siteUrl,
+      "x-default": seoConfig.siteUrl,
+    },
   },
   robots: seoConfig.robotsDefault,
   openGraph: {
@@ -56,7 +62,11 @@ export const metadata: Metadata = {
     description: seoConfig.shortDescription,
     images: [
       {
-        url: `/api/og?title=${encodeURIComponent("Find Your Game. Play With Your City.")}`,
+        // Absolute URL — WhatsApp/Facebook crawlers cannot resolve
+        // relative og:image paths. metadataBase handles most cases but
+        // being explicit here avoids edge bugs on preview deployments.
+        url: seoConfig.defaultOGImage.url,
+        secureUrl: seoConfig.defaultOGImage.url,
         width: seoConfig.defaultOGImage.width,
         height: seoConfig.defaultOGImage.height,
         alt: seoConfig.defaultOGImage.alt,
@@ -70,7 +80,7 @@ export const metadata: Metadata = {
     description: seoConfig.shortDescription,
     site: seoConfig.twitterHandle,
     creator: seoConfig.twitterHandle,
-    images: [`/api/og?title=${encodeURIComponent("Find Your Game. Play With Your City.")}`],
+    images: [seoConfig.defaultOGImage.url],
   },
   applicationName: seoConfig.applicationName,
   category: seoConfig.category,
@@ -123,14 +133,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         {seoConfig.analytics.ga4MeasurementId && (
           <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${seoConfig.analytics.ga4MeasurementId}`} />
-            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${seoConfig.analytics.ga4MeasurementId}',{anonymize_ip:true});` }} />
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${seoConfig.analytics.ga4MeasurementId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${seoConfig.analytics.ga4MeasurementId}',{anonymize_ip:true});`}
+            </Script>
           </>
         )}
         {seoConfig.analytics.metaPixelId && (
           <>
-            <script dangerouslySetInnerHTML={{ __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${seoConfig.analytics.metaPixelId}');fbq('track','PageView');` }} />
-            <noscript dangerouslySetInnerHTML={{ __html: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${seoConfig.analytics.metaPixelId}&ev=PageView&noscript=1" />` }} />
+            <Script id="meta-pixel" strategy="afterInteractive">
+              {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${seoConfig.analytics.metaPixelId}');fbq('track','PageView');`}
+            </Script>
+            <noscript
+              dangerouslySetInnerHTML={{
+                __html: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${seoConfig.analytics.metaPixelId}&ev=PageView&noscript=1" alt="" />`,
+              }}
+            />
           </>
         )}
       </body>

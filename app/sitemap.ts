@@ -48,7 +48,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "hourly", // Sessions are time-sensitive — crawl frequently
       priority: 0.9,
     },
+    {
+      url: `${BASE_URL}/sports`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/privacy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ];
+
+  // Per-sport programmatic landing pages — high SEO value for "<sport> near me"
+  const SPORTS = [
+    "football",
+    "basketball",
+    "tennis",
+    "badminton",
+    "running",
+    "cycling",
+    "swimming",
+    "gym",
+    "boxing",
+  ];
+  const sportPages: MetadataRoute.Sitemap = SPORTS.map((sport) => ({
+    url: `${BASE_URL}/sports/${sport}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
 
   // Blog post pages — fetch full post data to use real lastModified dates
   let blogPages: MetadataRoute.Sitemap = [];
@@ -82,5 +119,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Silently skip if Supabase is unreachable during build
   }
 
-  return [...staticPages, ...blogPages, ...eventPages];
+  return [...staticPages, ...sportPages, ...blogPages, ...eventPages];
 }
