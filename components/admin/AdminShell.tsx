@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, onAuthChange } from "@/lib/auth";
+import { Wordmark } from "@/components/brand/Wordmark";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: "⬡", exact: true },
@@ -58,16 +59,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/8">
           <div className="flex items-center gap-2">
-            <Image src="/logo-mark.png" alt="" width={24} height={24} priority />
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={94}
-              height={36}
-              priority
-              className="h-5 w-auto"
-            />
-            <span className="text-white/30 text-xs font-[family-name:var(--font-dm-sans)] border border-white/10 rounded px-1.5 py-0.5">
+            <Image src="/logo-icon-lime.png" alt="" width={24} height={24} priority />
+            <Wordmark height={20} />
+            <span className="text-white/30 text-xs font-[family-name:var(--font-inter-tight)] border border-white/10 rounded px-1.5 py-0.5">
               ADMIN
             </span>
           </div>
@@ -81,7 +75,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all font-[family-name:var(--font-dm-sans)]
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all font-[family-name:var(--font-inter-tight)]
                   ${isActive(item.href, item.exact)
                     ? "bg-[#B6FF00]/10 text-[#B6FF00] font-medium"
                     : "text-white/50 hover:text-white hover:bg-white/5"
@@ -98,7 +92,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className="px-3 py-4 border-t border-white/8">
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all font-[family-name:var(--font-dm-sans)]"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all font-[family-name:var(--font-inter-tight)]"
           >
             <span className="text-base leading-none">⊗</span>
             Sign out
@@ -125,15 +119,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             ☰
           </button>
           <div className="flex items-center gap-2">
-            <Image src="/logo-mark.png" alt="" width={22} height={22} />
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={86}
-              height={32}
-              className="h-[18px] w-auto"
-            />
-            <span className="text-white/40 text-xs font-[family-name:var(--font-dm-sans)] uppercase tracking-wider">
+            <Image src="/logo-icon-lime.png" alt="" width={22} height={22} />
+            <Wordmark height={18} />
+            <span className="text-white/40 text-xs font-[family-name:var(--font-inter-tight)] uppercase tracking-wider">
               Admin
             </span>
           </div>

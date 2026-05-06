@@ -27,7 +27,7 @@ function Bar({ value, max, color = "#B6FF00" }: { value: number; max: number; co
       <div className="flex-1 h-2 bg-white/8 rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
-      <span className="text-xs text-white/40 w-10 text-right font-[family-name:var(--font-dm-sans)]">{value}</span>
+      <span className="text-xs text-white/40 w-10 text-right font-[family-name:var(--font-inter-tight)]">{value}</span>
     </div>
   );
 }
@@ -197,14 +197,14 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
             {/* Sessions by sport */}
             <div className="border border-white/8 rounded-2xl p-6">
-              <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-5 font-[family-name:var(--font-dm-sans)]">
+              <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-5 font-[family-name:var(--font-inter-tight)]">
                 Sessions by Sport
               </h3>
               <div className="space-y-3">
                 {sportStats.map((s) => (
                   <div key={s.sport}>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium text-white capitalize font-[family-name:var(--font-dm-sans)]">
+                      <span className="text-sm font-medium text-white capitalize font-[family-name:var(--font-inter-tight)]">
                         {s.sport.replace(/_/g, " ")}
                       </span>
                     </div>
@@ -217,17 +217,17 @@ export default function AnalyticsPage() {
 
             {/* Conversion funnel by sport */}
             <div className="border border-white/8 rounded-2xl p-6">
-              <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-5 font-[family-name:var(--font-dm-sans)]">
+              <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-5 font-[family-name:var(--font-inter-tight)]">
                 Views → Joins (by Sport)
               </h3>
               <div className="space-y-4">
                 {sportStats.map((f) => (
                   <div key={f.sport}>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium text-white capitalize font-[family-name:var(--font-dm-sans)]">
+                      <span className="text-sm font-medium text-white capitalize font-[family-name:var(--font-inter-tight)]">
                         {f.sport.replace(/_/g, " ")}
                       </span>
-                      <span className="text-xs text-white/40 font-[family-name:var(--font-dm-sans)]">
+                      <span className="text-xs text-white/40 font-[family-name:var(--font-inter-tight)]">
                         {f.fill_rate}% · {f.joins}/{f.views}
                       </span>
                     </div>
@@ -244,7 +244,7 @@ export default function AnalyticsPage() {
 
           {/* Daily chart (last 14 days) */}
           <div className="border border-white/8 rounded-2xl p-6 mb-8">
-            <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-5 font-[family-name:var(--font-dm-sans)]">
+            <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-5 font-[family-name:var(--font-inter-tight)]">
               Daily Signups · Last 14 Days
             </h3>
             <div className="space-y-2">
@@ -256,10 +256,10 @@ export default function AnalyticsPage() {
                   <div className="flex-1">
                     <Bar value={d.signups} max={maxDaily} />
                   </div>
-                  <span className="text-xs text-white/40 w-14 text-right font-[family-name:var(--font-dm-sans)] shrink-0">
+                  <span className="text-xs text-white/40 w-14 text-right font-[family-name:var(--font-inter-tight)] shrink-0">
                     {d.sessions} sess
                   </span>
-                  <span className="text-xs text-[#B6FF00]/60 w-16 text-right font-[family-name:var(--font-dm-sans)] shrink-0">
+                  <span className="text-xs text-[#B6FF00]/60 w-16 text-right font-[family-name:var(--font-inter-tight)] shrink-0">
                     £{(d.revenue_pence / 100).toFixed(2)}
                   </span>
                 </div>

@@ -17,6 +17,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { useRouter } from "next/navigation";
 import {
   motion,
@@ -91,7 +92,7 @@ function IconChevronDown({ size = 18, color = "currentColor" }: { size?: number;
 // ─── CSS (font variables injected by next/font in layout) ────────────────────
 const globalStyles = `*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: #050505; color: #fff; font-family: var(--font-dm-sans, 'DM Sans', sans-serif); overflow-x: hidden; }
+  body { background: #050505; color: #fff; font-family: var(--font-inter-tight, 'Inter Tight', sans-serif); overflow-x: hidden; }
 
   @keyframes glowPulse {
     0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
@@ -281,21 +282,14 @@ function Navbar() {
       <Link href="/" aria-label="Fittrybe — return to homepage" style={{
         display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none",
       }}>
-        <Image src="/logo-mark.png" alt="" width={32} height={32} priority style={{ display: "block" }} />
-        <Image
-          src="/wordmark-white.png"
-          alt="Fittrybe"
-          width={120}
-          height={45}
-          priority
-          style={{ display: "block", height: "26px", width: "auto" }}
-        />
+        <Image src="/logo-icon-lime.png" alt="" width={32} height={32} priority style={{ display: "block" }} />
+        <Wordmark height={26} />
       </Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
         <Link href="/sports" aria-label="Browse sports on Fittrybe" style={{
           color: "#9CA3AF",
-          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
           fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
           textTransform: "uppercase", textDecoration: "none",
           transition: "color 0.2s",
@@ -305,7 +299,7 @@ function Navbar() {
         >Sports</Link>
         <Link href="/events" aria-label="View upcoming sports sessions" style={{
           color: "#9CA3AF",
-          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
           fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
           textTransform: "uppercase", textDecoration: "none",
           transition: "color 0.2s",
@@ -315,7 +309,7 @@ function Navbar() {
         >Sessions</Link>
         <Link href="/blog" aria-label="Read the Fittrybe blog" style={{
           color: "#9CA3AF",
-          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
           fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
           textTransform: "uppercase", textDecoration: "none",
           transition: "color 0.2s",
@@ -327,7 +321,7 @@ function Navbar() {
       <a href="/waitlist" aria-label="Join the Fittrybe waitlist for early access" style={{
         background: "#B6FF00", color: "#0D0D0D",
         padding: "0.45rem 1.3rem", borderRadius: 6,
-        fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+        fontFamily: "var(--font-anton, 'Anton', sans-serif)",
         fontWeight: 800, fontSize: "0.9rem", letterSpacing: "0.07em",
         textTransform: "uppercase", textDecoration: "none",
         transition: "box-shadow 0.2s, transform 0.2s",
@@ -445,7 +439,7 @@ function HeroSection() {
 
         {/* ── H1: Primary keyword target ── */}
         <h1 style={{
-          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontWeight: 900,
+          fontFamily: "var(--font-anton, 'Anton', sans-serif)", fontWeight: 900,
           fontSize: "clamp(3.5rem, 7vw, 6.5rem)", lineHeight: 0.92,
           letterSpacing: "-0.02em", textTransform: "uppercase", marginBottom: "1.5rem",
         }}>
@@ -496,7 +490,7 @@ function HeroSection() {
         >
           <a href="/waitlist" aria-label="Join the Fittrybe waitlist and get early access to local sports sessions" style={{
             background: "#B6FF00", color: "#0D0D0D", padding: "0.85rem 2rem",
-            borderRadius: 8, fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+            borderRadius: 8, fontFamily: "var(--font-anton, 'Anton', sans-serif)",
             fontSize: "1rem", fontWeight: 800, letterSpacing: "0.08em",
             textTransform: "uppercase", textDecoration: "none",
             display: "inline-flex", alignItems: "center", gap: "0.5rem",
@@ -509,7 +503,7 @@ function HeroSection() {
           <a href="#how-it-works" aria-label="Learn how Fittrybe works" style={{
             color: "#9CA3AF", padding: "0.85rem 2rem",
             border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8,
-            fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+            fontFamily: "var(--font-anton, 'Anton', sans-serif)",
             fontSize: "1rem", fontWeight: 700, letterSpacing: "0.08em",
             textTransform: "uppercase", textDecoration: "none",
             display: "inline-flex", alignItems: "center", gap: "0.5rem",
@@ -657,17 +651,17 @@ function StickyScrollStory() {
             <motion.div key={slide.label} style={{ opacity: opacities[i], position: "absolute", pointerEvents: "none" }}>
               {/* H2 for each section */}
               <h2 style={{
-                fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                fontFamily: "var(--font-anton, 'Anton', sans-serif)",
                 fontWeight: 900, fontSize: "clamp(4rem, 10vw, 9rem)",
                 lineHeight: 0.88, textTransform: "uppercase", letterSpacing: "-0.03em", color: "#fff",
               }}>
                 <span style={{ display: "block", fontSize: "0.32em", color: "#B6FF00", marginBottom: "0.5rem", letterSpacing: "0.08em" }}>{slide.label}</span>
                 {slide.word}
-                <span style={{ display: "block", fontSize: "0.22em", color: "#4B5563", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "0.8rem", fontFamily: "var(--font-dm-sans, sans-serif)" }}>
+                <span style={{ display: "block", fontSize: "0.22em", color: "#4B5563", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "0.8rem", fontFamily: "var(--font-inter-tight, sans-serif)" }}>
                   {slide.sub}
                 </span>
               </h2>
-              <p style={{ fontSize: "0.95rem", color: "#6B7280", lineHeight: 1.6, maxWidth: 360, marginTop: "1.5rem", fontFamily: "var(--font-dm-sans, sans-serif)" }}>
+              <p style={{ fontSize: "0.95rem", color: "#6B7280", lineHeight: 1.6, maxWidth: 360, marginTop: "1.5rem", fontFamily: "var(--font-inter-tight, sans-serif)" }}>
                 {slide.desc}
               </p>
             </motion.div>
@@ -791,7 +785,7 @@ function BentoGrid() {
         style={{ marginBottom: "3rem", textAlign: "center" }}
       >
         <h2 style={{
-          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
           fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: 900,
           textTransform: "uppercase", letterSpacing: "-0.02em",
         }}>
@@ -809,7 +803,7 @@ function BentoGrid() {
         >
           <div>
             <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "1rem" }}>● LIVE COUNT</p>
-            <p style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontSize: "clamp(3.5rem, 6vw, 5.5rem)", fontWeight: 900, lineHeight: 1, color: "#fff" }}>
+            <p style={{ fontFamily: "var(--font-anton, 'Anton', sans-serif)", fontSize: "clamp(3.5rem, 6vw, 5.5rem)", fontWeight: 900, lineHeight: 1, color: "#fff" }}>
               <AnimatedCount target={waitlistCount + 100 || 240} suffix="+" />
             </p>
             <p style={{ fontSize: "0.85rem", color: "#4B5563", fontWeight: 500, marginTop: "0.5rem" }}>Players on the waitlist</p>
@@ -817,7 +811,7 @@ function BentoGrid() {
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {[{ num: "5+", label: "Sports & growing" }, { num: "FREE", label: "To join & play" }, { num: "2026", label: "Launch target" }].map(({ num, label }) => (
               <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontSize: "1.4rem", fontWeight: 800, color: "#B6FF00" }}>{num}</span>
+                <span style={{ fontFamily: "var(--font-anton, 'Anton', sans-serif)", fontSize: "1.4rem", fontWeight: 800, color: "#B6FF00" }}>{num}</span>
                 <span style={{ fontSize: "0.75rem", color: "#4B5563", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>{label}</span>
               </div>
             ))}
@@ -875,7 +869,7 @@ function BentoGrid() {
                 marginBottom: "0.75rem" 
               }}>● COMING SOON</p>
               <h3 style={{ 
-                fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", 
+                fontFamily: "var(--font-anton, 'Anton', sans-serif)", 
                 fontSize: "clamp(1.8rem, 4vw, 3rem)", 
                 fontWeight: 900, 
                 textTransform: "uppercase", 
@@ -995,7 +989,7 @@ function BlogPreviewSection() {
         <div>
           <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#B6FF00", marginBottom: "0.6rem" }}>● FROM THE BLOG</p>
           <h2 style={{
-            fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+            fontFamily: "var(--font-anton, 'Anton', sans-serif)",
             fontSize: "clamp(2.2rem, 5vw, 4rem)", fontWeight: 900,
             textTransform: "uppercase", letterSpacing: "-0.02em",
           }}>
@@ -1004,7 +998,7 @@ function BlogPreviewSection() {
         </div>
         <Link href="/blog" style={{
           color: "#9CA3AF", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
-          fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
           fontWeight: 700, fontSize: "0.85rem", letterSpacing: "0.07em", textTransform: "uppercase",
           transition: "color 0.2s",
         }}
@@ -1069,7 +1063,7 @@ function BlogPreviewSection() {
                   </p>
                 )}
                 <h3 style={{
-                  fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                  fontFamily: "var(--font-anton, 'Anton', sans-serif)",
                   fontSize: "1.2rem", fontWeight: 800, textTransform: "uppercase",
                   letterSpacing: "-0.01em", lineHeight: 1.2, color: "#fff",
                   marginBottom: "0.6rem", flex: 1,
@@ -1134,7 +1128,7 @@ function FAQSection({
         <h2
           style={{
             fontFamily:
-              "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+              "var(--font-anton, 'Anton', sans-serif)",
             fontSize: "clamp(2rem, 5vw, 3rem)",
             fontWeight: 900,
             textTransform: "uppercase",
@@ -1171,7 +1165,7 @@ function FAQSection({
                     border: "none",
                     color: "#fff",
                     fontFamily:
-                      "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                      "var(--font-anton, 'Anton', sans-serif)",
                     fontWeight: 700,
                     fontSize: "1.05rem",
                     letterSpacing: "0.01em",
@@ -1227,14 +1221,8 @@ function Footer() {
         <Link href="/" aria-label="Fittrybe homepage" style={{
           display: "flex", alignItems: "center", gap: "0.55rem", textDecoration: "none",
         }}>
-          <Image src="/logo-mark.png" alt="" width={28} height={28} style={{ display: "block" }} />
-          <Image
-            src="/wordmark-white.png"
-            alt="Fittrybe"
-            width={106}
-            height={40}
-            style={{ display: "block", height: "22px", width: "auto" }}
-          />
+          <Image src="/logo-icon-lime.png" alt="" width={28} height={28} style={{ display: "block" }} />
+          <Wordmark height={22} />
         </Link>
 
         <nav aria-label="Footer navigation" style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>

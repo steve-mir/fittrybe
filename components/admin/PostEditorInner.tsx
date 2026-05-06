@@ -63,7 +63,7 @@ export default function PostEditorInner({ content, onChange }: PostEditorProps) 
   }
 
   const btnBase =
-    "px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors font-[family-name:var(--font-dm-sans)]";
+    "px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors font-[family-name:var(--font-inter-tight)]";
   const btnActive = "bg-[#B6FF00] text-black";
   const btnInactive = "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white";
 

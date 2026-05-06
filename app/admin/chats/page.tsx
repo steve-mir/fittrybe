@@ -152,7 +152,7 @@ export default function ChatsPage() {
         <>
           <FilterBar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search chat name or ID…" />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
               {filteredChats.length} chats
             </span>
           </FilterBar>
@@ -197,7 +197,7 @@ export default function ChatsPage() {
         <>
           <FilterBar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search message text or sender…" />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
               {filteredMessages.length} messages
             </span>
           </FilterBar>

@@ -174,7 +174,7 @@ export default function ContentPage() {
                 { value: "testimonial", label: "Testimonials" },
               ]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filteredPosts.length} posts</span>
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filteredPosts.length} posts</span>
           </FilterBar>
           <AdminTable
             headers={["Author", "Type", "Caption", "Image", "Session", "Views", "Date", ""]}

@@ -88,14 +88,14 @@ export default function PostForm({ initial, onSave }: PostFormProps) {
     }
   }
 
-  const fieldLabel = "block text-sm text-white/60 mb-1.5 font-[family-name:var(--font-dm-sans)]";
+  const fieldLabel = "block text-sm text-white/60 mb-1.5 font-[family-name:var(--font-inter-tight)]";
   const fieldInput =
-    "w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-[#B6FF00]/50 transition-colors font-[family-name:var(--font-dm-sans)] text-sm";
+    "w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-[#B6FF00]/50 transition-colors font-[family-name:var(--font-inter-tight)] text-sm";
 
   return (
     <div className="space-y-6">
       {error && (
-        <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm font-[family-name:var(--font-dm-sans)]">
+        <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm font-[family-name:var(--font-inter-tight)]">
           {error}
         </div>
       )}
@@ -116,7 +116,7 @@ export default function PostForm({ initial, onSave }: PostFormProps) {
       <div>
         <label className={fieldLabel}>Slug *</label>
         <div className="flex items-center gap-2">
-          <span className="text-white/30 text-sm font-[family-name:var(--font-dm-sans)]">/blog/</span>
+          <span className="text-white/30 text-sm font-[family-name:var(--font-inter-tight)]">/blog/</span>
           <input
             type="text"
             value={slug}
@@ -181,7 +181,7 @@ export default function PostForm({ initial, onSave }: PostFormProps) {
           type="button"
           onClick={() => submit("draft")}
           disabled={saving}
-          className="px-6 py-3 border border-white/10 text-white/60 hover:text-white hover:border-white/30 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 font-[family-name:var(--font-barlow-condensed)] uppercase tracking-wide"
+          className="px-6 py-3 border border-white/10 text-white/60 hover:text-white hover:border-white/30 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 font-[family-name:var(--font-anton)] uppercase tracking-wide"
         >
           {saving ? "Saving…" : "Save Draft"}
         </button>
@@ -189,7 +189,7 @@ export default function PostForm({ initial, onSave }: PostFormProps) {
           type="button"
           onClick={() => submit("published")}
           disabled={saving}
-          className="px-6 py-3 bg-[#B6FF00] text-black font-bold rounded-xl text-sm hover:bg-[#B6FF00]/90 transition-colors disabled:opacity-50 font-[family-name:var(--font-barlow-condensed)] uppercase tracking-wide"
+          className="px-6 py-3 bg-[#B6FF00] text-black font-bold rounded-xl text-sm hover:bg-[#B6FF00]/90 transition-colors disabled:opacity-50 font-[family-name:var(--font-anton)] uppercase tracking-wide"
         >
           {saving ? "Publishing…" : "Publish"}
         </button>
@@ -197,7 +197,7 @@ export default function PostForm({ initial, onSave }: PostFormProps) {
           type="button"
           onClick={() => router.push("/admin")}
           disabled={saving}
-          className="ml-auto text-sm text-white/40 hover:text-white/60 transition-colors font-[family-name:var(--font-dm-sans)]"
+          className="ml-auto text-sm text-white/40 hover:text-white/60 transition-colors font-[family-name:var(--font-inter-tight)]"
         >
           Cancel
         </button>

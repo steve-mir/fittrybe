@@ -215,7 +215,7 @@ export default function ModerationPage() {
                 { value: "escalated", label: "Escalated" },
               ]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filteredReports.length} reports</span>
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filteredReports.length} reports</span>
           </FilterBar>
           <AdminTable
             headers={["Reporter", "Reported", "Reason", "Context", "Description", "Status", "Action Taken", "Date", ""]}
@@ -264,7 +264,7 @@ export default function ModerationPage() {
                 { value: "player", label: "Player No-shows" },
               ]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filteredStrikes.length} strikes</span>
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filteredStrikes.length} strikes</span>
           </FilterBar>
           <AdminTable
             headers={["User", "Strike Type", "Sub-type", "Session", "Date", ""]}

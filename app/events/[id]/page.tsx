@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/Wordmark";
 import {
   getEventById,
   getAllEventIds,
@@ -175,18 +175,11 @@ export default async function EventDetailPage({
             aria-label="Fittrybe — return to homepage"
             className="inline-flex items-center"
           >
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={132}
-              height={50}
-              priority
-              className="h-7 w-auto"
-            />
+            <Wordmark height={28} />
           </Link>
           <Link
             href="/events"
-            className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)]"
+            className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)]"
           >
             ← All sessions
           </Link>
@@ -207,7 +200,7 @@ export default async function EventDetailPage({
 
           {/* Title */}
           <header className="mb-8">
-            <h1 className="font-[family-name:var(--font-barlow-condensed)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4">
+            <h1 className="font-[family-name:var(--font-anton)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4">
               {event.title}
             </h1>
 
@@ -215,7 +208,7 @@ export default async function EventDetailPage({
             {event.isCancelled && (
               <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl mb-6">
                 <span className="text-red-400 text-xl">⚠️</span>
-                <p className="text-red-400 font-medium font-[family-name:var(--font-dm-sans)]">
+                <p className="text-red-400 font-medium font-[family-name:var(--font-inter-tight)]">
                   This session has been cancelled.
                   {event.cancellationReason && (
                     <span className="text-red-400/70 ml-1">
@@ -227,7 +220,7 @@ export default async function EventDetailPage({
             )}
 
             {/* Key details */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-[family-name:var(--font-dm-sans)]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-[family-name:var(--font-inter-tight)]">
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Date</p>
                 <p className="text-white font-semibold text-sm">{dateStr}</p>
@@ -269,10 +262,10 @@ export default async function EventDetailPage({
           {/* Session description (host-provided) */}
           {event.description && (
             <section className="mb-10">
-              <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold uppercase tracking-tight text-white mb-4">
+              <h2 className="font-[family-name:var(--font-anton)] text-2xl font-bold uppercase tracking-tight text-white mb-4">
                 About This Session
               </h2>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 font-[family-name:var(--font-dm-sans)]">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 font-[family-name:var(--font-inter-tight)]">
                 <p className="text-white/80 text-base leading-relaxed whitespace-pre-line">
                   {event.description}
                 </p>
@@ -282,10 +275,10 @@ export default async function EventDetailPage({
 
           {/* Location */}
           <section className="mb-10">
-            <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold uppercase tracking-tight text-white mb-4">
+            <h2 className="font-[family-name:var(--font-anton)] text-2xl font-bold uppercase tracking-tight text-white mb-4">
               📍 Location
             </h2>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 font-[family-name:var(--font-dm-sans)]">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 font-[family-name:var(--font-inter-tight)]">
               <p className="text-white font-semibold text-lg mb-1">
                 {event.placeName || event.locationLabel}
               </p>
@@ -315,7 +308,7 @@ export default async function EventDetailPage({
 
           {/* Stats row */}
           <section className="mb-10">
-            <div className="flex gap-6 font-[family-name:var(--font-dm-sans)] text-sm text-white/40">
+            <div className="flex gap-6 font-[family-name:var(--font-inter-tight)] text-sm text-white/40">
               <span>{event.participantsCount} joined</span>
               {event.isRecurring && <span>🔄 Recurring</span>}
             </div>
@@ -325,39 +318,39 @@ export default async function EventDetailPage({
           <footer className="mt-10 p-8 bg-white/5 border border-white/10 rounded-2xl text-center">
             {event.isCancelled ? (
               <>
-                <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+                <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
                   This session was cancelled. Browse other upcoming sessions.
                 </p>
                 <Link
                   href="/events"
-                  className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+                  className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
                 >
                   See All Sessions
                 </Link>
               </>
             ) : isFull ? (
               <>
-                <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+                <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
                   This session is full. Join Fittrybe to get notified when spots open up.
                 </p>
                 <Link
                   href="/waitlist"
-                  className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+                  className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
                 >
                   Join Fittrybe — Get Notified
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-white/60 mb-2 font-[family-name:var(--font-dm-sans)]">
+                <p className="text-white/60 mb-2 font-[family-name:var(--font-inter-tight)]">
                   {isLowSpots ? `Only ${event.spotsLeft} spot${event.spotsLeft === 1 ? "" : "s"} left!` : "Ready to play?"}
                 </p>
-                <p className="text-white/40 text-sm mb-6 font-[family-name:var(--font-dm-sans)]">
+                <p className="text-white/40 text-sm mb-6 font-[family-name:var(--font-inter-tight)]">
                   Download the Fittrybe app to reserve your spot.
                 </p>
                 <Link
                   href="/waitlist"
-                  className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+                  className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
                 >
                   Join Fittrybe — Reserve Your Spot
                 </Link>

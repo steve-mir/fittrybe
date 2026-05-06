@@ -15,8 +15,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { getBlogPost, getAllBlogSlugs } from "@/lib/posts";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
 import {
   buildWebPageSchema,
@@ -192,18 +192,11 @@ export default async function BlogPostPage({
             aria-label="Fittrybe — return to homepage"
             className="inline-flex items-center"
           >
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={132}
-              height={50}
-              priority
-              className="h-7 w-auto"
-            />
+            <Wordmark height={28} />
           </Link>
           <Link
             href="/blog"
-            className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)]"
+            className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)]"
           >
             ← All articles
           </Link>
@@ -230,17 +223,17 @@ export default async function BlogPostPage({
           <header className="mb-10">
             <h1
               itemProp="headline"
-              className="font-[family-name:var(--font-barlow-condensed)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4"
+              className="font-[family-name:var(--font-anton)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4"
             >
               {post.title}
             </h1>
             <p
               itemProp="description"
-              className="text-xl text-white/60 mb-6 font-[family-name:var(--font-dm-sans)]"
+              className="text-xl text-white/60 mb-6 font-[family-name:var(--font-inter-tight)]"
             >
               {post.description}
             </p>
-            <div className="flex items-center gap-4 text-sm text-white/40 font-[family-name:var(--font-dm-sans)]">
+            <div className="flex items-center gap-4 text-sm text-white/40 font-[family-name:var(--font-inter-tight)]">
               <span itemProp="author">{post.author?.name ?? "Fittrybe"}</span>
               <span>·</span>
               <time itemProp="datePublished" dateTime={post.publishedAt}>
@@ -268,12 +261,12 @@ export default async function BlogPostPage({
           </div>
 
           <footer className="mt-16 p-8 bg-white/5 border border-white/10 rounded-2xl text-center">
-            <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+            <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
               Ready to find local sports sessions near you?
             </p>
             <Link
               href="/waitlist"
-              className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+              className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
             >
               Join Fittrybe — Find Your Game
             </Link>

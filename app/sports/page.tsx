@@ -7,9 +7,9 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { SPORTS } from "@/lib/sports";
 import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
+import { Wordmark } from "@/components/brand/Wordmark";
 import {
   buildBreadcrumbSchema,
   buildGraphSchema,
@@ -106,25 +106,18 @@ export default function SportsHubPage() {
             aria-label="Fittrybe — return to homepage"
             className="inline-flex items-center"
           >
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={132}
-              height={50}
-              priority
-              className="h-7 w-auto"
-            />
+            <Wordmark height={28} />
           </Link>
           <div className="flex items-center gap-4">
             <Link
               href="/events"
-              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] hidden sm:block"
+              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] hidden sm:block"
             >
               Sessions
             </Link>
             <Link
               href="/waitlist"
-              className="text-sm font-medium px-4 py-2 rounded-full bg-[#B6FF00] text-black hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-dm-sans)]"
+              className="text-sm font-medium px-4 py-2 rounded-full bg-[#B6FF00] text-black hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-inter-tight)]"
             >
               Join Waitlist
             </Link>
@@ -135,12 +128,12 @@ export default function SportsHubPage() {
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#B6FF00] mb-4">
             Sports Hub
           </span>
-          <h1 className="font-[family-name:var(--font-barlow-condensed)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
+          <h1 className="font-[family-name:var(--font-anton)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
             Find Your Game.
             <br />
             <span className="text-[#B6FF00]">Pick Your Sport.</span>
           </h1>
-          <p className="text-white/60 text-lg max-w-2xl mx-auto font-[family-name:var(--font-dm-sans)]">
+          <p className="text-white/60 text-lg max-w-2xl mx-auto font-[family-name:var(--font-inter-tight)]">
             From five-a-side football to morning tennis. Every grassroots sport
             on Fittrybe, with live sessions across the UK.
           </p>
@@ -161,10 +154,10 @@ export default function SportsHubPage() {
                   <div className="text-4xl mb-3" aria-hidden="true">
                     {sport.emoji}
                   </div>
-                  <h2 className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold uppercase tracking-tight text-white mb-1 group-hover:text-[#B6FF00] transition-colors">
+                  <h2 className="font-[family-name:var(--font-anton)] text-xl font-bold uppercase tracking-tight text-white mb-1 group-hover:text-[#B6FF00] transition-colors">
                     {sport.name}
                   </h2>
-                  <p className="text-xs text-white/50 font-[family-name:var(--font-dm-sans)] line-clamp-2">
+                  <p className="text-xs text-white/50 font-[family-name:var(--font-inter-tight)] line-clamp-2">
                     {sport.tagline}
                   </p>
                 </Link>
@@ -174,12 +167,12 @@ export default function SportsHubPage() {
         </section>
 
         <section className="border-t border-white/10 py-16 text-center px-6">
-          <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+          <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
             Don&apos;t see your sport? More are added every month.
           </p>
           <Link
             href="/waitlist"
-            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
           >
             Join Fittrybe — Request a Sport
           </Link>

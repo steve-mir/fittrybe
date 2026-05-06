@@ -4,7 +4,7 @@
  */
 
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, DM_Sans } from "next/font/google";
+import { Anton, Inter_Tight } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { seoConfig } from "@/lib/seo-config";
@@ -15,18 +15,19 @@ import {
 } from "@/lib/structured-data";
 
 // ─── Font Optimisation ────────────────────────────────────────────────────────
-const barlowCondensed = Barlow_Condensed({
+// Display + body fonts to match fittrybe.app
+const anton = Anton({
   subsets: ["latin"],
-  weight: ["400", "700", "800", "900"],
-  variable: "--font-barlow-condensed",
+  weight: ["400"],
+  variable: "--font-anton",
   display: "swap",
   preload: true,
 });
 
-const dmSans = DM_Sans({
+const interTight = Inter_Tight({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-dm-sans",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter-tight",
   display: "swap",
   preload: true,
 });
@@ -120,7 +121,7 @@ const globalJsonLd = buildGraphSchema([buildOrganizationSchema(), buildWebSiteSc
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={seoConfig.siteLanguage} dir="ltr" className={`${barlowCondensed.variable} ${dmSans.variable}`}>
+    <html lang={seoConfig.siteLanguage} dir="ltr" className={`${anton.variable} ${interTight.variable}`}>
       <head>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: globalJsonLd }} />
         <link rel="preconnect" href="https://firestore.googleapis.com" />

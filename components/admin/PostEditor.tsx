@@ -9,7 +9,7 @@ const PostEditorInner = dynamic(() => import("./PostEditorInner"), {
   ssr: false,
   loading: () => (
     <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 min-h-[400px] flex items-center justify-center">
-      <span className="text-white/30 text-sm font-[family-name:var(--font-dm-sans)]">
+      <span className="text-white/30 text-sm font-[family-name:var(--font-inter-tight)]">
         Loading editor…
       </span>
     </div>

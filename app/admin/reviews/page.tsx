@@ -181,7 +181,7 @@ export default function ReviewsPage() {
         <>
           <FilterBar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search reviewer, host, comment…" />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filteredReviews.length} reviews</span>
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filteredReviews.length} reviews</span>
           </FilterBar>
           <AdminTable
             headers={["Reviewer", "Host", "Host Rating", "Session", "Venue", "Comment", "Date", ""]}

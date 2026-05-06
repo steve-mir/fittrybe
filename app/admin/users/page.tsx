@@ -200,7 +200,7 @@ export default function UsersPage() {
                 { value: "active_24h", label: "Active Last 24h" },
               ]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
               {filteredUsers.length} of {users.length}
             </span>
           </FilterBar>
@@ -232,7 +232,7 @@ export default function UsersPage() {
                   <button
                     onClick={() => adjustReliability(user)}
                     disabled={actionId === user.id}
-                    className={`text-sm font-bold font-[family-name:var(--font-barlow-condensed)] transition-colors hover:text-[#B6FF00] ${
+                    className={`text-sm font-bold font-[family-name:var(--font-anton)] transition-colors hover:text-[#B6FF00] ${
                       (user.reliability_score ?? 100) < 50 ? "text-red-400" : "text-white/70"
                     }`}
                   >
@@ -279,7 +279,7 @@ export default function UsersPage() {
         <>
           <FilterBar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search name or email…" />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
               {filteredWaitlist.length} of {waitlist.length}
             </span>
           </FilterBar>

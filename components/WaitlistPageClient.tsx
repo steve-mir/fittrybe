@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/Wordmark";
 
 function IconArrowLeft({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
   return (
@@ -17,7 +17,7 @@ function IconArrowLeft({ size = 16, color = "currentColor" }: { size?: number; c
 const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: #0D0D0D; color: #fff; font-family: var(--font-dm-sans, 'DM Sans', sans-serif); overflow-x: hidden; min-height: 100vh; }
+  body { background: #0D0D0D; color: #fff; font-family: var(--font-inter-tight, 'Inter Tight', sans-serif); overflow-x: hidden; min-height: 100vh; }
   body::before {
     content: ''; position: fixed; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
@@ -93,7 +93,7 @@ export default function WaitlistPageClient() {
     width: "100%", background: "#111",
     border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
     padding: "0.85rem 1rem", color: "#fff",
-    fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)", fontSize: "0.95rem", outline: "none",
+    fontFamily: "var(--font-inter-tight, 'Inter Tight', sans-serif)", fontSize: "0.95rem", outline: "none",
     transition: "border-color 0.2s",
   };
 
@@ -126,14 +126,7 @@ export default function WaitlistPageClient() {
             <Link href="/" aria-label="Fittrybe — return to homepage" style={{
               display: "inline-block", textDecoration: "none",
             }}>
-              <Image
-                src="/wordmark-white.png"
-                alt="Fittrybe"
-                width={132}
-                height={50}
-                priority
-                style={{ display: "block", height: "30px", width: "auto" }}
-              />
+              <Wordmark height={30} />
             </Link>
           </div>
 
@@ -150,7 +143,7 @@ export default function WaitlistPageClient() {
               </div>
 
               <h1 style={{
-                fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontWeight: 900,
+                fontFamily: "var(--font-anton, 'Anton', sans-serif)", fontWeight: 900,
                 fontSize: "clamp(2rem, 6vw, 3rem)", lineHeight: 1, letterSpacing: "-0.02em",
                 textTransform: "uppercase", marginBottom: "0.75rem",
               }}>
@@ -220,7 +213,7 @@ export default function WaitlistPageClient() {
                 style={{
                   width: "100%", background: loading ? "rgba(182,255,0,0.6)" : "#B6FF00",
                   border: "none", borderRadius: 8, padding: "1rem",
-                  fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                  fontFamily: "var(--font-anton, 'Anton', sans-serif)",
                   fontSize: "1.05rem", fontWeight: 800, letterSpacing: "0.08em",
                   textTransform: "uppercase", color: "#0D0D0D",
                   cursor: loading ? "not-allowed" : "pointer",

@@ -51,17 +51,17 @@ export default function BlogCard({ post }: BlogCardProps) {
         )}
 
         {/* Title */}
-        <h2 className="text-lg font-bold text-white mb-2 group-hover:text-[#B6FF00] transition-colors line-clamp-2 font-[family-name:var(--font-barlow-condensed)]">
+        <h2 className="text-lg font-bold text-white mb-2 group-hover:text-[#B6FF00] transition-colors line-clamp-2 font-[family-name:var(--font-anton)]">
           {post.title}
         </h2>
 
         {/* Description */}
-        <p className="text-sm text-white/60 line-clamp-3 mb-4 font-[family-name:var(--font-dm-sans)]">
+        <p className="text-sm text-white/60 line-clamp-3 mb-4 font-[family-name:var(--font-inter-tight)]">
           {post.description}
         </p>
 
         {/* Meta */}
-        <div className="flex items-center justify-between text-xs text-white/40 font-[family-name:var(--font-dm-sans)]">
+        <div className="flex items-center justify-between text-xs text-white/40 font-[family-name:var(--font-inter-tight)]">
           <span>{post.author?.name ?? "Fittrybe"}</span>
           <time dateTime={post.publishedAt}>{date}</time>
         </div>

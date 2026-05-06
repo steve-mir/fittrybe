@@ -201,7 +201,7 @@ export default function NotificationsPage() {
               onChange={setTypeFilter}
               options={[{ value: "all", label: "All Types" }, ...notifTypes.map((t) => ({ value: t, label: t }))]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
               {filteredNotifs.length} notifications
             </span>
           </FilterBar>
@@ -309,7 +309,7 @@ export default function NotificationsPage() {
               />
             </FormField>
             {sendMsg && (
-              <p className={`text-sm font-[family-name:var(--font-dm-sans)] ${sendMsg.startsWith("✓") ? "text-[#B6FF00]" : "text-red-400"}`}>
+              <p className={`text-sm font-[family-name:var(--font-inter-tight)] ${sendMsg.startsWith("✓") ? "text-[#B6FF00]" : "text-red-400"}`}>
                 {sendMsg}
               </p>
             )}

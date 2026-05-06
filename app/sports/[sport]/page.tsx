@@ -9,8 +9,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { getAllSportSlugs, getSportBySlug } from "@/lib/sports";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { getUpcomingEvents } from "@/lib/events";
 import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
 import EventCard from "@/components/EventCard";
@@ -124,25 +124,18 @@ export default async function SportLandingPage({
             aria-label="Fittrybe — return to homepage"
             className="inline-flex items-center"
           >
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={132}
-              height={50}
-              priority
-              className="h-7 w-auto"
-            />
+            <Wordmark height={28} />
           </Link>
           <div className="flex items-center gap-4">
             <Link
               href="/sports"
-              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] hidden sm:block"
+              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] hidden sm:block"
             >
               All sports
             </Link>
             <Link
               href="/waitlist"
-              className="text-sm font-medium px-4 py-2 rounded-full bg-[#B6FF00] text-black hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-dm-sans)]"
+              className="text-sm font-medium px-4 py-2 rounded-full bg-[#B6FF00] text-black hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-inter-tight)]"
             >
               Join Waitlist
             </Link>
@@ -156,15 +149,15 @@ export default async function SportLandingPage({
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#B6FF00] mb-4">
             {content.name} on Fittrybe
           </span>
-          <h1 className="font-[family-name:var(--font-barlow-condensed)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
+          <h1 className="font-[family-name:var(--font-anton)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
             {content.headline}
           </h1>
-          <p className="text-white/70 text-lg max-w-2xl mx-auto font-[family-name:var(--font-dm-sans)] mb-8">
+          <p className="text-white/70 text-lg max-w-2xl mx-auto font-[family-name:var(--font-inter-tight)] mb-8">
             {content.intro}
           </p>
           <Link
             href={`/events?sport=${content.slug}`}
-            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
           >
             See Upcoming {content.name} Sessions
           </Link>
@@ -175,7 +168,7 @@ export default async function SportLandingPage({
           aria-label={`What to expect from ${content.name} on Fittrybe`}
           className="max-w-4xl mx-auto px-6 py-12"
         >
-          <h2 className="font-[family-name:var(--font-barlow-condensed)] text-3xl md:text-4xl font-bold uppercase tracking-tight text-white mb-8 text-center">
+          <h2 className="font-[family-name:var(--font-anton)] text-3xl md:text-4xl font-bold uppercase tracking-tight text-white mb-8 text-center">
             What to expect
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -184,10 +177,10 @@ export default async function SportLandingPage({
                 key={h.title}
                 className="bg-white/5 border border-white/10 rounded-2xl p-6"
               >
-                <h3 className="font-[family-name:var(--font-barlow-condensed)] text-lg font-bold uppercase tracking-tight text-[#B6FF00] mb-2">
+                <h3 className="font-[family-name:var(--font-anton)] text-lg font-bold uppercase tracking-tight text-[#B6FF00] mb-2">
                   {h.title}
                 </h3>
-                <p className="text-white/70 text-sm font-[family-name:var(--font-dm-sans)] leading-relaxed">
+                <p className="text-white/70 text-sm font-[family-name:var(--font-inter-tight)] leading-relaxed">
                   {h.body}
                 </p>
               </div>
@@ -201,12 +194,12 @@ export default async function SportLandingPage({
           className="max-w-6xl mx-auto px-6 py-12 border-t border-white/10"
         >
           <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
-            <h2 className="font-[family-name:var(--font-barlow-condensed)] text-3xl md:text-4xl font-bold uppercase tracking-tight text-white">
+            <h2 className="font-[family-name:var(--font-anton)] text-3xl md:text-4xl font-bold uppercase tracking-tight text-white">
               Live {content.name} sessions
             </h2>
             <Link
               href={`/events?sport=${content.slug}`}
-              className="text-sm text-[#B6FF00] hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] uppercase tracking-wider font-bold"
+              className="text-sm text-[#B6FF00] hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] uppercase tracking-wider font-bold"
             >
               View all →
             </Link>
@@ -214,14 +207,14 @@ export default async function SportLandingPage({
 
           {sportEvents.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-10 text-center">
-              <p className="text-white/60 mb-6 font-[family-name:var(--font-dm-sans)]">
+              <p className="text-white/60 mb-6 font-[family-name:var(--font-inter-tight)]">
                 No live {content.name.toLowerCase()} sessions in your area
                 right now. Join the waitlist and get notified the moment one
                 drops.
               </p>
               <Link
                 href="/waitlist"
-                className="inline-block px-6 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] uppercase tracking-wide"
+                className="inline-block px-6 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] uppercase tracking-wide"
               >
                 Get notified
               </Link>
@@ -240,7 +233,7 @@ export default async function SportLandingPage({
           aria-label={`Frequently asked questions about ${content.name} on Fittrybe`}
           className="max-w-3xl mx-auto px-6 py-16 border-t border-white/10"
         >
-          <h2 className="font-[family-name:var(--font-barlow-condensed)] text-3xl md:text-4xl font-bold uppercase tracking-tight text-white mb-8 text-center">
+          <h2 className="font-[family-name:var(--font-anton)] text-3xl md:text-4xl font-bold uppercase tracking-tight text-white mb-8 text-center">
             {content.name} FAQ
           </h2>
           <dl className="space-y-6">
@@ -249,10 +242,10 @@ export default async function SportLandingPage({
                 key={faq.question}
                 className="bg-white/5 border border-white/10 rounded-2xl p-6"
               >
-                <dt className="font-[family-name:var(--font-barlow-condensed)] text-lg font-bold uppercase tracking-tight text-white mb-2">
+                <dt className="font-[family-name:var(--font-anton)] text-lg font-bold uppercase tracking-tight text-white mb-2">
                   {faq.question}
                 </dt>
-                <dd className="text-white/70 text-sm font-[family-name:var(--font-dm-sans)] leading-relaxed">
+                <dd className="text-white/70 text-sm font-[family-name:var(--font-inter-tight)] leading-relaxed">
                   {faq.answer}
                 </dd>
               </div>
@@ -265,7 +258,7 @@ export default async function SportLandingPage({
           aria-label="Other sports on Fittrybe"
           className="max-w-6xl mx-auto px-6 py-12 border-t border-white/10"
         >
-          <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold uppercase tracking-tight text-white mb-6 text-center">
+          <h2 className="font-[family-name:var(--font-anton)] text-2xl font-bold uppercase tracking-tight text-white mb-6 text-center">
             Other sports
           </h2>
           <ul className="flex flex-wrap justify-center gap-3">
@@ -277,7 +270,7 @@ export default async function SportLandingPage({
                   <li key={slug}>
                     <Link
                       href={`/sports/${slug}`}
-                      className="inline-block text-sm font-medium px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#B6FF00]/40 text-white/70 hover:text-white transition-all font-[family-name:var(--font-dm-sans)]"
+                      className="inline-block text-sm font-medium px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#B6FF00]/40 text-white/70 hover:text-white transition-all font-[family-name:var(--font-inter-tight)]"
                     >
                       <span aria-hidden="true">{other.emoji}</span> {other.name}
                     </Link>
@@ -288,12 +281,12 @@ export default async function SportLandingPage({
         </section>
 
         <section className="border-t border-white/10 py-16 text-center px-6">
-          <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+          <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
             Ready to play {content.name.toLowerCase()}?
           </p>
           <Link
             href="/waitlist"
-            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
           >
             Join Fittrybe — Find Your Game
           </Link>

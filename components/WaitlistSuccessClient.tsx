@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/Wordmark";
 
 function IconCheck({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
   return (
@@ -22,7 +22,7 @@ function IconArrowLeft({ size = 16, color = "currentColor" }: { size?: number; c
 
 const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0D0D0D; color: #fff; font-family: var(--font-dm-sans, 'DM Sans', sans-serif); min-height: 100vh; }
+  body { background: #0D0D0D; color: #fff; font-family: var(--font-inter-tight, 'Inter Tight', sans-serif); min-height: 100vh; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes checkPop { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
@@ -62,14 +62,7 @@ export default function WaitlistSuccessClient() {
 
           <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
             <Link href="/" aria-label="Fittrybe — return to homepage" style={{ display: "inline-block", textDecoration: "none" }}>
-              <Image
-                src="/wordmark-white.png"
-                alt="Fittrybe"
-                width={132}
-                height={50}
-                priority
-                style={{ display: "block", height: "30px", width: "auto" }}
-              />
+              <Wordmark height={30} />
             </Link>
           </div>
 
@@ -79,7 +72,7 @@ export default function WaitlistSuccessClient() {
               <IconCheck size={32} color="#B6FF00" />
             </div>
 
-            <h1 style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontWeight: 900, fontSize: "clamp(1.8rem, 5vw, 2.5rem)", textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "0.75rem" }}>
+            <h1 style={{ fontFamily: "var(--font-anton, 'Anton', sans-serif)", fontWeight: 900, fontSize: "clamp(1.8rem, 5vw, 2.5rem)", textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: "0.75rem" }}>
               You&apos;re <span style={{ color: "#B6FF00" }}>In!</span>
             </h1>
 

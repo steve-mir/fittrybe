@@ -101,7 +101,7 @@ export default function AdminOverview() {
       <PageHeader title="Overview" desc="Platform pulse at a glance" />
 
       {loading ? (
-        <div className="text-white/30 text-sm font-[family-name:var(--font-dm-sans)]">Loading stats…</div>
+        <div className="text-white/30 text-sm font-[family-name:var(--font-inter-tight)]">Loading stats…</div>
       ) : stats ? (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
@@ -135,7 +135,7 @@ export default function AdminOverview() {
         </>
       ) : null}
 
-      <h2 className="text-xs font-medium text-white/30 uppercase tracking-widest mb-4 font-[family-name:var(--font-dm-sans)]">
+      <h2 className="text-xs font-medium text-white/30 uppercase tracking-widest mb-4 font-[family-name:var(--font-inter-tight)]">
         Admin Sections
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -148,10 +148,10 @@ export default function AdminOverview() {
             {l.alert && l.alert > 0 ? (
               <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-red-400" />
             ) : null}
-            <span className="text-sm font-medium text-white group-hover:text-[#B6FF00] transition-colors font-[family-name:var(--font-dm-sans)]">
+            <span className="text-sm font-medium text-white group-hover:text-[#B6FF00] transition-colors font-[family-name:var(--font-inter-tight)]">
               {l.label}
             </span>
-            <span className="text-xs text-white/40 font-[family-name:var(--font-dm-sans)]">{l.desc}</span>
+            <span className="text-xs text-white/40 font-[family-name:var(--font-inter-tight)]">{l.desc}</span>
           </Link>
         ))}
       </div>

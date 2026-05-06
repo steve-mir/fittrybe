@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/Wordmark";
 
 export const metadata: Metadata = {
   title: "Account Deleted — Fittrybe",
@@ -18,19 +18,12 @@ export default function AccountDeletedPage() {
         alignItems: "center",
         justifyContent: "center",
         padding: "100px 5vw 60px",
-        fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+        fontFamily: "var(--font-inter-tight, 'Inter Tight', sans-serif)",
       }}
     >
       <div style={{ width: "100%", maxWidth: 480, textAlign: "center" }}>
         <div style={{ marginBottom: "2rem" }}>
-          <Image
-            src="/wordmark-white.png"
-            alt="Fittrybe"
-            width={132}
-            height={50}
-            priority
-            style={{ display: "inline-block", height: "30px", width: "auto" }}
-          />
+          <Wordmark height={30} />
         </div>
 
         <div
@@ -60,7 +53,7 @@ export default function AccountDeletedPage() {
 
           <h1
             style={{
-              fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+              fontFamily: "var(--font-anton, 'Anton', sans-serif)",
               fontWeight: 900,
               fontSize: "clamp(1.75rem, 5vw, 2.25rem)",
               lineHeight: 1.05,
@@ -86,7 +79,7 @@ export default function AccountDeletedPage() {
               padding: "0.85rem 1.75rem",
               borderRadius: 8,
               textDecoration: "none",
-              fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+              fontFamily: "var(--font-anton, 'Anton', sans-serif)",
               fontSize: "0.95rem",
               fontWeight: 800,
               letterSpacing: "0.08em",

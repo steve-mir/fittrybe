@@ -175,7 +175,7 @@ export default function VenuesPage() {
 
       {editing ? (
         <div className="border border-[#B6FF00]/20 bg-[#B6FF00]/3 rounded-2xl p-6 mb-8">
-          <h2 className="text-lg font-black font-[family-name:var(--font-barlow-condensed)] uppercase text-white mb-6">
+          <h2 className="text-lg font-black font-[family-name:var(--font-anton)] uppercase text-white mb-6">
             {editing.id ? "Edit Venue" : "New Venue"}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -226,7 +226,7 @@ export default function VenuesPage() {
           </FormField>
 
           <div className="mt-4">
-            <label className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-dm-sans)] block mb-2">
+            <label className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-inter-tight)] block mb-2">
               Sport Types
             </label>
             <div className="flex flex-wrap gap-2">
@@ -250,7 +250,7 @@ export default function VenuesPage() {
           </div>
 
           <div className="mt-4">
-            <label className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-dm-sans)] block mb-2">
+            <label className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-inter-tight)] block mb-2">
               Amenities
             </label>
             <div className="flex flex-wrap gap-2">
@@ -298,7 +298,7 @@ export default function VenuesPage() {
             { value: "inactive", label: "Inactive Only" },
           ]}
         />
-        <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+        <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
           {filtered.length} of {venues.length}
         </span>
       </FilterBar>

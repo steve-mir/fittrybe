@@ -74,7 +74,7 @@ export default function AdminPostsPage() {
         action={
           <Link
             href="/admin/posts/new"
-            className="px-5 py-2.5 bg-[#B6FF00] text-black font-bold rounded-xl hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-sm uppercase tracking-wide"
+            className="px-5 py-2.5 bg-[#B6FF00] text-black font-bold rounded-xl hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-sm uppercase tracking-wide"
           >
             + New Post
           </Link>
@@ -82,7 +82,7 @@ export default function AdminPostsPage() {
       />
 
       {loading ? (
-        <div className="text-white/40 py-20 text-center font-[family-name:var(--font-dm-sans)]">Loading…</div>
+        <div className="text-white/40 py-20 text-center font-[family-name:var(--font-inter-tight)]">Loading…</div>
       ) : (
         <AdminTable
           headers={["Title", "Slug", "Status", "Updated", ""]}

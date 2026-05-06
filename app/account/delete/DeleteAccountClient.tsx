@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 
 const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0D0D0D; color: #fff; font-family: var(--font-dm-sans, 'DM Sans', sans-serif); min-height: 100vh; }
+  body { background: #0D0D0D; color: #fff; font-family: var(--font-inter-tight, 'Inter Tight', sans-serif); min-height: 100vh; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
   .card { animation: fadeUp 0.5s ease forwards; }
@@ -25,7 +25,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 8,
   padding: "0.85rem 1rem",
   color: "#fff",
-  fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+  fontFamily: "var(--font-inter-tight, 'Inter Tight', sans-serif)",
   fontSize: "0.95rem",
   outline: "none",
 };
@@ -223,14 +223,7 @@ export default function DeleteAccountClient() {
         <div className={`card ${shake ? "shake" : ""}`} style={{ width: "100%", maxWidth: 480 }}>
           <div style={{ marginBottom: "2rem", textAlign: "center" }}>
             <Link href="/" aria-label="Fittrybe — return to homepage" style={{ display: "inline-block" }}>
-              <Image
-                src="/wordmark-white.png"
-                alt="Fittrybe"
-                width={132}
-                height={50}
-                priority
-                style={{ display: "block", height: "30px", width: "auto" }}
-              />
+              <Wordmark height={30} />
             </Link>
           </div>
 
@@ -244,7 +237,7 @@ export default function DeleteAccountClient() {
           >
             <h1
               style={{
-                fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                fontFamily: "var(--font-anton, 'Anton', sans-serif)",
                 fontWeight: 900,
                 fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
                 lineHeight: 1.05,
@@ -374,7 +367,7 @@ export default function DeleteAccountClient() {
                       border: "none",
                       borderRadius: 8,
                       padding: "1rem",
-                      fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                      fontFamily: "var(--font-anton, 'Anton', sans-serif)",
                       fontSize: "1.05rem",
                       fontWeight: 800,
                       letterSpacing: "0.08em",
@@ -456,7 +449,7 @@ export default function DeleteAccountClient() {
                     border: "none",
                     borderRadius: 8,
                     padding: "1rem",
-                    fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)",
+                    fontFamily: "var(--font-anton, 'Anton', sans-serif)",
                     fontSize: "1.05rem",
                     fontWeight: 800,
                     letterSpacing: "0.08em",
@@ -482,7 +475,7 @@ export default function DeleteAccountClient() {
                     border: "1px solid rgba(255,255,255,0.08)",
                     borderRadius: 8,
                     padding: "0.85rem",
-                    fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+                    fontFamily: "var(--font-inter-tight, 'Inter Tight', sans-serif)",
                     fontSize: "0.85rem",
                     color: "#9CA3AF",
                     cursor: deleting ? "not-allowed" : "pointer",

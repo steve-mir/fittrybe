@@ -175,7 +175,7 @@ export default function SessionsPage() {
             label: s === "all" ? "All Statuses" : s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
           }))}
         />
-        <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+        <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
           {filtered.length} sessions
         </span>
       </FilterBar>

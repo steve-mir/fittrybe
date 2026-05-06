@@ -44,12 +44,12 @@ export default function EventCard({ event }: EventCardProps) {
       {/* Content */}
       <div className="p-6">
         {/* Title */}
-        <h2 className="text-lg font-bold text-white mb-2 group-hover:text-[#B6FF00] transition-colors line-clamp-2 font-[family-name:var(--font-barlow-condensed)]">
+        <h2 className="text-lg font-bold text-white mb-2 group-hover:text-[#B6FF00] transition-colors line-clamp-2 font-[family-name:var(--font-anton)]">
           {event.title}
         </h2>
 
         {/* Location */}
-        <p className="text-sm text-white/50 mb-4 font-[family-name:var(--font-dm-sans)] flex items-center gap-1.5 line-clamp-1">
+        <p className="text-sm text-white/50 mb-4 font-[family-name:var(--font-inter-tight)] flex items-center gap-1.5 line-clamp-1">
           <svg className="w-3.5 h-3.5 text-[#B6FF00]/70 shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
           </svg>
@@ -57,7 +57,7 @@ export default function EventCard({ event }: EventCardProps) {
         </p>
 
         {/* Meta row */}
-        <div className="flex items-center justify-between text-xs font-[family-name:var(--font-dm-sans)]">
+        <div className="flex items-center justify-between text-xs font-[family-name:var(--font-inter-tight)]">
           <div className="flex flex-col gap-0.5">
             <span className="text-white/70 font-medium">{dateStr}</span>
             <span className="text-white/40">{timeStr}</span>

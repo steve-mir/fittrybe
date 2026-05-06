@@ -152,7 +152,7 @@ export default function HostsPage() {
 
       <FilterBar>
         <SearchInput value={search} onChange={setSearch} placeholder="Search host name or email…" />
-        <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filtered.length} hosts</span>
+        <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filtered.length} hosts</span>
       </FilterBar>
 
       {loading ? (

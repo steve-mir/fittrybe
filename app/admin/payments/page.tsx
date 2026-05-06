@@ -213,7 +213,7 @@ export default function PaymentsPage() {
               onChange={setTxTypeFilter}
               options={[{ value: "all", label: "All Types" }, ...txTypes.map((t) => ({ value: t, label: t.charAt(0).toUpperCase() + t.slice(1) }))]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
               {filteredWallet.length} entries
             </span>
           </FilterBar>
@@ -270,7 +270,7 @@ export default function PaymentsPage() {
                 { value: "rejected", label: "Rejected" },
               ]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filteredRefunds.length} events</span>
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filteredRefunds.length} events</span>
           </FilterBar>
           <AdminTable
             headers={["Player", "Session", "Amount", "Type", "Approval", "Reason", "Date", ""]}

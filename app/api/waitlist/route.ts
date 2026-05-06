@@ -150,7 +150,7 @@ function buildEmailHtml(name: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>You're on the Fittrybe waitlist!</title>
 </head>
-<body style="margin:0;padding:0;background:#0D0D0D;font-family:'DM Sans',Arial,sans-serif;color:#fff;">
+<body style="margin:0;padding:0;background:#0D0D0D;font-family:'Inter Tight',Arial,sans-serif;color:#fff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#0D0D0D;padding:40px 0;">
     <tr>
       <td align="center">
@@ -168,8 +168,8 @@ function buildEmailHtml(name: string): string {
           <!-- Logo + hero -->
           <tr>
             <td style="padding:40px 40px 0;text-align:center;">
-              <p style="margin:0 0 24px;line-height:1;">
-                <img src="https://fittrybe.co.uk/wordmark-white.png" alt="Fittrybe" width="160" height="60" style="display:inline-block;height:36px;width:auto;border:0;" />
+              <p style="margin:0 0 24px;line-height:1;font-size:32px;font-weight:800;letter-spacing:-0.01em;font-family:Arial,Helvetica,sans-serif;">
+                <span style="color:#ffffff;">fitTry</span><span style="color:#B6FF00;font-weight:900;">be</span>
               </p>
               <h1 style="margin:0 0 12px;font-size:36px;font-weight:900;letter-spacing:-0.02em;text-transform:uppercase;line-height:1.1;color:#fff;">
                 You're <span style="color:#B6FF00;">In,</span><br/>${name.split(" ")[0]}! 🎉

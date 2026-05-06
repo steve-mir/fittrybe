@@ -442,7 +442,7 @@ export default function VerificationsPage() {
                 { value: "all", label: "All" },
               ]}
             />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">
               {filtered.length} of {applicants.length}
             </span>
           </FilterBar>
@@ -679,10 +679,10 @@ function ReviewDrawer({
       >
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/8 bg-[#0a0a0a]/95 backdrop-blur">
           <div>
-            <p className="text-xs text-white/40 uppercase tracking-widest font-[family-name:var(--font-dm-sans)]">
+            <p className="text-xs text-white/40 uppercase tracking-widest font-[family-name:var(--font-inter-tight)]">
               Applicant
             </p>
-            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-barlow-condensed)] uppercase">
+            <h2 className="text-lg font-bold text-white font-[family-name:var(--font-anton)] uppercase">
               {applicant.display_name ?? applicant.full_name ?? "Unnamed"}
             </h2>
           </div>
@@ -695,7 +695,7 @@ function ReviewDrawer({
           </button>
         </div>
 
-        <div className="px-6 py-6 space-y-6 font-[family-name:var(--font-dm-sans)]">
+        <div className="px-6 py-6 space-y-6 font-[family-name:var(--font-inter-tight)]">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Email</p>
@@ -852,7 +852,7 @@ function ReviewDrawer({
             <button
               onClick={onReject}
               disabled={busy}
-              className="px-5 py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors font-[family-name:var(--font-barlow-condensed)] text-sm uppercase tracking-wide font-bold disabled:opacity-50"
+              className="px-5 py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors font-[family-name:var(--font-anton)] text-sm uppercase tracking-wide font-bold disabled:opacity-50"
             >
               {busy ? "…" : "Reject"}
             </button>
@@ -870,7 +870,7 @@ function ProfileImageTile({ label, url }: { label: string; url: string | null })
   return (
     <div className="rounded-xl border border-white/8 bg-white/3 overflow-hidden">
       <div className="px-3 py-2 border-b border-white/8 flex items-center justify-between">
-        <span className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-dm-sans)]">
+        <span className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-inter-tight)]">
           {label}
         </span>
         {url && (
@@ -878,7 +878,7 @@ function ProfileImageTile({ label, url }: { label: string; url: string | null })
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-[#B6FF3B] hover:underline font-[family-name:var(--font-dm-sans)]"
+            className="text-xs text-[#B6FF3B] hover:underline font-[family-name:var(--font-inter-tight)]"
           >
             Open ↗
           </a>
@@ -889,7 +889,7 @@ function ProfileImageTile({ label, url }: { label: string; url: string | null })
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={label} className="w-full h-full object-cover" />
         ) : (
-          <span className="text-white/30 text-xs font-[family-name:var(--font-dm-sans)]">
+          <span className="text-white/30 text-xs font-[family-name:var(--font-inter-tight)]">
             Not provided
           </span>
         )}

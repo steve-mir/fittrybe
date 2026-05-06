@@ -217,7 +217,7 @@ export default function SettingsPage() {
           </SectionNote>
 
           <div className="border border-[#B6FF00]/20 bg-[#B6FF00]/3 rounded-2xl p-6 mb-6">
-            <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-4 font-[family-name:var(--font-dm-sans)]">
+            <h3 className="text-xs font-medium text-white/40 uppercase tracking-widest mb-4 font-[family-name:var(--font-inter-tight)]">
               Add or Update Key
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -236,7 +236,7 @@ export default function SettingsPage() {
 
           <FilterBar>
             <SearchInput value={configSearch} onChange={setConfigSearch} placeholder="Search keys…" />
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filteredConfig.length} keys</span>
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filteredConfig.length} keys</span>
           </FilterBar>
 
           <AdminTable
@@ -267,7 +267,7 @@ export default function SettingsPage() {
         <>
           {editingHelp ? (
             <div className="border border-[#B6FF00]/20 bg-[#B6FF00]/3 rounded-2xl p-6 mb-6">
-              <h3 className="text-lg font-black font-[family-name:var(--font-barlow-condensed)] uppercase text-white mb-5">
+              <h3 className="text-lg font-black font-[family-name:var(--font-anton)] uppercase text-white mb-5">
                 {editingHelp.id ? "Edit Help Entry" : "New Help Entry"}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -315,7 +315,7 @@ export default function SettingsPage() {
                   onChange={(e) => setEditingHelp({ ...editingHelp, is_active: e.target.checked })}
                   className="accent-[#B6FF00]"
                 />
-                <label htmlFor="help-active" className="text-sm text-white/70 font-[family-name:var(--font-dm-sans)]">
+                <label htmlFor="help-active" className="text-sm text-white/70 font-[family-name:var(--font-inter-tight)]">
                   Active (visible to users)
                 </label>
               </div>
@@ -331,7 +331,7 @@ export default function SettingsPage() {
           <FilterBar>
             <SearchInput value={helpSearch} onChange={setHelpSearch} placeholder="Search section, title, body…" />
             <PrimaryButton onClick={() => setEditingHelp({ ...EMPTY_HELP })}>+ New Entry</PrimaryButton>
-            <span className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)]">{filteredHelp.length} entries</span>
+            <span className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)]">{filteredHelp.length} entries</span>
           </FilterBar>
 
           <AdminTable

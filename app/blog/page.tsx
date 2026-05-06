@@ -10,7 +10,7 @@ import { getPublishedPosts } from "@/lib/posts";
 import { buildCanonicalUrl, seoConfig } from "@/lib/seo-config";
 import BlogCard from "@/components/BlogCard";
 import Link from "next/link";
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/Wordmark";
 
 const blogOGImage = `${seoConfig.siteUrl}/api/og?title=${encodeURIComponent(
   "The Fittrybe Blog"
@@ -69,14 +69,7 @@ export default async function BlogIndexPage() {
           aria-label="Fittrybe — return to homepage"
           className="inline-flex items-center"
         >
-          <Image
-            src="/wordmark-white.png"
-            alt="Fittrybe"
-            width={132}
-            height={50}
-            priority
-            className="h-7 w-auto"
-          />
+          <Wordmark height={28} />
         </Link>
         <Link
           href="/waitlist"
@@ -91,12 +84,12 @@ export default async function BlogIndexPage() {
         <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#B6FF00] mb-4">
           The Fittrybe Blog
         </span>
-        <h1 className="font-[family-name:var(--font-barlow-condensed)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
+        <h1 className="font-[family-name:var(--font-anton)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
           Find Your Game.
           <br />
           <span className="text-[#B6FF00]">Stay in the Know.</span>
         </h1>
-        <p className="text-white/60 text-lg max-w-xl mx-auto font-[family-name:var(--font-dm-sans)]">
+        <p className="text-white/60 text-lg max-w-xl mx-auto font-[family-name:var(--font-inter-tight)]">
           Sports tips, fitness guides, community stories, and everything you need
           to stay active in your city.
         </p>
@@ -106,7 +99,7 @@ export default async function BlogIndexPage() {
       <section className="max-w-6xl mx-auto px-6 pb-20">
         {posts.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-white/40 text-lg font-[family-name:var(--font-dm-sans)]">
+            <p className="text-white/40 text-lg font-[family-name:var(--font-inter-tight)]">
               No posts published yet. Check back soon!
             </p>
           </div>
@@ -121,12 +114,12 @@ export default async function BlogIndexPage() {
 
       {/* CTA */}
       <section className="border-t border-white/10 py-16 text-center">
-        <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+        <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
           Ready to find your tribe?
         </p>
         <Link
           href="/waitlist"
-          className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+          className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
         >
           Join the Waitlist
         </Link>

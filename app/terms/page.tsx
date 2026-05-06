@@ -5,8 +5,8 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
+import { Wordmark } from "@/components/brand/Wordmark";
 import {
   buildWebPageSchema,
   buildGraphSchema,
@@ -72,18 +72,11 @@ export default function TermsOfUsePage() {
             aria-label="Fittrybe — return to homepage"
             className="inline-flex items-center"
           >
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={132}
-              height={50}
-              priority
-              className="h-7 w-auto"
-            />
+            <Wordmark height={28} />
           </Link>
           <Link
             href="/"
-            className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)]"
+            className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)]"
           >
             ← Home
           </Link>
@@ -92,13 +85,13 @@ export default function TermsOfUsePage() {
         {/* ─── Content ─────────────────────────────────────────────────────── */}
         <article className="max-w-4xl mx-auto px-6 py-12">
           <header className="mb-10">
-            <h1 className="font-[family-name:var(--font-barlow-condensed)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4">
+            <h1 className="font-[family-name:var(--font-anton)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4">
               Terms of Use
             </h1>
-            <p className="text-lg text-white/60 font-[family-name:var(--font-dm-sans)]">
+            <p className="text-lg text-white/60 font-[family-name:var(--font-inter-tight)]">
               Your agreement with FitTrybe when using the app and services
             </p>
-            <p className="text-sm text-white/40 mt-2 font-[family-name:var(--font-dm-sans)]">
+            <p className="text-sm text-white/40 mt-2 font-[family-name:var(--font-inter-tight)]">
               Effective Date: 14 April 2025 · Version 1.0
             </p>
           </header>

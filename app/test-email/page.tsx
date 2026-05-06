@@ -67,7 +67,7 @@ export default function TestEmailPage() {
       minHeight: "100vh",
       background: "#0D0D0D",
       color: "#fff",
-      fontFamily: "'DM Sans', sans-serif",
+      fontFamily: "'Inter Tight', sans-serif",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -82,7 +82,7 @@ export default function TestEmailPage() {
         padding: "2.5rem",
       }}>
         <h1 style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: "'Anton', sans-serif",
           fontSize: "2rem",
           fontWeight: 900,
           textTransform: "uppercase",
@@ -133,7 +133,7 @@ export default function TestEmailPage() {
             border: "none",
             borderRadius: 8,
             padding: "1rem",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: "'Anton', sans-serif",
             fontSize: "1.05rem",
             fontWeight: 800,
             letterSpacing: "0.08em",

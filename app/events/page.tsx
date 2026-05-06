@@ -4,7 +4,7 @@ import { buildCanonicalUrl, seoConfig } from "@/lib/seo-config";
 import { buildItemListSchema } from "@/lib/structured-data";
 import EventCard from "@/components/EventCard";
 import Link from "next/link";
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/Wordmark";
 
 // Revalidate every 60 seconds so new sessions appear without a full rebuild
 export const revalidate = 60;
@@ -128,31 +128,24 @@ export default async function EventsIndexPage({
             aria-label="Fittrybe — return to homepage"
             className="inline-flex items-center"
           >
-            <Image
-              src="/wordmark-white.png"
-              alt="Fittrybe"
-              width={132}
-              height={50}
-              priority
-              className="h-7 w-auto"
-            />
+            <Wordmark height={28} />
           </Link>
           <div className="flex items-center gap-4">
             <Link
               href="/sports"
-              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] hidden sm:block"
+              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] hidden sm:block"
             >
               Sports
             </Link>
             <Link
               href="/blog"
-              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] hidden sm:block"
+              className="text-sm text-white/60 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] hidden sm:block"
             >
               Blog
             </Link>
             <Link
               href="/waitlist"
-              className="text-sm font-medium px-4 py-2 rounded-full bg-[#B6FF00] text-black hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-dm-sans)]"
+              className="text-sm font-medium px-4 py-2 rounded-full bg-[#B6FF00] text-black hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-inter-tight)]"
             >
               Join Waitlist
             </Link>
@@ -164,13 +157,13 @@ export default async function EventsIndexPage({
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#B6FF00] mb-4">
             Live Sessions
           </span>
-          <h1 className="font-[family-name:var(--font-barlow-condensed)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
+          <h1 className="font-[family-name:var(--font-anton)] text-5xl md:text-7xl font-black uppercase tracking-tight text-white mb-4">
             Find Your Game.
             <br />
             <span className="text-[#B6FF00]">Show Up and Play.</span>
           </h1>
           {/* Location signal — geographic anchor text for local SEO */}
-          <p className="text-white/60 text-lg max-w-xl mx-auto font-[family-name:var(--font-dm-sans)]">
+          <p className="text-white/60 text-lg max-w-xl mx-auto font-[family-name:var(--font-inter-tight)]">
             {activeSport
               ? `Grassroots ${activeSport} sessions in Redhill, Surrey and across the UK. Reserve your spot and meet your tribe.`
               : "Grassroots sports sessions in Redhill, Surrey and across the UK. Football, basketball, cycling and more — reserve your spot in one tap."}
@@ -190,7 +183,7 @@ export default async function EventsIndexPage({
                   href={
                     filter.id === "all" ? "/events" : `/events?sport=${filter.id}`
                   }
-                  className={`text-sm font-medium px-4 py-2 rounded-full transition-all font-[family-name:var(--font-dm-sans)] ${
+                  className={`text-sm font-medium px-4 py-2 rounded-full transition-all font-[family-name:var(--font-inter-tight)] ${
                     isActive
                       ? "bg-[#B6FF00] text-black"
                       : "bg-white/5 text-white/60 hover:text-white border border-white/10 hover:border-white/30"
@@ -207,21 +200,21 @@ export default async function EventsIndexPage({
         <section className="max-w-6xl mx-auto px-6 pb-20">
           {isEmpty ? (
             <div className="text-center py-20">
-              <p className="text-white/40 text-lg font-[family-name:var(--font-dm-sans)] mb-6">
+              <p className="text-white/40 text-lg font-[family-name:var(--font-inter-tight)] mb-6">
                 {activeSport
                   ? `No upcoming ${activeSport} sessions right now. Check back soon!`
                   : "No upcoming sessions right now. Check back soon!"}
               </p>
               <Link
                 href="/waitlist"
-                className="inline-block px-6 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] uppercase tracking-wide"
+                className="inline-block px-6 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] uppercase tracking-wide"
               >
                 Get notified when sessions drop
               </Link>
             </div>
           ) : (
             <>
-              <p className="text-white/40 text-sm font-[family-name:var(--font-dm-sans)] mb-6">
+              <p className="text-white/40 text-sm font-[family-name:var(--font-inter-tight)] mb-6">
                 {filteredEvents.length} session
                 {filteredEvents.length !== 1 ? "s" : ""} available
               </p>
@@ -236,12 +229,12 @@ export default async function EventsIndexPage({
 
         {/* CTA */}
         <section className="border-t border-white/10 py-16 text-center">
-          <p className="text-white/60 mb-4 font-[family-name:var(--font-dm-sans)]">
+          <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
             Want to host your own session?
           </p>
           <Link
             href="/waitlist"
-            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-lg uppercase tracking-wide"
+            className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
           >
             Join Fittrybe — Host for Free
           </Link>

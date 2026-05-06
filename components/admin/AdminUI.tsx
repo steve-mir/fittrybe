@@ -8,13 +8,13 @@ interface StatCardProps {
 export function StatCard({ label, value, sub, accent }: StatCardProps) {
   return (
     <div className={`rounded-xl border p-5 ${accent ? "border-[#B6FF00]/20 bg-[#B6FF00]/5" : "border-white/8 bg-white/3"}`}>
-      <p className="text-xs font-medium text-white/40 uppercase tracking-wider font-[family-name:var(--font-dm-sans)] mb-2">
+      <p className="text-xs font-medium text-white/40 uppercase tracking-wider font-[family-name:var(--font-inter-tight)] mb-2">
         {label}
       </p>
-      <p className={`text-3xl font-black font-[family-name:var(--font-barlow-condensed)] ${accent ? "text-[#B6FF00]" : "text-white"}`}>
+      <p className={`text-3xl font-black font-[family-name:var(--font-anton)] ${accent ? "text-[#B6FF00]" : "text-white"}`}>
         {value}
       </p>
-      {sub && <p className="text-xs text-white/30 mt-1 font-[family-name:var(--font-dm-sans)]">{sub}</p>}
+      {sub && <p className="text-xs text-white/30 mt-1 font-[family-name:var(--font-inter-tight)]">{sub}</p>}
     </div>
   );
 }
@@ -29,11 +29,11 @@ export function PageHeader({ title, desc, action }: PageHeaderProps) {
   return (
     <div className="flex items-start justify-between mb-8">
       <div>
-        <h1 className="text-3xl font-black font-[family-name:var(--font-barlow-condensed)] uppercase tracking-wide text-white">
+        <h1 className="text-3xl font-black font-[family-name:var(--font-anton)] uppercase tracking-wide text-white">
           {title}
         </h1>
         {desc && (
-          <p className="text-white/40 text-sm mt-1 font-[family-name:var(--font-dm-sans)]">{desc}</p>
+          <p className="text-white/40 text-sm mt-1 font-[family-name:var(--font-inter-tight)]">{desc}</p>
         )}
       </div>
       {action && <div>{action}</div>}
@@ -51,7 +51,7 @@ interface TableProps {
 export function AdminTable({ headers, children, empty = "No data", isEmpty }: TableProps) {
   return (
     <div className="border border-white/8 rounded-2xl overflow-hidden overflow-x-auto">
-      <table className="w-full text-sm font-[family-name:var(--font-dm-sans)]">
+      <table className="w-full text-sm font-[family-name:var(--font-inter-tight)]">
         <thead>
           <tr className="border-b border-white/8 bg-white/3">
             {headers.map((h) => (
@@ -136,7 +136,7 @@ export function Select({ value, onChange, options }: { value: string; onChange: 
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 font-[family-name:var(--font-dm-sans)] focus:outline-none focus:border-[#B6FF00]/40"
+      className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 font-[family-name:var(--font-inter-tight)] focus:outline-none focus:border-[#B6FF00]/40"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value} className="bg-[#111]">{o.label}</option>
@@ -152,7 +152,7 @@ export function SearchInput({ value, onChange, placeholder }: { value: string; o
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder ?? "Search…"}
-      className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30 font-[family-name:var(--font-dm-sans)] focus:outline-none focus:border-[#B6FF00]/40 min-w-[200px]"
+      className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30 font-[family-name:var(--font-inter-tight)] focus:outline-none focus:border-[#B6FF00]/40 min-w-[200px]"
     />
   );
 }
@@ -172,7 +172,7 @@ export function ActionButton({ onClick, label, variant = "ghost" }: { onClick: (
 
 export function SectionNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-xs text-white/30 font-[family-name:var(--font-dm-sans)] bg-white/3 border border-white/8 rounded-xl p-4 mb-6">
+    <div className="text-xs text-white/30 font-[family-name:var(--font-inter-tight)] bg-white/3 border border-white/8 rounded-xl p-4 mb-6">
       {children}
     </div>
   );
@@ -193,7 +193,7 @@ export function Tabs<T extends string>({
         <button
           key={t.key}
           onClick={() => onChange(t.key)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium font-[family-name:var(--font-dm-sans)] transition-all ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium font-[family-name:var(--font-inter-tight)] transition-all ${
             active === t.key
               ? "bg-[#B6FF00]/10 text-[#B6FF00] border border-[#B6FF00]/20"
               : "text-white/40 hover:text-white border border-white/8"
@@ -222,7 +222,7 @@ export function PrimaryButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="px-5 py-2 bg-[#B6FF00] text-black font-bold rounded-xl hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-barlow-condensed)] text-sm uppercase tracking-wide disabled:opacity-50"
+      className="px-5 py-2 bg-[#B6FF00] text-black font-bold rounded-xl hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-sm uppercase tracking-wide disabled:opacity-50"
     >
       {children}
     </button>
@@ -242,7 +242,7 @@ export function GhostButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="px-5 py-2 border border-white/15 text-white/80 rounded-xl hover:bg-white/5 hover:text-white transition-colors font-[family-name:var(--font-dm-sans)] text-sm disabled:opacity-50"
+      className="px-5 py-2 border border-white/15 text-white/80 rounded-xl hover:bg-white/5 hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] text-sm disabled:opacity-50"
     >
       {children}
     </button>
@@ -260,12 +260,12 @@ export function FormField({
 }) {
   return (
     <div>
-      <label className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-dm-sans)] block mb-1.5">
+      <label className="text-xs text-white/40 uppercase tracking-wider font-[family-name:var(--font-inter-tight)] block mb-1.5">
         {label}
       </label>
       {children}
       {hint && (
-        <p className="text-xs text-white/30 mt-1 font-[family-name:var(--font-dm-sans)]">{hint}</p>
+        <p className="text-xs text-white/30 mt-1 font-[family-name:var(--font-inter-tight)]">{hint}</p>
       )}
     </div>
   );
@@ -275,7 +275,7 @@ export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/30 font-[family-name:var(--font-dm-sans)] focus:outline-none focus:border-[#B6FF00]/40 ${props.className ?? ""}`}
+      className={`w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/30 font-[family-name:var(--font-inter-tight)] focus:outline-none focus:border-[#B6FF00]/40 ${props.className ?? ""}`}
     />
   );
 }
@@ -284,7 +284,7 @@ export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return (
     <textarea
       {...props}
-      className={`w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/30 font-[family-name:var(--font-dm-sans)] focus:outline-none focus:border-[#B6FF00]/40 resize-none ${props.className ?? ""}`}
+      className={`w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/30 font-[family-name:var(--font-inter-tight)] focus:outline-none focus:border-[#B6FF00]/40 resize-none ${props.className ?? ""}`}
     />
   );
 }

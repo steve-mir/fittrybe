@@ -19,12 +19,12 @@ export default function NewPostPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/admin"
-              className="text-white/40 hover:text-white transition-colors text-sm font-[family-name:var(--font-dm-sans)]"
+              className="text-white/40 hover:text-white transition-colors text-sm font-[family-name:var(--font-inter-tight)]"
             >
               ← Dashboard
             </Link>
             <span className="text-white/20">/</span>
-            <span className="text-white/60 text-sm font-[family-name:var(--font-dm-sans)]">
+            <span className="text-white/60 text-sm font-[family-name:var(--font-inter-tight)]">
               New Post
             </span>
           </div>
@@ -32,7 +32,7 @@ export default function NewPostPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-6 py-10">
-        <h1 className="text-4xl font-black font-[family-name:var(--font-barlow-condensed)] uppercase mb-8">
+        <h1 className="text-4xl font-black font-[family-name:var(--font-anton)] uppercase mb-8">
           New Post
         </h1>
         <PostForm onSave={handleSave} />
