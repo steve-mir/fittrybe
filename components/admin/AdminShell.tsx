@@ -59,7 +59,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/8">
           <div className="flex items-center gap-2">
-            <Image src="/logo-icon-lime.png" alt="" width={24} height={24} priority />
+            <Image src="/logo-mark.png" alt="" width={24} height={24} priority />
             <Wordmark height={20} />
             <span className="text-white/30 text-xs font-[family-name:var(--font-inter-tight)] border border-white/10 rounded px-1.5 py-0.5">
               ADMIN
@@ -119,7 +119,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             ☰
           </button>
           <div className="flex items-center gap-2">
-            <Image src="/logo-icon-lime.png" alt="" width={22} height={22} />
+            <Image src="/logo-mark.png" alt="" width={22} height={22} />
             <Wordmark height={18} />
             <span className="text-white/40 text-xs font-[family-name:var(--font-inter-tight)] uppercase tracking-wider">
               Admin

@@ -24,7 +24,7 @@ export default function NotFound() {
           className="inline-flex items-center gap-2.5 mb-10"
         >
           <Image
-            src="/logo-icon-lime.png"
+            src="/logo-mark.png"
             alt=""
             width={36}
             height={36}

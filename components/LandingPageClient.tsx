@@ -282,7 +282,7 @@ function Navbar() {
       <Link href="/" aria-label="Fittrybe — return to homepage" style={{
         display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none",
       }}>
-        <Image src="/logo-icon-lime.png" alt="" width={32} height={32} priority style={{ display: "block" }} />
+        <Image src="/logo-mark.png" alt="" width={32} height={32} priority style={{ display: "block" }} />
         <Wordmark height={26} />
       </Link>
 
@@ -1221,7 +1221,7 @@ function Footer() {
         <Link href="/" aria-label="Fittrybe homepage" style={{
           display: "flex", alignItems: "center", gap: "0.55rem", textDecoration: "none",
         }}>
-          <Image src="/logo-icon-lime.png" alt="" width={28} height={28} style={{ display: "block" }} />
+          <Image src="/logo-mark.png" alt="" width={28} height={28} style={{ display: "block" }} />
           <Wordmark height={22} />
         </Link>
 

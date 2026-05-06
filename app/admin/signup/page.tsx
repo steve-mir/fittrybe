@@ -52,7 +52,7 @@ export default function AdminSignupPage() {
         {/* Logo */}
         <div className="text-center mb-10">
           <Image
-            src="/logo-icon-lime.png"
+            src="/logo-mark.png"
             alt=""
             width={64}
             height={64}
