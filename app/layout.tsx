@@ -24,9 +24,12 @@ const anton = Anton({
   preload: true,
 });
 
+// Body font — every weight ≥ 800 in the codebase is paired with the Anton
+// display font (var(--font-anton)), so Inter Tight ships only 400/500/700.
+// Removing 800 trims another ~15–20 KB of woff2.
 const interTight = Inter_Tight({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "700"],
   variable: "--font-inter-tight",
   display: "swap",
   preload: true,
@@ -124,28 +127,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang={seoConfig.siteLanguage} dir="ltr" className={`${anton.variable} ${interTight.variable}`}>
       <head>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: globalJsonLd }} />
-        <link rel="preconnect" href="https://firestore.googleapis.com" />
-        <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+        {/* Supabase is the actual data backend — preconnect to its origin. */}
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <>
+            <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="" />
+            <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+          </>
+        )}
         {seoConfig.analytics.ga4MeasurementId && (
-          <link rel="preconnect" href="https://www.googletagmanager.com" />
+          <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         )}
       </head>
       <body>
         {children}
         {seoConfig.analytics.ga4MeasurementId && (
           <>
+            {/* lazyOnload: defer to browser idle so analytics doesn't compete
+                with critical content for main-thread time. Cuts TBT/INP. */}
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${seoConfig.analytics.ga4MeasurementId}`}
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
-            <Script id="ga4-init" strategy="afterInteractive">
+            <Script id="ga4-init" strategy="lazyOnload">
               {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${seoConfig.analytics.ga4MeasurementId}',{anonymize_ip:true});`}
             </Script>
           </>
         )}
         {seoConfig.analytics.metaPixelId && (
           <>
-            <Script id="meta-pixel" strategy="afterInteractive">
+            <Script id="meta-pixel" strategy="lazyOnload">
               {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${seoConfig.analytics.metaPixelId}');fbq('track','PageView');`}
             </Script>
             <noscript
