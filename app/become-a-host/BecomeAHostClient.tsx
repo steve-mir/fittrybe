@@ -1,9 +1,15 @@
 /**
  * ─── /become-a-host ───────────────────────────────────────────────────────────
- * Two-step flow:
- *   Step 1 — Benefits + Continue CTA (no auth required)
- *   Step 2 — Sign-in (if not authenticated) + payment summary →
- *            POST /api/become-a-host/checkout → redirect to Stripe Checkout.
+ * Three-step flow:
+ *   Step 1 — Benefits + Apply CTA (no auth required)
+ *   Step 2 — Sign-in (if not authenticated) + Application form →
+ *            POST /api/become-a-host/apply → on success, advance to step 3.
+ *   Step 3 — "Application received" confirmation; we'll review and email
+ *            an activation link if approved.
+ *
+ * No payment is taken on this page. Verified-host membership (£9.99/mo)
+ * kicks in only after an admin approves the application and the applicant
+ * follows the activation link emailed to them.
  *
  * Design language matches the landing page: Anton display font,
  * lemon green #B6FF00 accent, dark #050505 background, fadeUp animations,
@@ -107,6 +113,29 @@ const PAGE_CSS = `
   }
   .bah-input:focus { border-color: rgba(182,255,0,0.4); }
   .bah-input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #111 inset !important; -webkit-text-fill-color: #fff !important; }
+
+  .bah-textarea {
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    color: #fff;
+    font-family: var(--font-inter-tight, 'Inter Tight', sans-serif);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .bah-textarea:focus { border-color: rgba(182,255,0,0.4); }
+
+  .bah-hint {
+    font-size: 0.72rem;
+    color: #4B5563;
+    margin-top: 0.35rem;
+  }
 
   .bah-label {
     display: block;
@@ -279,28 +308,36 @@ const BENEFITS: Array<{
   },
 ];
 
-type Step = "benefits" | "checkout";
+type Step = "benefits" | "application" | "submitted";
 
 export default function BecomeAHostClient() {
   // Lazy initializer so we hydrate straight to the right step when the user
-  // arrives with ?step=checkout (e.g. after an OAuth round-trip), avoiding a
-  // setState-in-useEffect render loop. Falls back to "benefits" on the server.
+  // arrives with ?step=application (e.g. after an OAuth round-trip).
+  // `?step=checkout` is still honoured for any stale links floating around.
   const [step, setStep] = useState<Step>(() => {
     if (typeof window === "undefined") return "benefits";
     const params = new URLSearchParams(window.location.search);
-    return params.get("step") === "checkout" ? "checkout" : "benefits";
+    const raw = params.get("step");
+    if (raw === "application" || raw === "checkout") return "application";
+    return "benefits";
   });
   const [user, setUser] = useState<User | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
 
-  // Sign-in form (shown only when step=checkout AND user is not authenticated)
+  // Sign-in form (shown only when step=application AND user is not authenticated)
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [signingIn, setSigningIn] = useState(false);
   const [oauthBusy, setOauthBusy] = useState<"google" | "apple" | null>(null);
 
-  // Stripe checkout
-  const [redirecting, setRedirecting] = useState(false);
+  // Application form
+  const [fullName, setFullName] = useState("");
+  const [city, setCity] = useState("");
+  const [primarySport, setPrimarySport] = useState("");
+  const [experience, setExperience] = useState("");
+  const [motivation, setMotivation] = useState("");
+  const [socialUrl, setSocialUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
@@ -352,7 +389,7 @@ export default function BecomeAHostClient() {
     setOauthBusy(provider);
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/become-a-host?step=checkout` },
+      options: { redirectTo: `${window.location.origin}/become-a-host?step=application` },
     });
     if (err) {
       setOauthBusy(null);
@@ -361,41 +398,57 @@ export default function BecomeAHostClient() {
     }
   }
 
-  async function handleStartCheckout() {
+  async function handleSubmitApplication() {
     if (!user) {
       setError("Please sign in first.");
       triggerShake();
       return;
     }
+    if (!fullName.trim() || !city.trim() || !primarySport.trim() || !motivation.trim()) {
+      setError("Please fill in your name, city, primary sport, and why you want to host.");
+      triggerShake();
+      return;
+    }
+
     setError(null);
-    setRedirecting(true);
+    setSubmitting(true);
 
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
     if (!token) {
-      setRedirecting(false);
+      setSubmitting(false);
       setError("Your session expired. Sign in again.");
       setUser(null);
       return;
     }
 
     try {
-      const res = await fetch("/api/become-a-host/checkout", {
+      const res = await fetch("/api/become-a-host/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          full_name: fullName.trim(),
+          city: city.trim(),
+          primary_sport: primarySport.trim(),
+          experience: experience.trim(),
+          motivation: motivation.trim(),
+          social_url: socialUrl.trim() || null,
+        }),
       });
       const body = await res.json().catch(() => ({}));
-      if (!res.ok || !body?.url) {
-        setRedirecting(false);
-        setError(body?.error ?? "Could not start checkout. Please try again.");
+      if (!res.ok) {
+        setSubmitting(false);
+        setError(body?.error ?? "Could not submit your application. Please try again.");
         triggerShake();
         return;
       }
-      // Hard redirect to Stripe-hosted page
-      window.location.href = body.url as string;
+      setSubmitting(false);
+      setStep("submitted");
+      // Scroll to top so users see the confirmation banner first.
+      if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       console.error(err);
-      setRedirecting(false);
+      setSubmitting(false);
       setError("Network error. Please try again.");
       triggerShake();
     }
@@ -464,10 +517,10 @@ export default function BecomeAHostClient() {
         />
 
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1080, margin: "0 auto" }}>
-          {step === "benefits" ? <BenefitsStep onContinue={() => setStep("checkout")} /> : null}
+          {step === "benefits" ? <BenefitsStep onContinue={() => setStep("application")} /> : null}
 
-          {step === "checkout" ? (
-            <CheckoutStep
+          {step === "application" ? (
+            <ApplicationStep
               shake={shake}
               user={user}
               checkingSession={checkingSession}
@@ -477,19 +530,35 @@ export default function BecomeAHostClient() {
               setPassword={setPassword}
               signingIn={signingIn}
               oauthBusy={oauthBusy}
-              redirecting={redirecting}
+              submitting={submitting}
               error={error}
+              fullName={fullName}
+              setFullName={setFullName}
+              city={city}
+              setCity={setCity}
+              primarySport={primarySport}
+              setPrimarySport={setPrimarySport}
+              experience={experience}
+              setExperience={setExperience}
+              motivation={motivation}
+              setMotivation={setMotivation}
+              socialUrl={socialUrl}
+              setSocialUrl={setSocialUrl}
               onBack={() => {
                 setError(null);
                 setStep("benefits");
               }}
               onSignIn={handleSignIn}
               onOAuth={handleOAuth}
-              onCheckout={handleStartCheckout}
+              onSubmit={handleSubmitApplication}
               onSignOut={async () => {
                 await supabase.auth.signOut();
               }}
             />
+          ) : null}
+
+          {step === "submitted" ? (
+            <SubmittedStep userEmail={user?.email ?? null} />
           ) : null}
         </div>
       </main>
@@ -521,7 +590,7 @@ function BenefitsStep({ onContinue }: { onContinue: () => void }) {
         }}
       >
         <span style={{ width: 6, height: 6, background: "#B6FF00", borderRadius: "50%", animation: "bahBlink 1.5s infinite" }} aria-hidden="true" />
-        Become a Verified Host
+        Apply to be a Verified Host
       </div>
 
       <h1
@@ -551,7 +620,8 @@ function BenefitsStep({ onContinue }: { onContinue: () => void }) {
         }}
       >
         Verified hosts get the tools, the trust, and the reach to run great sessions consistently.
-        It&apos;s £9.99/month — cancel anytime, no contracts, no fluff.
+        Tell us a bit about you and the games you want to run — if it&apos;s a fit, we&apos;ll email you
+        an activation link.
       </p>
 
       {/* Benefits grid */}
@@ -588,7 +658,7 @@ function BenefitsStep({ onContinue }: { onContinue: () => void }) {
         ))}
       </div>
 
-      {/* CTA + price strip */}
+      {/* CTA + apply strip */}
       <div
         className="bah-fade-4"
         style={{
@@ -608,38 +678,37 @@ function BenefitsStep({ onContinue }: { onContinue: () => void }) {
           <p
             style={{
               fontFamily: "var(--font-anton, 'Anton', sans-serif)",
-              fontSize: "clamp(2.5rem, 5vw, 3.25rem)",
+              fontSize: "clamp(1.6rem, 3.5vw, 2rem)",
               fontWeight: 900,
-              lineHeight: 1,
-              letterSpacing: "-0.02em",
+              lineHeight: 1.1,
+              letterSpacing: "-0.01em",
+              textTransform: "uppercase",
               color: "#fff",
             }}
           >
-            £9.99
-            <span style={{ fontSize: "1rem", color: "#6B7280", fontWeight: 500, letterSpacing: 0, marginLeft: "0.4rem" }}>
-              /month
-            </span>
+            Free to apply
           </p>
-          <p style={{ fontSize: "0.82rem", color: "#6B7280", marginTop: "0.5rem" }}>
-            Cancel anytime. No setup fees. Secured by Stripe.
+          <p style={{ fontSize: "0.82rem", color: "#6B7280", marginTop: "0.6rem", lineHeight: 1.5 }}>
+            Takes about 2 minutes. Approved hosts pay £9.99/month after activation —
+            cancel anytime, no setup fees.
           </p>
         </div>
 
         <button
           type="button"
           onClick={onContinue}
-          aria-label="Continue to payment"
+          aria-label="Start your host application"
           className="bah-cta"
         >
-          Continue <IconArrowRight size={18} />
+          Start application <IconArrowRight size={18} />
         </button>
       </div>
     </div>
   );
 }
 
-/* ─── Step 2: Auth + Checkout ──────────────────────────────────────────── */
-function CheckoutStep(props: {
+/* ─── Step 2: Auth + Application form ──────────────────────────────────── */
+function ApplicationStep(props: {
   shake: boolean;
   user: User | null;
   checkingSession: boolean;
@@ -649,23 +718,42 @@ function CheckoutStep(props: {
   setPassword: (v: string) => void;
   signingIn: boolean;
   oauthBusy: "google" | "apple" | null;
-  redirecting: boolean;
+  submitting: boolean;
   error: string | null;
+  fullName: string;
+  setFullName: (v: string) => void;
+  city: string;
+  setCity: (v: string) => void;
+  primarySport: string;
+  setPrimarySport: (v: string) => void;
+  experience: string;
+  setExperience: (v: string) => void;
+  motivation: string;
+  setMotivation: (v: string) => void;
+  socialUrl: string;
+  setSocialUrl: (v: string) => void;
   onBack: () => void;
   onSignIn: () => void;
   onOAuth: (provider: "google" | "apple") => void;
-  onCheckout: () => void;
+  onSubmit: () => void;
   onSignOut: () => void;
 }) {
   const {
     shake, user, checkingSession,
     email, setEmail, password, setPassword,
-    signingIn, oauthBusy, redirecting, error,
-    onBack, onSignIn, onOAuth, onCheckout, onSignOut,
+    signingIn, oauthBusy, submitting, error,
+    fullName, setFullName, city, setCity,
+    primarySport, setPrimarySport,
+    experience, setExperience,
+    motivation, setMotivation,
+    socialUrl, setSocialUrl,
+    onBack, onSignIn, onOAuth, onSubmit, onSignOut,
   } = props;
 
+  const signedIn = !!user;
+
   return (
-    <div className={`bah-fade ${shake ? "bah-shake" : ""}`} style={{ maxWidth: 520, margin: "0 auto" }}>
+    <div className={`bah-fade ${shake ? "bah-shake" : ""}`} style={{ maxWidth: 560, margin: "0 auto" }}>
       <button type="button" className="bah-step-back" onClick={onBack} aria-label="Back to benefits">
         ← Back
       </button>
@@ -689,41 +777,23 @@ function CheckoutStep(props: {
             marginBottom: "0.5rem",
           }}
         >
-          Confirm <span style={{ color: "#B6FF00" }}>your subscription</span>
+          {signedIn ? (
+            <>Tell us about <span style={{ color: "#B6FF00" }}>your hosting</span></>
+          ) : (
+            <>Sign in <span style={{ color: "#B6FF00" }}>to apply</span></>
+          )}
         </h2>
         <p style={{ fontSize: "0.9rem", color: "#9CA3AF", lineHeight: 1.6, marginBottom: "1.75rem" }}>
-          Sign in to link the subscription to your Fittrybe profile, then we&apos;ll hand you over to Stripe.
+          {signedIn
+            ? "A few quick questions so we can review your application. We usually get back to applicants within 2–3 working days."
+            : "Sign in to link your application to your Fittrybe profile — then we'll show you the short application form."}
         </p>
-
-        {/* Order summary */}
-        <div
-          style={{
-            border: "1px solid rgba(182,255,0,0.18)",
-            background: "rgba(182,255,0,0.04)",
-            borderRadius: 12,
-            padding: "1rem 1.1rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <div className="bah-summary-row">
-            <span style={{ color: "#9CA3AF" }}>Plan</span>
-            <span style={{ color: "#fff", fontWeight: 600 }}>Verified Host — Monthly</span>
-          </div>
-          <div className="bah-summary-row">
-            <span style={{ color: "#9CA3AF" }}>Billing</span>
-            <span style={{ color: "#fff", fontWeight: 600 }}>£9.99 / month</span>
-          </div>
-          <div className="bah-summary-row">
-            <span style={{ color: "#9CA3AF" }}>Cancellation</span>
-            <span style={{ color: "#fff", fontWeight: 600 }}>Anytime</span>
-          </div>
-        </div>
 
         {checkingSession ? (
           <p style={{ color: "#6B7280", fontSize: "0.85rem", textAlign: "center" }}>
             Checking session…
           </p>
-        ) : !user ? (
+        ) : !signedIn ? (
           <>
             {/* OAuth */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem", marginBottom: "1rem" }}>
@@ -813,13 +883,14 @@ function CheckoutStep(props: {
           </>
         ) : (
           <>
+            {/* Signed-in badge */}
             <div
               style={{
                 background: "rgba(182,255,0,0.06)",
                 border: "1px solid rgba(182,255,0,0.18)",
                 borderRadius: 8,
                 padding: "0.9rem 1rem",
-                marginBottom: "1.25rem",
+                marginBottom: "1.5rem",
                 display: "flex", alignItems: "center", gap: "0.8rem",
               }}
             >
@@ -836,68 +907,276 @@ function CheckoutStep(props: {
               </span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <p style={{ fontSize: "0.7rem", color: "#9CA3AF", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 2 }}>
-                  Signed in as
+                  Applying as
                 </p>
                 <p style={{ fontSize: "0.92rem", color: "#fff", fontWeight: 600, wordBreak: "break-all" }}>
-                  {user.email}
+                  {user!.email}
                 </p>
               </div>
             </div>
 
-            {error && (
-              <p role="alert" style={{ fontSize: "0.82rem", color: "#ff6b6b", textAlign: "center", marginBottom: "0.9rem" }}>
-                {error}
-              </p>
-            )}
+            {/* Application form */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+              <div>
+                <label htmlFor="bah-fullname" className="bah-label">Full name</label>
+                <input
+                  id="bah-fullname"
+                  type="text"
+                  autoComplete="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="bah-input"
+                  placeholder="e.g. Jordan Adebayo"
+                />
+              </div>
 
-            <button
-              type="button"
-              onClick={onCheckout}
-              disabled={redirecting}
-              className="bah-cta"
-            >
-              {redirecting ? "Redirecting to Stripe…" : (
-                <>
-                  Pay £9.99 / month <IconArrowRight size={18} />
-                </>
+              <div>
+                <label htmlFor="bah-city" className="bah-label">City / area</label>
+                <input
+                  id="bah-city"
+                  type="text"
+                  autoComplete="address-level2"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="bah-input"
+                  placeholder="e.g. London — Hackney"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="bah-sport" className="bah-label">Primary sport you want to host</label>
+                <input
+                  id="bah-sport"
+                  type="text"
+                  value={primarySport}
+                  onChange={(e) => setPrimarySport(e.target.value)}
+                  className="bah-input"
+                  placeholder="e.g. 5-a-side football"
+                />
+                <p className="bah-hint">You can host other sports too — just tell us the main one.</p>
+              </div>
+
+              <div>
+                <label htmlFor="bah-experience" className="bah-label">Hosting experience (optional)</label>
+                <textarea
+                  id="bah-experience"
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                  className="bah-textarea"
+                  placeholder="Run a weekly kickabout? Coach a team? Manage a WhatsApp group? Tell us briefly."
+                  maxLength={500}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="bah-motivation" className="bah-label">Why do you want to host on Fittrybe?</label>
+                <textarea
+                  id="bah-motivation"
+                  value={motivation}
+                  onChange={(e) => setMotivation(e.target.value)}
+                  className="bah-textarea"
+                  placeholder="What kind of trybe are you trying to build, and how often do you plan to run sessions?"
+                  maxLength={800}
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="bah-social" className="bah-label">Instagram / social or website (optional)</label>
+                <input
+                  id="bah-social"
+                  type="url"
+                  value={socialUrl}
+                  onChange={(e) => setSocialUrl(e.target.value)}
+                  className="bah-input"
+                  placeholder="https://instagram.com/yourhandle"
+                />
+                <p className="bah-hint">Helps us verify the community you already run.</p>
+              </div>
+
+              {error && (
+                <p role="alert" style={{ fontSize: "0.82rem", color: "#ff6b6b", textAlign: "center" }}>
+                  {error}
+                </p>
               )}
-            </button>
 
-            <p
-              style={{
-                marginTop: "0.85rem",
-                fontSize: "0.74rem",
-                color: "#4B5563",
-                textAlign: "center",
-                display: "inline-flex",
-                width: "100%",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.4rem",
-              }}
-            >
-              <IconLock size={12} />
-              Secure checkout powered by Stripe
-            </p>
+              <button
+                type="button"
+                onClick={onSubmit}
+                disabled={submitting}
+                className="bah-cta"
+              >
+                {submitting ? "Submitting…" : (
+                  <>
+                    Submit application <IconArrowRight size={18} />
+                  </>
+                )}
+              </button>
 
-            <button
-              type="button"
-              onClick={onSignOut}
-              disabled={redirecting}
-              className="bah-ghost-btn"
-              style={{ marginTop: "0.85rem" }}
-            >
-              Use a different account
-            </button>
+              <p
+                style={{
+                  fontSize: "0.74rem",
+                  color: "#4B5563",
+                  textAlign: "center",
+                  display: "inline-flex",
+                  width: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.4rem",
+                }}
+              >
+                <IconLock size={12} />
+                Your details are reviewed by the Fittrybe team only.
+              </p>
+
+              <button
+                type="button"
+                onClick={onSignOut}
+                disabled={submitting}
+                className="bah-ghost-btn"
+              >
+                Use a different account
+              </button>
+            </div>
           </>
         )}
       </div>
 
       <p style={{ marginTop: "1.25rem", fontSize: "0.75rem", color: "#4B5563", textAlign: "center", lineHeight: 1.6 }}>
-        By subscribing you agree to our{" "}
+        By applying you agree to our{" "}
         <Link href="/terms" style={{ color: "#9CA3AF", textDecoration: "underline", textUnderlineOffset: 3 }}>Terms</Link> and{" "}
         <Link href="/privacy" style={{ color: "#9CA3AF", textDecoration: "underline", textUnderlineOffset: 3 }}>Privacy Policy</Link>.
       </p>
+    </div>
+  );
+}
+
+/* ─── Step 3: Submitted ────────────────────────────────────────────────── */
+function SubmittedStep({ userEmail }: { userEmail: string | null }) {
+  return (
+    <div className="bah-fade" style={{ maxWidth: 560, margin: "0 auto", textAlign: "center" }}>
+      <div
+        aria-hidden="true"
+        style={{
+          width: 84, height: 84,
+          borderRadius: "50%",
+          background: "#B6FF00",
+          color: "#0D0D0D",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 1.75rem",
+          boxShadow: "0 0 0 12px rgba(182,255,0,0.08), 0 30px 80px rgba(182,255,0,0.18)",
+        }}
+      >
+        <IconCheck size={36} />
+      </div>
+
+      <p
+        style={{
+          color: "#B6FF00",
+          fontSize: "0.72rem",
+          fontWeight: 800,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          marginBottom: "0.75rem",
+        }}
+      >
+        Application Received
+      </p>
+
+      <h2
+        className="bah-fade-1"
+        style={{
+          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
+          fontWeight: 900,
+          fontSize: "clamp(2rem, 5.5vw, 3rem)",
+          lineHeight: 1.05,
+          letterSpacing: "-0.02em",
+          textTransform: "uppercase",
+          marginBottom: "1.25rem",
+        }}
+      >
+        Thanks — we&apos;ve <span style={{ color: "#B6FF00" }}>got it.</span>
+      </h2>
+
+      <p
+        className="bah-fade-2"
+        style={{
+          fontSize: "1rem",
+          color: "#9CA3AF",
+          lineHeight: 1.7,
+          marginBottom: "1.75rem",
+        }}
+      >
+        Your host application is in. A real human from the Fittrybe team will read it
+        and get back to you within 2–3 working days
+        {userEmail ? <> at <span style={{ color: "#fff" }}>{userEmail}</span></> : null}.
+        If approved, we&apos;ll send you an activation link to switch on your verified-host tools.
+      </p>
+
+      <div
+        className="bah-fade-3"
+        style={{
+          background: "#0a0a0a",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 14,
+          padding: "1.25rem 1.4rem",
+          marginBottom: "2rem",
+          textAlign: "left",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "0.7rem",
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "#6B7280",
+            marginBottom: "0.6rem",
+          }}
+        >
+          What happens next
+        </p>
+        <ol style={{ paddingLeft: "1.1rem", color: "#9CA3AF", fontSize: "0.9rem", lineHeight: 1.7 }}>
+          <li>We review your application (usually 2–3 working days).</li>
+          <li>If it&apos;s a fit, you&apos;ll get an email with an activation link.</li>
+          <li>Activate, start running sessions, and build your trybe.</li>
+        </ol>
+      </div>
+
+      <div
+        className="bah-fade-3"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.75rem",
+          justifyContent: "center",
+        }}
+      >
+        <Link href="/" className="bah-cta" aria-label="Back to Fittrybe homepage" style={{ textDecoration: "none" }}>
+          Back to home
+        </Link>
+        <Link
+          href="/events"
+          aria-label="Browse upcoming sessions"
+          style={{
+            background: "transparent",
+            color: "#9CA3AF",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 10,
+            padding: "0.85rem 1.4rem",
+            fontSize: "0.88rem",
+            fontWeight: 500,
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          Browse sessions
+        </Link>
+      </div>
     </div>
   );
 }
