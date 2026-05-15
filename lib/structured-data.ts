@@ -262,34 +262,70 @@ export const LANDING_FAQS = [
 ];
 
 // ─── SportsEvent ──────────────────────────────────────────────────────────────
+//
+// Implements the full SportsEvent vocabulary that Google's events rich-result
+// guidelines reward — endDate (required for reliability), capacity numbers,
+// performer + organizer, recurring linking via superEvent, optional
+// aggregateRating, and Place geo. Additional fields are gated so callers can
+// pass partial data without breaking validation.
+//
+// Reference: https://developers.google.com/search/docs/appearance/structured-data/event
 export function buildEventSchema({
+  id,
   title,
   description,
   startsAt,
+  endsAt,
+  durationMinutes,
   placeName,
   placeVicinity,
   locationArea,
   placeLat,
   placeLng,
+  postalCode,
   joinPricePence,
   spotsLeft,
+  capacity,
   isCancelled,
+  previousStartDate,
   ogImage,
   canonicalUrl,
+  sportId,
+  hostName,
+  hostUrl,
+  parentSessionUrl,
+  aggregateRating,
+  keywords,
 }: {
+  id?: string;
   title: string;
   description: string | null;
   startsAt: string;
+  /** Explicit end timestamp. Falls back to startsAt + durationMinutes. */
+  endsAt?: string | null;
+  /** If endsAt is missing this is used to compute it. Defaults to 60 min. */
+  durationMinutes?: number | null;
   placeName: string;
   placeVicinity: string;
   locationArea: string;
-  placeLat: string;
-  placeLng: string;
+  placeLat: string | number | null;
+  placeLng: string | number | null;
+  postalCode?: string | null;
   joinPricePence: number;
   spotsLeft: number;
+  capacity?: number | null;
   isCancelled: boolean;
+  /** Original start date when the event was cancelled / rescheduled. */
+  previousStartDate?: string | null;
   ogImage: string;
   canonicalUrl: string;
+  sportId?: string;
+  hostName?: string | null;
+  hostUrl?: string | null;
+  /** URL of the parent recurring session, if this is a child. */
+  parentSessionUrl?: string | null;
+  aggregateRating?: { ratingValue: number; reviewCount: number } | null;
+  keywords?: string[];
 }) {
   const availability =
     spotsLeft <= 0
@@ -298,29 +334,42 @@ export function buildEventSchema({
       ? "https://schema.org/LimitedAvailability"
       : "https://schema.org/InStock";
 
-  return {
+  // Compute endDate — Google strongly prefers it for SportsEvent results.
+  const endDate =
+    endsAt ??
+    (() => {
+      const start = new Date(startsAt).getTime();
+      const minutes = durationMinutes && durationMinutes > 0 ? durationMinutes : 60;
+      return new Date(start + minutes * 60_000).toISOString();
+    })();
+
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
-    "@id": `${canonicalUrl}/#event`,
+    "@id": id ? `${canonicalUrl}/#event-${id}` : `${canonicalUrl}/#event`,
     name: title,
     ...(description ? { description } : {}),
     url: canonicalUrl,
     startDate: startsAt,
+    endDate,
+    inLanguage: seoConfig.siteLanguage,
     location: {
       "@type": "Place",
       name: placeName,
       address: {
         "@type": "PostalAddress",
-        streetAddress: placeVicinity,
+        ...(placeVicinity ? { streetAddress: placeVicinity } : {}),
         addressLocality: locationArea,
+        ...(postalCode ? { postalCode } : {}),
+        addressRegion: locationArea,
         addressCountry: "GB",
       },
-      ...(placeLat
+      ...(placeLat && placeLng
         ? {
             geo: {
               "@type": "GeoCoordinates",
-              latitude: placeLat,
-              longitude: placeLng,
+              latitude: typeof placeLat === "string" ? Number(placeLat) : placeLat,
+              longitude: typeof placeLng === "string" ? Number(placeLng) : placeLng,
             },
           }
         : {}),
@@ -331,33 +380,299 @@ export function buildEventSchema({
       priceCurrency: "GBP",
       availability,
       url: canonicalUrl,
+      validFrom: new Date(
+        new Date(startsAt).getTime() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString(),
+      ...(capacity ? { inventoryLevel: spotsLeft } : {}),
     },
     organizer: {
       "@type": "Organization",
       name: seoConfig.siteName,
       url: seoConfig.siteUrl,
     },
-    image: ogImage,
+    ...(hostName
+      ? {
+          performer: {
+            "@type": "Person",
+            name: hostName,
+            ...(hostUrl ? { url: hostUrl } : {}),
+          },
+        }
+      : {}),
+    image: [ogImage],
     eventStatus: isCancelled
       ? "https://schema.org/EventCancelled"
       : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    ...(capacity
+      ? {
+          maximumAttendeeCapacity: capacity,
+          remainingAttendeeCapacity: Math.max(spotsLeft, 0),
+        }
+      : {}),
+    ...(parentSessionUrl
+      ? {
+          superEvent: {
+            "@type": "SportsEvent",
+            "@id": `${parentSessionUrl}/#event`,
+            url: parentSessionUrl,
+          },
+        }
+      : {}),
+    ...(previousStartDate ? { previousStartDate } : {}),
+    ...(sportId
+      ? {
+          sport: sportId.charAt(0).toUpperCase() + sportId.slice(1),
+        }
+      : {}),
+    ...(keywords && keywords.length > 0 ? { keywords: keywords.join(", ") } : {}),
+    ...(aggregateRating && aggregateRating.reviewCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(aggregateRating.ratingValue.toFixed(2)),
+            reviewCount: aggregateRating.reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
+
+  return schema;
 }
 
-// ─── ItemList (for events listing page) ──────────────────────────────────────
+// ─── ItemList (for events listing pages) ──────────────────────────────────────
+//
+// Richer than a bare list of URLs — Google ingests the embedded item objects to
+// preview the list in SERP carousels. Each listItem embeds a minimal
+// SportsEvent so the listing page itself can rank for "events near me".
+export interface ItemListEvent {
+  id: string;
+  title: string;
+  startsAt: string;
+  endsAt?: string | null;
+  durationMinutes?: number | null;
+  sportId: string;
+  placeName: string;
+  locationArea: string;
+  joinPricePence: number;
+  spotsLeft: number;
+  isCancelled: boolean;
+  bannerUrl?: string | null;
+  placeLat?: string | number | null;
+  placeLng?: string | number | null;
+}
+
 export function buildItemListSchema(
-  events: Array<{ id: string }>,
-  baseUrl: string
+  events: ItemListEvent[],
+  baseUrl: string,
+  options?: { name?: string; description?: string }
 ) {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Upcoming Sports Sessions",
-    itemListElement: events.map((event, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: `${baseUrl}/events/${event.id}`,
-    })),
+    name: options?.name ?? "Upcoming Sports Sessions",
+    ...(options?.description ? { description: options.description } : {}),
+    numberOfItems: events.length,
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    itemListElement: events.map((event, index) => {
+      const url = `${baseUrl}/events/${event.id}`;
+      const endDate =
+        event.endsAt ??
+        new Date(
+          new Date(event.startsAt).getTime() +
+            (event.durationMinutes && event.durationMinutes > 0
+              ? event.durationMinutes
+              : 60) *
+              60_000
+        ).toISOString();
+
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        url,
+        item: {
+          "@type": "SportsEvent",
+          "@id": `${url}/#event`,
+          name: event.title,
+          url,
+          startDate: event.startsAt,
+          endDate,
+          eventStatus: event.isCancelled
+            ? "https://schema.org/EventCancelled"
+            : "https://schema.org/EventScheduled",
+          eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+          location: {
+            "@type": "Place",
+            name: event.placeName,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: event.locationArea,
+              addressRegion: event.locationArea,
+              addressCountry: "GB",
+            },
+            ...(event.placeLat && event.placeLng
+              ? {
+                  geo: {
+                    "@type": "GeoCoordinates",
+                    latitude:
+                      typeof event.placeLat === "string"
+                        ? Number(event.placeLat)
+                        : event.placeLat,
+                    longitude:
+                      typeof event.placeLng === "string"
+                        ? Number(event.placeLng)
+                        : event.placeLng,
+                  },
+                }
+              : {}),
+          },
+          offers: {
+            "@type": "Offer",
+            price:
+              event.joinPricePence === 0
+                ? "0"
+                : (event.joinPricePence / 100).toFixed(2),
+            priceCurrency: "GBP",
+            availability:
+              event.spotsLeft <= 0
+                ? "https://schema.org/SoldOut"
+                : event.spotsLeft <= 3
+                ? "https://schema.org/LimitedAvailability"
+                : "https://schema.org/InStock",
+            url,
+          },
+          organizer: {
+            "@type": "Organization",
+            name: seoConfig.siteName,
+            url: seoConfig.siteUrl,
+          },
+          ...(event.bannerUrl ? { image: [event.bannerUrl] } : {}),
+          sport: event.sportId.charAt(0).toUpperCase() + event.sportId.slice(1),
+        },
+      };
+    }),
+  };
+}
+
+// ─── CollectionPage ──────────────────────────────────────────────────────────
+// Used for /events, /events/in/[city], /events/[sport]/in/[city], /venues/[slug]
+export function buildCollectionPageSchema({
+  url,
+  name,
+  description,
+  numberOfItems,
+  breadcrumb,
+}: {
+  url: string;
+  name: string;
+  description: string;
+  numberOfItems: number;
+  breadcrumb?: Array<{ name: string; url: string }>;
+}) {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${url}/#collection`,
+    url,
+    name,
+    description,
+    inLanguage: seoConfig.siteLanguage,
+    isPartOf: { "@id": `${seoConfig.siteUrl}/#website` },
+    about: { "@id": `${seoConfig.siteUrl}/#organization` },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems,
+    },
+  };
+  if (breadcrumb && breadcrumb.length > 0) {
+    schema.breadcrumb = buildBreadcrumbSchema(breadcrumb);
+  }
+  return schema;
+}
+
+// ─── SportsActivityLocation (for venue pages) ────────────────────────────────
+export function buildSportsLocationSchema({
+  name,
+  description,
+  url,
+  address,
+  city,
+  postalCode,
+  lat,
+  lng,
+  phone,
+  website,
+  image,
+  sportTypes,
+  amenities,
+  rating,
+}: {
+  name: string;
+  description?: string | null;
+  url: string;
+  address: string;
+  city?: string | null;
+  postalCode?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  phone?: string | null;
+  website?: string | null;
+  image?: string | null;
+  sportTypes?: string[];
+  amenities?: string[];
+  rating?: number | null;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    "@id": `${url}/#venue`,
+    name,
+    url,
+    ...(description ? { description } : {}),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: address,
+      ...(city ? { addressLocality: city } : {}),
+      ...(postalCode ? { postalCode } : {}),
+      addressCountry: "GB",
+    },
+    ...(lat && lng
+      ? {
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: lat,
+            longitude: lng,
+          },
+        }
+      : {}),
+    ...(phone ? { telephone: phone } : {}),
+    ...(website ? { sameAs: [website] } : {}),
+    ...(image ? { image: [image] } : {}),
+    ...(sportTypes && sportTypes.length > 0
+      ? { sport: sportTypes.map((s) => s.charAt(0).toUpperCase() + s.slice(1)) }
+      : {}),
+    ...(amenities && amenities.length > 0
+      ? {
+          amenityFeature: amenities.map((a) => ({
+            "@type": "LocationFeatureSpecification",
+            name: a,
+            value: true,
+          })),
+        }
+      : {}),
+    ...(rating
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(rating.toFixed(2)),
+            reviewCount: 1,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
+    isAccessibleForFree: true,
   };
 }

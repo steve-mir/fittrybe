@@ -675,26 +675,38 @@ function StickyScrollStory() {
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // Section is 350svh; with offset ["start start", "end end"] the effective
-  // scroll range = section.height - viewport.height = 250svh. Windows are
-  // widened so slide 3 (PLAY) gets ~80svh of full-visibility plateau — enough
-  // to survive a single fast Chromium fling-scroll on mobile.
+  // Section is 300svh; with offset ["start start", "end end"] the effective
+  // scroll range = 200svh. Phases are equal fifths (40svh each) so every
+  // slide-to-next transition feels identical.
   //
-  // Why each transform has 4 strictly-increasing inputs covering [0, 1]:
-  // Framer Motion 12 forwards these arrays to Chromium's GPU-accelerated
-  // scroll-driven CSS animations. Duplicate input values (e.g. [0, 0, …])
-  // break that path on Chromium — earlier slides fail to fade to 0, causing
-  // text from slide 1 (EXPLORE) to bleed through slide 3 (PLAY). Firefox uses
-  // the JS interpolation path and clamps correctly either way, which is why
-  // the bug was Chromium-only.
-  const opacity0 = useTransform(scrollYProgress, [0, 0.22, 0.32, 1], [1, 1, 0, 0]);
-  const opacity1 = useTransform(scrollYProgress, [0.22, 0.32, 0.58, 0.68], [0, 1, 1, 0]);
-  const opacity2 = useTransform(scrollYProgress, [0, 0.58, 0.68, 1], [0, 0, 1, 1]);
+  // IMPORTANT: each opacity transform is a function (not an input/output
+  // array). When useTransform is given a function, framer-motion skips its
+  // GPU-accelerated CSS scroll-driven animations path and uses the JS
+  // interpolation path that Firefox always uses. On Chromium that array path
+  // proved brittle with sticky + svh + `contain` range — progress sometimes
+  // never reached the slide-3 threshold reliably. The function form makes
+  // behavior identical across browsers. Do not refactor back to array form.
+  const opacity0 = useTransform(scrollYProgress, (v) => {
+    if (v <= 0.20) return 1;
+    if (v >= 0.40) return 0;
+    return 1 - (v - 0.20) / 0.20;
+  });
+  const opacity1 = useTransform(scrollYProgress, (v) => {
+    if (v <= 0.20 || v >= 0.80) return 0;
+    if (v <= 0.40) return (v - 0.20) / 0.20;
+    if (v <= 0.60) return 1;
+    return 1 - (v - 0.60) / 0.20;
+  });
+  const opacity2 = useTransform(scrollYProgress, (v) => {
+    if (v <= 0.60) return 0;
+    if (v >= 0.80) return 1;
+    return (v - 0.60) / 0.20;
+  });
   const opacities = [opacity0, opacity1, opacity2];
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    if (v < 0.27) setActiveSlide(0);
-    else if (v < 0.63) setActiveSlide(1);
+    if (v < 0.30) setActiveSlide(0);
+    else if (v < 0.70) setActiveSlide(1);
     else setActiveSlide(2);
   });
 
@@ -703,7 +715,7 @@ function StickyScrollStory() {
       id="how-it-works"
       aria-label="How Fittrybe works — explore, connect, play"
       ref={containerRef}
-      style={{ height: "350svh", position: "relative" }}
+      style={{ height: "300svh", position: "relative" }}
     >
       <div
         className="sticky-inner"

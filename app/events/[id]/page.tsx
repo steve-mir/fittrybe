@@ -2,25 +2,34 @@
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
 import {
-  getEventById,
-  getAllEventIds,
-  sportEmoji,
+  citySlug,
   formatEventDate,
   formatEventTime,
   formatPrice,
+  getEventWithExtras,
+  getRelatedEvents,
+  sportEmoji,
+  sportLabel,
 } from "@/lib/events";
 import { seoConfig, buildCanonicalUrl } from "@/lib/seo-config";
-import { buildBreadcrumbSchema, buildEventSchema, buildGraphSchema, buildWebPageSchema } from "@/lib/structured-data";
+import {
+  buildBreadcrumbSchema,
+  buildEventSchema,
+  buildGraphSchema,
+  buildWebPageSchema,
+} from "@/lib/structured-data";
+import EventCard from "@/components/EventCard";
 
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-  const ids = await getAllEventIds();
-  return ids.map((id) => ({ id }));
-}
+// Past events still need to resolve (deep-links shared after the fact remain
+// valid) but we deliberately do NOT prebuild every event ID — the listing
+// changes too often and the build would balloon. ISR handles long-tail traffic.
+export const dynamicParams = true;
 
 function resolveOGImage(event: {
   bannerUrl: string | null;
@@ -43,17 +52,32 @@ function resolveOGImage(event: {
   return `${seoConfig.siteUrl}/api/og?${params.toString()}`;
 }
 
+function isEventPast(startsAt: string, durationMinutes: number | null): boolean {
+  const start = new Date(startsAt).getTime();
+  const minutes = durationMinutes && durationMinutes > 0 ? durationMinutes : 60;
+  return Date.now() > start + minutes * 60_000;
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const event = await getEventById(id);
-  if (!event) return { title: "Session Not Found" };
+  const result = await getEventWithExtras(id);
+  if (!result) {
+    return {
+      title: "Session Not Found",
+      robots: { index: false, follow: false },
+    };
+  }
+  const { event, extras } = result;
 
   const canonicalUrl = buildCanonicalUrl(`/events/${id}`);
   const ogImage = resolveOGImage(event);
+  const isPast = isEventPast(event.startsAt, extras.durationMinutes);
+  const shouldNoindex = event.isCancelled || isPast;
+
   const spotsText =
     event.spotsLeft <= 0
       ? "Session full"
@@ -61,18 +85,37 @@ export async function generateMetadata({
       ? `Only ${event.spotsLeft} spot${event.spotsLeft === 1 ? "" : "s"} left`
       : `${event.spotsLeft} spots available`;
 
-  const description = `${sportEmoji(event.sportId)} ${
-    event.sportId.charAt(0).toUpperCase() + event.sportId.slice(1)
-  } session at ${event.placeName || event.locationLabel}, ${
-    event.locationArea
-  } — ${formatEventDate(event.startsAt)} at ${formatEventTime(
-    event.startsAt
-  )}. ${spotsText}. ${formatPrice(event.joinPricePence)} entry. Book via Fittrybe.`;
+  const sportName = sportLabel(event.sportId);
+  const venuePart = event.placeName || event.locationLabel;
+  const description =
+    `${sportEmoji(event.sportId)} ${sportName} session at ${venuePart}, ` +
+    `${event.locationArea} — ${formatEventDate(event.startsAt)} at ${formatEventTime(event.startsAt)}. ` +
+    `${spotsText}. ${formatPrice(event.joinPricePence)} entry. Book on Fittrybe.`;
+
+  // Per-event keywords mix sport, location, and intent — feeds long-tail
+  // queries like "five-a-side football redhill saturday".
+  const keywords = [
+    `${event.sportId} near me`,
+    `${event.sportId} ${event.locationArea}`,
+    `${sportName} session ${event.locationArea}`,
+    `${sportName} ${venuePart}`,
+    `pickup ${event.sportId}`,
+    `${event.sportId} game ${event.locationArea}`,
+    "fittrybe",
+  ];
 
   return {
     title: `${event.title} — ${formatEventDate(event.startsAt)} | Fittrybe`,
     description,
+    keywords,
     alternates: { canonical: canonicalUrl },
+    robots: shouldNoindex
+      ? {
+          index: false,
+          follow: true,
+          googleBot: { index: false, follow: true, "max-snippet": 0 },
+        }
+      : seoConfig.robotsDefault,
     openGraph: {
       type: "website",
       url: canonicalUrl,
@@ -107,9 +150,10 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const event = await getEventById(id);
+  const result = await getEventWithExtras(id);
 
-  if (!event) notFound();
+  if (!result) notFound();
+  const { event, extras } = result;
 
   const canonicalUrl = buildCanonicalUrl(`/events/${id}`);
   const ogImage = resolveOGImage(event);
@@ -120,45 +164,86 @@ export default async function EventDetailPage({
   const coverImage = event.bannerUrl || event.placePhotoUrl;
   const isFull = event.spotsLeft === 0;
   const isLowSpots = event.spotsLeft > 0 && event.spotsLeft <= 3;
+  const isPast = isEventPast(event.startsAt, extras.durationMinutes);
+  const sportName = sportLabel(event.sportId);
+  const cityHref = `/events/in/${citySlug(event.locationArea)}`;
+  const sportCityHref = `/events/${event.sportId}/in/${citySlug(event.locationArea)}`;
+
+  const computedEndDate = new Date(
+    new Date(event.startsAt).getTime() +
+      (extras.durationMinutes && extras.durationMinutes > 0
+        ? extras.durationMinutes
+        : 60) *
+        60_000
+  ).toISOString();
+
+  const parentSessionUrl = event.parentSessionId
+    ? buildCanonicalUrl(`/events/${event.parentSessionId}`)
+    : null;
+
+  const eventSchema = buildEventSchema({
+    id: event.id,
+    title: event.title,
+    description: event.description ?? null,
+    startsAt: event.startsAt,
+    endsAt: computedEndDate,
+    durationMinutes: extras.durationMinutes,
+    placeName: event.placeName || event.locationLabel,
+    placeVicinity: event.placeVicinity,
+    locationArea: event.locationArea,
+    placeLat: event.placeLat,
+    placeLng: event.placeLng,
+    joinPricePence: event.joinPricePence,
+    spotsLeft: event.spotsLeft,
+    capacity: extras.capacity,
+    isCancelled: event.isCancelled,
+    previousStartDate: event.isCancelled ? event.startsAt : null,
+    ogImage,
+    canonicalUrl,
+    sportId: event.sportId,
+    hostName: extras.hostName,
+    hostUrl: extras.hostUsername
+      ? `${seoConfig.siteUrl}/u/${extras.hostUsername}`
+      : null,
+    parentSessionUrl,
+    aggregateRating: extras.reviewSummary,
+    keywords: [
+      `${event.sportId} near me`,
+      `${sportName} ${event.locationArea}`,
+      event.placeName || event.locationLabel,
+    ],
+  });
 
   const pageJsonLd = buildGraphSchema([
-    buildEventSchema({
-      title: event.title,
-      description: event.description ?? null,
-      startsAt: event.startsAt,
-      placeName: event.placeName || event.locationLabel,
-      placeVicinity: event.placeVicinity,
-      locationArea: event.locationArea,
-      placeLat: event.placeLat,
-      placeLng: event.placeLng,
-      joinPricePence: event.joinPricePence,
-      spotsLeft: event.spotsLeft,
-      isCancelled: event.isCancelled,
-      ogImage,
-      canonicalUrl,
-    }),
+    eventSchema,
     buildWebPageSchema({
       url: canonicalUrl,
       title: event.title,
-      description: `${event.sportId} session at ${event.placeName}`,
+      description: `${sportName} session at ${event.placeName || event.locationLabel} — ${dateStr} ${timeStr}. Book on Fittrybe.`,
+      datePublished: event.createdAt,
+      dateModified: event.updatedAt ?? event.createdAt,
       breadcrumb: [
         { name: "Home", url: seoConfig.siteUrl },
         { name: "Events", url: buildCanonicalUrl("/events") },
+        { name: event.locationArea, url: buildCanonicalUrl(cityHref) },
         { name: event.title, url: canonicalUrl },
       ],
     }),
     buildBreadcrumbSchema([
       { name: "Home", url: seoConfig.siteUrl },
       { name: "Events", url: buildCanonicalUrl("/events") },
+      { name: event.locationArea, url: buildCanonicalUrl(cityHref) },
       { name: event.title, url: canonicalUrl },
     ]),
   ]);
 
-  // Use place name + area for a clean, reliable Maps search (no invalid UUIDs)
+  // Place name + area is more reliable for Maps than the synthetic UUID query
   const mapsQuery = encodeURIComponent(
     `${event.placeName || event.locationLabel} ${event.locationArea}`
   );
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+
+  const relatedEvents = await getRelatedEvents(event, 3);
 
   return (
     <>
@@ -186,14 +271,48 @@ export default async function EventDetailPage({
         </nav>
 
         <article className="max-w-4xl mx-auto px-6 py-12">
+          {/* Breadcrumb (visible) — strengthens internal linking + accessibility */}
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-6 text-sm text-white/40 font-[family-name:var(--font-inter-tight)]"
+          >
+            <ol className="flex flex-wrap items-center gap-2">
+              <li>
+                <Link href="/events" className="hover:text-[#B6FF00] transition-colors">
+                  Events
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href={cityHref} className="hover:text-[#B6FF00] transition-colors">
+                  {event.locationArea}
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href={sportCityHref} className="hover:text-[#B6FF00] transition-colors">
+                  {sportName}
+                </Link>
+              </li>
+            </ol>
+          </nav>
+
           {/* Sport badge */}
           <div className="mb-6">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#B6FF00]/10 text-[#B6FF00] border border-[#B6FF00]/20">
-              {emoji} {event.sportId}
-            </span>
+            <Link
+              href={sportCityHref}
+              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-[#B6FF00]/10 text-[#B6FF00] border border-[#B6FF00]/20 hover:bg-[#B6FF00]/20 transition-colors"
+            >
+              {emoji} {sportName}
+            </Link>
             {event.isFeatured && (
               <span className="ml-2 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
                 ⭐ Featured
+              </span>
+            )}
+            {event.isRecurring && (
+              <span className="ml-2 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/5 text-white/60 border border-white/10">
+                🔄 Recurring
               </span>
             )}
           </div>
@@ -203,6 +322,20 @@ export default async function EventDetailPage({
             <h1 className="font-[family-name:var(--font-anton)] text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4">
               {event.title}
             </h1>
+
+            {/* Past-event banner — keep page useful even after the session */}
+            {isPast && !event.isCancelled && (
+              <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-xl mb-6">
+                <span className="text-white/60 text-xl">⌛</span>
+                <p className="text-white/70 font-medium font-[family-name:var(--font-inter-tight)]">
+                  This session has already happened. Browse upcoming{" "}
+                  <Link href={sportCityHref} className="text-[#B6FF00] hover:underline">
+                    {sportName.toLowerCase()} sessions in {event.locationArea}
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
 
             {/* Cancelled banner */}
             {event.isCancelled && (
@@ -219,42 +352,84 @@ export default async function EventDetailPage({
               </div>
             )}
 
-            {/* Key details */}
+            {/* Key details — `<time>` carries machine-readable datetime */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-[family-name:var(--font-inter-tight)]">
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Date</p>
-                <p className="text-white font-semibold text-sm">{dateStr}</p>
+                <time
+                  dateTime={event.startsAt}
+                  className="text-white font-semibold text-sm block"
+                >
+                  {dateStr}
+                </time>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Time</p>
-                <p className="text-white font-semibold text-sm">{timeStr}</p>
+                <time
+                  dateTime={event.startsAt}
+                  className="text-white font-semibold text-sm block"
+                >
+                  {timeStr}
+                </time>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Entry</p>
-                <p className={`font-semibold text-sm ${event.joinPricePence === 0 ? "text-[#B6FF00]" : "text-white"}`}>
+                <p
+                  className={`font-semibold text-sm ${
+                    event.joinPricePence === 0 ? "text-[#B6FF00]" : "text-white"
+                  }`}
+                >
                   {price}
                   {event.joinPricePence > 0 && (
-                    <span className="text-white/40 text-xs font-normal ml-1">({event.paymentMethod})</span>
+                    <span className="text-white/40 text-xs font-normal ml-1">
+                      ({event.paymentMethod})
+                    </span>
                   )}
                 </p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Spots</p>
-                <p className={`font-semibold text-sm ${isFull ? "text-red-400" : isLowSpots ? "text-orange-400" : "text-white"}`}>
-                  {isFull ? "Full" : `${event.spotsLeft} left`}
+                <p
+                  className={`font-semibold text-sm ${
+                    isFull ? "text-red-400" : isLowSpots ? "text-orange-400" : "text-white"
+                  }`}
+                >
+                  {isFull
+                    ? "Full"
+                    : `${event.spotsLeft}${extras.capacity ? ` of ${extras.capacity}` : ""} left`}
                 </p>
               </div>
             </div>
+
+            {/* Host attribution — fills SportsEvent.performer */}
+            {extras.hostName && (
+              <p className="mt-6 text-sm text-white/50 font-[family-name:var(--font-inter-tight)]">
+                Hosted by{" "}
+                {extras.hostUsername ? (
+                  <Link
+                    href={`/u/${extras.hostUsername}`}
+                    className="text-white hover:text-[#B6FF00] transition-colors"
+                    rel="author"
+                  >
+                    {extras.hostName}
+                  </Link>
+                ) : (
+                  <span className="text-white">{extras.hostName}</span>
+                )}
+              </p>
+            )}
           </header>
 
-          {/* Banner image */}
+          {/* Banner image — next/image gives us responsive srcset + AVIF */}
           {coverImage && (
-            <div className="mb-10 rounded-2xl overflow-hidden aspect-[16/9]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+            <div className="mb-10 rounded-2xl overflow-hidden aspect-[16/9] relative bg-white/5">
+              <Image
                 src={coverImage}
-                alt={event.title}
-                className="w-full h-full object-cover"
+                alt={`${event.title} — ${sportName} at ${event.placeName || event.locationLabel}, ${event.locationArea}`}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover"
               />
             </div>
           )}
@@ -278,14 +453,29 @@ export default async function EventDetailPage({
             <h2 className="font-[family-name:var(--font-anton)] text-2xl font-bold uppercase tracking-tight text-white mb-4">
               📍 Location
             </h2>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 font-[family-name:var(--font-inter-tight)]">
-              <p className="text-white font-semibold text-lg mb-1">
+            <div
+              className="bg-white/5 border border-white/10 rounded-2xl p-6 font-[family-name:var(--font-inter-tight)]"
+              itemScope
+              itemType="https://schema.org/Place"
+            >
+              <p className="text-white font-semibold text-lg mb-1" itemProp="name">
                 {event.placeName || event.locationLabel}
               </p>
-              {event.placeVicinity && (
-                <p className="text-white/60 text-sm mb-1">{event.placeVicinity}</p>
-              )}
-              <p className="text-white/40 text-sm mb-4">{event.locationArea}</p>
+              <div
+                itemProp="address"
+                itemScope
+                itemType="https://schema.org/PostalAddress"
+              >
+                {event.placeVicinity && (
+                  <p className="text-white/60 text-sm mb-1" itemProp="streetAddress">
+                    {event.placeVicinity}
+                  </p>
+                )}
+                <p className="text-white/40 text-sm mb-4">
+                  <span itemProp="addressLocality">{event.locationArea}</span>
+                  <meta itemProp="addressCountry" content="GB" />
+                </p>
+              </div>
               {event.placeRating && (
                 <p className="text-white/50 text-xs mb-4">
                   ⭐ {event.placeRating} on Google
@@ -310,6 +500,9 @@ export default async function EventDetailPage({
           <section className="mb-10">
             <div className="flex gap-6 font-[family-name:var(--font-inter-tight)] text-sm text-white/40">
               <span>{event.participantsCount} joined</span>
+              {extras.durationMinutes && (
+                <span>⏱ {extras.durationMinutes} min</span>
+              )}
               {event.isRecurring && <span>🔄 Recurring</span>}
             </div>
           </section>
@@ -322,10 +515,22 @@ export default async function EventDetailPage({
                   This session was cancelled. Browse other upcoming sessions.
                 </p>
                 <Link
-                  href="/events"
+                  href={sportCityHref}
                   className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
                 >
-                  See All Sessions
+                  See {sportName} in {event.locationArea}
+                </Link>
+              </>
+            ) : isPast ? (
+              <>
+                <p className="text-white/60 mb-4 font-[family-name:var(--font-inter-tight)]">
+                  This session has finished. Find another one near you.
+                </p>
+                <Link
+                  href={sportCityHref}
+                  className="inline-block px-8 py-3 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
+                >
+                  See Upcoming {sportName} Sessions
                 </Link>
               </>
             ) : isFull ? (
@@ -343,7 +548,9 @@ export default async function EventDetailPage({
             ) : (
               <>
                 <p className="text-white/60 mb-2 font-[family-name:var(--font-inter-tight)]">
-                  {isLowSpots ? `Only ${event.spotsLeft} spot${event.spotsLeft === 1 ? "" : "s"} left!` : "Ready to play?"}
+                  {isLowSpots
+                    ? `Only ${event.spotsLeft} spot${event.spotsLeft === 1 ? "" : "s"} left!`
+                    : "Ready to play?"}
                 </p>
                 <p className="text-white/40 text-sm mb-6 font-[family-name:var(--font-inter-tight)]">
                   Download the Fittrybe app to reserve your spot.
@@ -357,6 +564,31 @@ export default async function EventDetailPage({
               </>
             )}
           </footer>
+
+          {/* Related events — internal linking + crawl depth + on-page utility */}
+          {relatedEvents.length > 0 && (
+            <section
+              aria-label={`More ${sportName} sessions`}
+              className="mt-16 pt-12 border-t border-white/10"
+            >
+              <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
+                <h2 className="font-[family-name:var(--font-anton)] text-2xl md:text-3xl font-bold uppercase tracking-tight text-white">
+                  More {sportName} Sessions
+                </h2>
+                <Link
+                  href={sportCityHref}
+                  className="text-sm text-[#B6FF00] hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] uppercase tracking-wider font-bold"
+                >
+                  View all →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {relatedEvents.map((related) => (
+                  <EventCard key={related.id} event={related} />
+                ))}
+              </div>
+            </section>
+          )}
         </article>
       </main>
     </>
