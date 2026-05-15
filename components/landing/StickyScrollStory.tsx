@@ -47,14 +47,26 @@ export default function StickyScrollStory() {
   });
   const [activeSlide, setActiveSlide] = useState(0);
 
-  const opacity0 = useTransform(scrollYProgress, [0, 0, 0.25, 0.38], [1, 1, 1, 0]);
-  const opacity1 = useTransform(scrollYProgress, [0.28, 0.38, 0.62, 0.72], [0, 1, 1, 0]);
-  const opacity2 = useTransform(scrollYProgress, [0.62, 0.72, 1, 1], [0, 1, 1, 1]);
+  // Section is 350svh; with offset ["start start", "end end"] the effective
+  // scroll range = section.height - viewport.height = 250svh. Windows are
+  // widened so slide 3 (PLAY) gets ~80svh of full-visibility plateau — enough
+  // to survive a single fast Chromium fling-scroll on mobile.
+  //
+  // Why each transform has 4 strictly-increasing inputs covering [0, 1]:
+  // Framer Motion 12 forwards these arrays to Chromium's GPU-accelerated
+  // scroll-driven CSS animations. Duplicate input values (e.g. [0, 0, …])
+  // break that path on Chromium — earlier slides fail to fade to 0, causing
+  // text from slide 1 (EXPLORE) to bleed through slide 3 (PLAY). Firefox uses
+  // the JS interpolation path and clamps correctly either way, which is why
+  // the bug was Chromium-only.
+  const opacity0 = useTransform(scrollYProgress, [0, 0.22, 0.32, 1], [1, 1, 0, 0]);
+  const opacity1 = useTransform(scrollYProgress, [0.22, 0.32, 0.58, 0.68], [0, 1, 1, 0]);
+  const opacity2 = useTransform(scrollYProgress, [0, 0.58, 0.68, 1], [0, 0, 1, 1]);
   const opacities = [opacity0, opacity1, opacity2];
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    if (v < 0.38) setActiveSlide(0);
-    else if (v < 0.72) setActiveSlide(1);
+    if (v < 0.27) setActiveSlide(0);
+    else if (v < 0.63) setActiveSlide(1);
     else setActiveSlide(2);
   });
 
@@ -63,14 +75,18 @@ export default function StickyScrollStory() {
       id="how-it-works"
       aria-label="How Fittrybe works — explore, connect, play"
       ref={containerRef}
-      style={{ height: "300vh", position: "relative" }}
+      style={{ height: "350svh", position: "relative" }}
     >
       <div
         className="sticky-inner"
         style={{
           position: "sticky",
           top: 0,
-          height: "100vh",
+          // svh matches the visible viewport regardless of mobile-browser URL-bar state.
+          // Using vh on Chromium mobile renders this taller than the visible area, which
+          // causes the section to release before scrollYProgress reaches 1.0 — slide 3
+          // then gets clipped out as the page scrolls into the next section.
+          height: "100svh",
           display: "flex",
           alignItems: "center",
           overflow: "hidden",
@@ -91,7 +107,7 @@ export default function StickyScrollStory() {
           {SCROLL_SLIDES.map((slide, i) => (
             <motion.div
               key={slide.label}
-              style={{ opacity: opacities[i], position: "absolute", pointerEvents: "none" }}
+              style={{ opacity: opacities[i], position: "absolute", pointerEvents: "none", willChange: "opacity" }}
             >
               <h2
                 style={{
@@ -242,7 +258,7 @@ export default function StickyScrollStory() {
                 {SCROLL_SLIDES.map((slide, i) => (
                   <motion.div
                     key={slide.img + i}
-                    style={{ position: "absolute", inset: 0, opacity: opacities[i] }}
+                    style={{ position: "absolute", inset: 0, opacity: opacities[i], willChange: "opacity" }}
                   >
                     <Image
                       src={slide.img}

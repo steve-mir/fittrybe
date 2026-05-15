@@ -350,6 +350,7 @@ html { scroll-behavior: smooth; }
   .sticky-inner {
     flex-direction: column !important;
     height: 100vh !important;
+    height: 100svh !important;
     padding: 80px 5vw 60px !important;
     gap: 0 !important;
     justify-content: flex-start !important;
