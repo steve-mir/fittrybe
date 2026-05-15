@@ -161,6 +161,54 @@ const globalStyles = `*, *::before, *::after { box-sizing: border-box; margin: 0
   .faq-item { border-bottom: 1px solid rgba(255,255,255,0.06); }
   .faq-item:last-child { border-bottom: none; }
 
+  /* ── Navbar ── */
+  .nav-link {
+    color: #9CA3AF;
+    font-family: var(--font-anton, 'Anton', sans-serif);
+    font-weight: 700; font-size: 0.9rem; letter-spacing: 0.07em;
+    text-transform: uppercase; text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: #fff; }
+  .nav-cta {
+    background: #B6FF00; color: #0D0D0D;
+    padding: 0.45rem 1.3rem; border-radius: 6px;
+    font-family: var(--font-anton, 'Anton', sans-serif);
+    font-weight: 800; font-size: 0.9rem; letter-spacing: 0.07em;
+    text-transform: uppercase; text-decoration: none; white-space: nowrap;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover { box-shadow: 0 8px 24px rgba(182,255,0,0.3); transform: translateY(-2px); }
+  .mobile-menu-toggle {
+    display: none;
+    width: 40px; height: 40px;
+    align-items: center; justify-content: center;
+    background: transparent; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; cursor: pointer; color: #fff;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .mobile-menu-toggle:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+  .mobile-menu {
+    position: fixed; top: 64px; left: 0; right: 0;
+    background: rgba(5,5,5,0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 1.25rem 5vw 1.75rem;
+    display: flex; flex-direction: column; gap: 1.1rem;
+    transform: translateY(-12px); opacity: 0; pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 99;
+  }
+  .mobile-menu.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .mobile-menu .nav-link { font-size: 1.05rem; padding: 0.5rem 0; }
+  .mobile-menu .nav-cta { text-align: center; margin-top: 0.4rem; padding: 0.75rem 1.3rem; font-size: 0.95rem; }
+
+  @media (max-width: 720px) {
+    .site-nav-links { display: none !important; }
+    .mobile-menu-toggle { display: inline-flex !important; }
+  }
+
   @media (max-width: 1024px) {
     .hero-section {
       grid-template-columns: 1fr !important;
@@ -256,81 +304,88 @@ const globalStyles = `*, *::before, *::after { box-sizing: border-box; margin: 0
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close menu on resize past mobile breakpoint
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 720) setMenuOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <motion.nav
-      role="navigation"
-      aria-label="Main navigation"
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        padding: "0 5vw", height: 64,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: scrolled ? "rgba(5,5,5,0.92)" : "transparent",
-        backdropFilter: scrolled ? "blur(20px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.05)" : "none",
-        transition: "background 0.4s ease, backdrop-filter 0.4s ease, border-bottom 0.4s ease",
-      }}
-    >
-      <Link href="/" aria-label="Fittrybe — return to homepage" style={{
-        display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none",
-      }}>
-        <Image src="/logo-mark.png" alt="" width={32} height={32} priority style={{ display: "block" }} />
-        <Wordmark height={26} />
-      </Link>
+    <>
+      <motion.nav
+        role="navigation"
+        aria-label="Main navigation"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+          padding: "0 5vw", height: 64,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: scrolled || menuOpen ? "rgba(5,5,5,0.92)" : "transparent",
+          backdropFilter: scrolled || menuOpen ? "blur(20px)" : "none",
+          WebkitBackdropFilter: scrolled || menuOpen ? "blur(20px)" : "none",
+          borderBottom: scrolled || menuOpen ? "1px solid rgba(255,255,255,0.05)" : "none",
+          transition: "background 0.4s ease, backdrop-filter 0.4s ease, border-bottom 0.4s ease",
+        }}
+      >
+        <Link href="/" aria-label="Fittrybe — return to homepage" style={{
+          display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none",
+        }}>
+          <Image src="/logo-mark.png" alt="" width={32} height={32} priority style={{ display: "block" }} />
+          <Wordmark height={26} />
+        </Link>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-        <Link href="/sports" aria-label="Browse sports on Fittrybe" style={{
-          color: "#9CA3AF",
-          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
-          fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
-          textTransform: "uppercase", textDecoration: "none",
-          transition: "color 0.2s",
-        }}
-          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#9CA3AF"; }}
-        >Sports</Link>
-        <Link href="/events" aria-label="View upcoming sports sessions" style={{
-          color: "#9CA3AF",
-          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
-          fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
-          textTransform: "uppercase", textDecoration: "none",
-          transition: "color 0.2s",
-        }}
-          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#9CA3AF"; }}
-        >Sessions</Link>
-        <Link href="/blog" aria-label="Read the Fittrybe blog" style={{
-          color: "#9CA3AF",
-          fontFamily: "var(--font-anton, 'Anton', sans-serif)",
-          fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.07em",
-          textTransform: "uppercase", textDecoration: "none",
-          transition: "color 0.2s",
-        }}
-          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = "#9CA3AF"; }}
-        >Blog</Link>
+        <div className="site-nav-links" style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+          <Link href="/sports" aria-label="Browse sports on Fittrybe" className="nav-link">Sports</Link>
+          <Link href="/events" aria-label="View upcoming sports sessions" className="nav-link">Sessions</Link>
+          <Link href="/blog" aria-label="Read the Fittrybe blog" className="nav-link">Blog</Link>
+          <a href="/waitlist" aria-label="Join the Fittrybe waitlist for early access" className="nav-cta">Join Waitlist</a>
+        </div>
 
-      <a href="/waitlist" aria-label="Join the Fittrybe waitlist for early access" style={{
-        background: "#B6FF00", color: "#0D0D0D",
-        padding: "0.45rem 1.3rem", borderRadius: 6,
-        fontFamily: "var(--font-anton, 'Anton', sans-serif)",
-        fontWeight: 800, fontSize: "0.9rem", letterSpacing: "0.07em",
-        textTransform: "uppercase", textDecoration: "none",
-        transition: "box-shadow 0.2s, transform 0.2s",
-      }}
-        onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(182,255,0,0.3)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-        onMouseLeave={e => { e.currentTarget.style.boxShadow = ""; e.currentTarget.style.transform = ""; }}
-      >Join Waitlist</a>
+        <button
+          type="button"
+          className="mobile-menu-toggle"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
+          onClick={() => setMenuOpen(v => !v)}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {menuOpen ? (
+              <>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </>
+            ) : (
+              <>
+                <line x1="3" y1="7" x2="21" y2="7" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="17" x2="21" y2="17" />
+              </>
+            )}
+          </svg>
+        </button>
+      </motion.nav>
+
+      <div id="mobile-menu" className={`mobile-menu${menuOpen ? " open" : ""}`} role="menu" aria-hidden={!menuOpen}>
+        <Link href="/sports" className="nav-link" onClick={closeMenu} role="menuitem">Sports</Link>
+        <Link href="/events" className="nav-link" onClick={closeMenu} role="menuitem">Sessions</Link>
+        <Link href="/blog" className="nav-link" onClick={closeMenu} role="menuitem">Blog</Link>
+        <a href="/waitlist" className="nav-cta" onClick={closeMenu} role="menuitem">Join Waitlist</a>
       </div>
-    </motion.nav>
+    </>
   );
 }
 
