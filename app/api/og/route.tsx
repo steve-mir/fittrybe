@@ -34,10 +34,21 @@ const GREY      = "#6B7280";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
-  const title = searchParams.get("title") ?? "Find Your Game. Play With Your City.";
-  const description =
+  // Hard truncation safeguards — without these, long event titles or venue
+  // descriptions break the layout (text clipping, container overflow). Social
+  // crawlers treat broken OG images as missing entirely, so we'd rather render
+  // a slightly truncated string than a corrupted preview.
+  const rawTitle = searchParams.get("title") ?? "Find Your Game. Play With Your City.";
+  const title = rawTitle.length > 80 ? rawTitle.slice(0, 77).trimEnd() + "…" : rawTitle;
+
+  const rawDescription =
     searchParams.get("description") ??
     "Discover real sports sessions near you. Join a game, meet your tribe, show up and play.";
+  const description =
+    rawDescription.length > 140
+      ? rawDescription.slice(0, 137).trimEnd() + "…"
+      : rawDescription;
+
   const sport = searchParams.get("sport") ?? ""; // e.g. "football", "cycling"
   const date  = searchParams.get("date")  ?? ""; // e.g. "Sat, 13 Mar 2026"
   const price = searchParams.get("price") ?? ""; // e.g. "Free" or "£5.00"
@@ -45,6 +56,8 @@ export async function GET(req: NextRequest) {
   const SPORT_EMOJI: Record<string, string> = {
     football: "⚽", basketball: "🏀", cycling: "🚴", running: "🏃",
     badminton: "🏸", tennis: "🎾", gym: "🏋️", cricket: "🏏",
+    swimming: "🏊", boxing: "🥊", squash: "🎾", padel: "🎾",
+    pickleball: "🎾", table_tennis: "🏓",
   };
   const emoji = sport ? (SPORT_EMOJI[sport.toLowerCase()] ?? "🏅") : null;
 
@@ -182,10 +195,14 @@ export async function GET(req: NextRequest) {
             </span>
           </div>
 
-          {/* Title */}
+          {/* Title — three-tier font sizing keeps long venue+title strings
+              inside the 1200×630 frame without overflow. Tier breaks tuned
+              against real session titles ("Saturday 5-a-side at Goals
+              Wembley") which routinely sit at 50+ chars. */}
           <div
             style={{
-              fontSize: title.length > 40 ? 54 : 68,
+              fontSize:
+                title.length > 60 ? 44 : title.length > 40 ? 54 : 68,
               fontWeight: 900,
               color: "#fff",
               lineHeight: 1.0,

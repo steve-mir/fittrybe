@@ -1,6 +1,10 @@
 /**
  * /events/[sport]/in/[city] — Sport + city programmatic landing page.
  *
+ * The route segment is named [id] for Next.js compatibility (it sits next
+ * to /events/[id]/page.tsx and Next requires matching slug names at the
+ * same position), but the value is always validated as a sport slug.
+ *
  * Targets long-tail "[sport] near [city]" queries — the highest-intent,
  * lowest-competition slice of grassroots sports search.
  */
@@ -51,12 +55,14 @@ function buildSportCityFaqs(sportName: string, cityName: string) {
 export async function generateStaticParams() {
   // Cap aggressively: only top sport×city combos are prebuilt; the rest
   // come from ISR. Otherwise we'd build hundreds of pages with no traffic.
+  // The dynamic segment is `id` for Next.js routing reasons but holds a
+  // sport slug here.
   const cities = await getUpcomingEventCities();
   const sports = getAllSportSlugs();
-  const params: Array<{ sport: string; city: string }> = [];
+  const params: Array<{ id: string; city: string }> = [];
   for (const city of cities.slice(0, 10)) {
     for (const sport of sports) {
-      params.push({ sport, city: city.slug });
+      params.push({ id: sport, city: city.slug });
     }
   }
   return params;
@@ -65,9 +71,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ sport: string; city: string }>;
+  params: Promise<{ id: string; city: string }>;
 }): Promise<Metadata> {
-  const { sport, city: slug } = await params;
+  const { id: sport, city: slug } = await params;
   const sportContent = getSportBySlug(sport);
   if (!sportContent) {
     return { title: "Sport Not Found", robots: { index: false, follow: false } };
@@ -138,9 +144,9 @@ export async function generateMetadata({
 export default async function SportCityPage({
   params,
 }: {
-  params: Promise<{ sport: string; city: string }>;
+  params: Promise<{ id: string; city: string }>;
 }) {
-  const { sport, city: slug } = await params;
+  const { id: sport, city: slug } = await params;
   const sportContent = getSportBySlug(sport);
   if (!sportContent) notFound();
 
