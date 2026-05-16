@@ -64,6 +64,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  // Per-sport session listing pages — primary conversion-driven SEO route.
+  // /session/<sport> ranks for "<sport> session near me" intent and lists
+  // live sessions. Higher priority than the editorial /sports/<sport> hub.
+  const sessionSportPages: MetadataRoute.Sitemap = SPORT_HUBS.map((sport) => ({
+    url: `${BASE_URL}/session/${sport}`,
+    lastModified: now,
+    changeFrequency: "hourly" as const,
+    priority: 0.9,
+  }));
+
   // City + sport×city programmatic pages — fed by live area data
   let cityPages: MetadataRoute.Sitemap = [];
   const sportCityPages: MetadataRoute.Sitemap = [];
@@ -141,6 +151,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPages,
     ...sportPages,
+    ...sessionSportPages,
     ...cityPages,
     ...sportCityPages,
     ...venuePages,

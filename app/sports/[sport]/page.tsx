@@ -156,7 +156,7 @@ export default async function SportLandingPage({
             {content.intro}
           </p>
           <Link
-            href={`/events?sport=${content.slug}`}
+            href={`/session/${content.slug}`}
             className="inline-block px-8 py-4 bg-[#B6FF00] text-black font-bold rounded-full hover:bg-[#B6FF00]/90 transition-colors font-[family-name:var(--font-anton)] text-lg uppercase tracking-wide"
           >
             See Upcoming {content.name} Sessions
@@ -198,7 +198,7 @@ export default async function SportLandingPage({
               Live {content.name} sessions
             </h2>
             <Link
-              href={`/events?sport=${content.slug}`}
+              href={`/session/${content.slug}`}
               className="text-sm text-[#B6FF00] hover:text-white transition-colors font-[family-name:var(--font-inter-tight)] uppercase tracking-wider font-bold"
             >
               View all →

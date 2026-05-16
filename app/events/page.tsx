@@ -251,8 +251,9 @@ export default async function EventsIndexPage({
           </p>
         </section>
 
-        {/* Sport filters — link to the sport hub for SEO equity, not just
-            a thin filter URL. Active "All" stays on /events. */}
+        {/* Sport filters — link to the per-sport session page (/session/<sport>)
+            so crawlers traverse to an indexable URL with its own canonical
+            instead of a thin filter variant. Active "All" stays on /events. */}
         <section className="max-w-6xl mx-auto px-6 mb-10" aria-label="Filter by sport">
           <div className="flex flex-wrap gap-2 justify-center">
             {SPORT_FILTERS.map((filter) => {
@@ -260,7 +261,7 @@ export default async function EventsIndexPage({
                 (!activeSport && filter.id === "all") ||
                 activeSport === filter.id;
               const href =
-                filter.id === "all" ? "/events" : `/events?sport=${filter.id}`;
+                filter.id === "all" ? "/events" : `/session/${filter.id}`;
               return (
                 <Link
                   key={filter.id}
@@ -270,7 +271,6 @@ export default async function EventsIndexPage({
                       ? "bg-[#B6FF00] text-black"
                       : "bg-white/5 text-white/60 hover:text-white border border-white/10 hover:border-white/30"
                   }`}
-                  rel={isActive ? undefined : "nofollow"}
                   aria-current={isActive ? "page" : undefined}
                 >
                   {filter.emoji && <span aria-hidden="true">{filter.emoji} </span>}

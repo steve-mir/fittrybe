@@ -1,4 +1,9 @@
-import { supabase } from "./supabase";
+import { getServerReadClient } from "./supabase-server-read";
+
+// Server-only Supabase client. Prefers service-role key so RLS on `sessions`
+// (and detail tables) can't return empty arrays to anonymous SSR readers.
+// Falls back to anon if service-role isn't configured (dev convenience).
+const supabase = getServerReadClient();
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
