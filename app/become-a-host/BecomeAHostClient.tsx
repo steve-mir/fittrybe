@@ -689,8 +689,9 @@ function BenefitsStep({ onContinue }: { onContinue: () => void }) {
             Free to apply
           </p>
           <p style={{ fontSize: "0.82rem", color: "#6B7280", marginTop: "0.6rem", lineHeight: 1.5 }}>
-            Takes about 2 minutes. Approved hosts pay £9.99/month after activation —
-            cancel anytime, no setup fees.
+            Takes about 2 minutes. 
+            {/* Approved hosts pay £9.99/month after activation —
+            cancel anytime, no setup fees. */}
           </p>
         </div>
 
